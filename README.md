@@ -5,13 +5,13 @@
     <title>Your Website Title</title>
 
     <!-- Favicon -->
-    <link rel="icon" type="[image/png](https://i.ibb.co/G2dH87P/Clipped-image-20240718-232638.png)" sizes="16x16" href="favicon-16x16.png">
-    <link rel="icon" type="[image/png](https://i.ibb.co/G2dH87P/Clipped-image-20240718-232638.png)" sizes="32x32" href="favicon-32x32.png">
-    <link rel="icon" type="[image/png](https://i.ibb.co/G2dH87P/Clipped-image-20240718-232638.png)" sizes="48x48" href="favicon-48x48.png">
-    <link rel="icon" type="[image/ico](https://i.ibb.co/G2dH87P/Clipped-image-20240718-232638.png)" href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="favicon-48x48.png">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
 
     <!-- Apple Touch Icon (Optional) -->
-    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://i.ibb.co/G2dH87P/Clipped-image-20240718-232638.png">
 
     <!-- Other head content (styles, scripts, etc.) -->
     <link rel="stylesheet" href="styles.css">
