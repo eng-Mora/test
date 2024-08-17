@@ -1,7 +1,7 @@
 <html>
 <head>
   <title>My Page Title</title>
-  <link rel="icon" type="[image/x-icon](https://i.ibb.co/G2dH87P/Clipped-image-20240718-232638.png)" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" href="Clipped_image_20240718_232638.png">
 </head>
 <body>
 
