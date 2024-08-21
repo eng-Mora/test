@@ -262,12 +262,15 @@
     }
 
     .menu-content {
-        background-color: #2c2c2c;
-        color: white;
-        padding: 10px;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
+    background-color: #2c2c2c;
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-height: 200px; /* Set the maximum height of the menu */
+    overflow-y: auto;  /* Enable vertical scrolling */
+}
+
 
     .menu-button {
         background-color: #4CAF50;
@@ -357,16 +360,15 @@
         <img src="https://i.ibb.co/G2dH87P/Clipped-image-20240718-232638.png" alt="Medal Image" class="medallion">
         <h2 id="video-heading">The Process platform</h2>
         <button class="menu-button" onclick="document.getElementById('video-menu').classList.toggle('hidden')">Select Video</button>
-        <div id="video-menu" class="menu-content hidden">
-            <ul>
-                <li onclick="showVideo('video1')">حصة التأهيل</li>
-                <li onclick="showVideo('video2')">حل واجب حصة 1</li>
-                <li onclick="showVideo('video4')">باقي حل اسئلة حصة 2</li>
-                <li onclick="showVideo('video3')">حل واجب حصة 2</li>
+<div id="video-menu" class="menu-content hidden">
+    <ul>
+        <li onclick="showVideo('video1')">حصة التأهيل</li>
+        <li onclick="showVideo('video2')">حل واجب حصة 1</li>
+        <li onclick="showVideo('video4')">باقي حل اسئلة حصة 2</li>
+        <li onclick="showVideo('video3')">حل واجب حصة 2</li>
+    </ul>
+</div>
 
-                
-            </ul>
-             </div>
         <div id="video1" class="video-container hidden">
     <h1 class="video-title">حصة التأهيل</h1>
     <div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%;">
@@ -392,9 +394,10 @@
 
 <div id="video4" class="video-container hidden">
     <h1 class="video-title">باقي حل اسئلة حصة 2</h1>
-    <div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 70%;"><iframe src="https://drive.google.com/file/d/1Awo0t3OaoAwpESJCJG56MED6dZEXrsZ7/preview" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0;" allowfullscreen scrolling="no" allow="encrypted-media;"></iframe></div>
-</div>
+<div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%;"><iframe src="https://drive.google.com/file/d/1Awo0t3OaoAwpESJCJG56MED6dZEXrsZ7/preview" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0;" allowfullscreen scrolling="no" allow="encrypted-media;"></iframe></div>
 
+
+  </div>
         <p class="contact-message">لو واجهتك مشكلة ابعتلي</p>
         <div class="contact-icons">
             <a href="https://www.facebook.com/mamro8529?mibextid=ZbWKwL" title="Facebook">
@@ -420,8 +423,18 @@
 
     <script>
         const userDetails = {
-            'admin': { name: 'administrator', icon: 'https://i.ibb.co/7KQqmM3/download.png'},
+            'admin': { name: 'administrator', icon: 'https://i.ibb.co/7KQqmM3/download.png '},
             
+            '48261': { name: 'زياد احمد يوسف', icon: 'https://api.multiavatar.com/12ac8e37b20a4556f1.svg'},
+            '75934': { name: 'جنى عبدالعليم', icon: 'https://api.multiavatar.com/54c54768ceb0c3f83a.svg'},
+            '21687': { name: 'روان إيهاب', icon: 'https://api.multiavatar.com/155a84d30e3e3cca7e.svg'},
+            '39472': { name: 'محمد عبدالعظيم', icon: 'https://api.multiavatar.com/147b5eefb657e22dc2.svg'},
+            '58210': { name: 'سلمى وائل', icon: 'https://api.multiavatar.com/95bf4a24efb7c2748c.svg'},
+            '70493': { name: 'فيروز محمد', icon: 'https://api.multiavatar.com/59e284ef4c6c59b44b.svg'},
+            '13856': { name: 'نورهان محمد', icon: 'https://api.multiavatar.com/d6698e2ee87a543c08.svg'},
+            '94720': { name: 'سندس محمد', icon: 'https://api.multiavatar.com/19b4a93ea61f0b650e.svg'},
+            '58391': { name: 'ملك محمد', icon: 'https://api.multiavatar.com/2422f12d6e1bb1d40b.svg'},
+            '62047': { name: 'منه الله جمال', icon: 'https://api.multiavatar.com/12de69a625c83e5ca8.svg'},
             '86284': { name: 'حبيبية شعبان', icon: 'https://api.multiavatar.com/1eae35ecc479f6edd1.svg'},
             '49696': { name: 'ادم عمرو', icon: 'https://api.multiavatar.com/f84f24bcc7b72eebf0.svg' },
             '81659': { name: 'نور عبدالرحمن', icon: 'https://api.multiavatar.com/20ba7ccc9a755d9743.svg' },
@@ -431,7 +444,7 @@
             '29474': { name: 'محمد ايهاب عبد الفتاح ', icon: 'https://api.multiavatar.com/7995823da6025e8a33.svg' },
             '86074': { name: 'نيفين حمدي محمد', icon: 'https://api.multiavatar.com/12de69a625c83e5ca8.svg' },
             '30693': { name: 'رحمه ماجد', icon: 'https://api.multiavatar.com/1eae35ecc479f6edd1.svg' },
-            '99': { name: 'teto', icon: 'https://api.multiavatar.com/Lucas.svg' },
+            '99'   : { name: 'teto', icon: 'https://api.multiavatar.com/Lucas.svg' },
             '41715': { name: 'احمد حسام', icon: 'https://api.multiavatar.com/Guadalajara.svg' },
             '58471': { name: 'عبدالرحمن شعبان', icon: 'https://api.multiavatar.com/ba66683f68073901ea.svg' },
             '18054': { name: 'حنين السيد سليمان', icon: 'https://api.multiavatar.com/9b8b2ae7d917ccd9ce.svg' },
