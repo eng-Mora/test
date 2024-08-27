@@ -366,6 +366,8 @@
         <li onclick="showVideo('video2')">حل واجب حصة 1</li>
         <li onclick="showVideo('video4')">باقي حل اسئلة حصة 2</li>
         <li onclick="showVideo('video3')">حل واجب حصة 2</li>
+        <li onclick="showVideo('video6')">حل واجب حصة 3</li>
+
     </ul>
 </div>
 
@@ -394,8 +396,33 @@
 
 <div id="video4" class="video-container hidden">
     <h1 class="video-title">باقي حل اسئلة حصة 2</h1>
-<div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%;"><iframe src="https://drive.google.com/file/d/1Awo0t3OaoAwpESJCJG56MED6dZEXrsZ7/preview" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0;" allowfullscreen scrolling="no" allow="encrypted-media;"></iframe></div>
+<div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%;"><iframe src="https://drive.google.com/file/d/1Awo0t3OaoAwpESJCJG56MED6dZEXrsZ7/preview" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0;" allowfullscreen scrolling="no" allow="encrypted-media;"></iframe>
+</div>
 
+<div id="video6" class="video-container hidden">
+    <h1 class="video-title">حل واجب حصة 3 (part1)</h1>
+<div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%;"><iframe src="https://drive.google.com/file/d/12bMN-bgiBlK9uMKfHmqa8tDE8jKgo0E_/preview" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0;" allowfullscreen scrolling="no" allow="encrypted-media;"></iframe></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
 
   </div>
         <p class="contact-message">لو واجهتك مشكلة ابعتلي</p>
@@ -423,7 +450,7 @@
 
     <script>
         const userDetails = {
-            'admin': { name: 'administrator', icon: 'https://i.ibb.co/7KQqmM3/download.png '},
+            'mora': { name: 'administrator', icon: 'https://i.ibb.co/7KQqmM3/download.png '},
             
             '48261': { name: 'زياد احمد يوسف', icon: 'https://api.multiavatar.com/12ac8e37b20a4556f1.svg'},
             '75934': { name: 'جنى عبدالعليم', icon: 'https://api.multiavatar.com/54c54768ceb0c3f83a.svg'},
@@ -435,7 +462,7 @@
             '94720': { name: 'سندس محمد', icon: 'https://api.multiavatar.com/19b4a93ea61f0b650e.svg'},
             '58391': { name: 'ملك محمد', icon: 'https://api.multiavatar.com/2422f12d6e1bb1d40b.svg'},
             '62047': { name: 'منه الله جمال', icon: 'https://api.multiavatar.com/12de69a625c83e5ca8.svg'},
-            '86284': { name: 'حبيبية شعبان', icon: 'https://api.multiavatar.com/1eae35ecc479f6edd1.svg'},
+            '86284o': { name: 'حبيبية شعبان', icon: 'https://api.multiavatar.com/1eae35ecc479f6edd1.svg'},
             '49696': { name: 'ادم عمرو', icon: 'https://api.multiavatar.com/f84f24bcc7b72eebf0.svg' },
             '81659': { name: 'نور عبدالرحمن', icon: 'https://api.multiavatar.com/20ba7ccc9a755d9743.svg' },
             '10781': { name: 'ياسمين السيد', icon: 'https://api.multiavatar.com/2422f12d6e1bb1d40b.svg' },
