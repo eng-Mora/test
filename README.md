@@ -6,329 +6,247 @@
     <style>
         /* General styles */
         body {
-  
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #302967; /* Updated background color */
-    margin: 0;
-    transition: background-color 0.5s, color 0.5s;
-    overflow: hidden; /* Prevent scrolling on the body */
-}
-{
-        font-family: Arial, sans-serif;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        background-color: #f0f0f0;
-        margin: 0;
-        transition: background-color 0.5s, color 0.5s;
-        overflow: hidden; /* Prevent scrolling on the body */
-    }
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #302967;
+            margin: 0;
+            transition: background-color 0.5s, color 0.5s;
+            overflow: hidden; /* Prevent scrolling */
+        }
 
-    .container {
-        background-color: white;
-        padding: 30px;
-        border-radius: 8px;
-        box-shadow: 0 0 15px rgba(0,0,0,0.2);
-        text-align: center;
-        width: 100%;
-        max-width: 1000px;
-        transition: background-color 0.5s, color 0.5s;
-        overflow-y: auto; /* Enable vertical scrolling */
-        max-height: 90vh; /* Limit the height to fit in the viewport */
-    }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 100%;
+            max-width: 400px; /* Adjusted max-width for better mobile compatibility */
+            transition: background-color 0.5s, color 0.5s;
+            overflow-y: auto; /* Enable vertical scrolling */
+            max-height: 90vh; /* Limit the height to fit in the viewport */
+        }
 
-    .container img {
-        width: 160px;
-        height: auto;
-        margin-bottom: 10px;
-        background-color: #fff;
-        padding: 10px;
-        border-radius: 8px;
-    }
+        .container img {
+            width: 160px;
+            height: auto;
+            margin-bottom: 10px;
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+        }
 
-    .container h2, .container h1 {
-        margin-bottom: 20px;
-    }
+        .container h2, .container h1 {
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
 
-    .container input {
-        width: 100%;
-        padding: 12px;
-        margin: 12px 0;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        box-sizing: border-box;
-    }
+        .container input {
+            width: 100%;
+            padding: 12px;
+            margin: 12px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
 
-    .container button {
-        width: 100%;
-        padding: 12px;
-        background-color: #9f54d9;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        position: relative;
-        overflow: hidden;
-        transition: background-color 0.3s, transform 0.3s;
-    }
+        .container button {
+            width: 100%;
+            padding: 12px;
+            background-color: #9f54d9;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: background-color 0.3s, transform 0.3s;
+        }
 
-    .container button:before,
-    .container button:after,
-    .container button .button_reflection-1,
-    .container button .button_reflection-2,
-    .container button .button_circle-2 {
-        content: "";
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        width: 100%;
-        background: rgba(255, 255, 255, 0.3);
-        transition: all 0.3s ease;
-    }
+        .container button:hover {
+            background-color: #a366e0;
+            transform: scale(1.05);
+        }
 
-    .container button:before {
-        left: -120%;
-        transform: skewX(-30deg);
-    }
+        .hidden {
+            display: none;
+        }
 
-    .container button:after {
-        left: 100%;
-        transform: skewX(30deg);
-    }
+        .footer-text {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #888;
+        }
 
-    .container button:hover:before {
-        left: 100%;
-    }
+        .contact-icons {
+            margin-top: 10px;
+        }
 
-    .container button:hover:after {
-        left: -100%;
-    }
+        .contact-icons a {
+            display: inline-block;
+            margin: 0 10px;
+        }
 
-    .container button:hover {
-        transform: rotate(-4deg) scale(1.1);
-    }
+        .contact-icons img {
+            width: 30px;
+            height: 30px;
+        }
 
-    .container button .button_reflection-1 {
-        left: 120%;
-    }
+        .contact-message {
+            font-size: 18px;
+            color: black;
+            margin-bottom: 10px;
+        }
 
-    .container button .button_reflection-2 {
-        left: -70%;
-    }
+        body.dark-mode .contact-message {
+            color: #f0f0f0;
+        }
 
-    .container button:hover .button_circle-2 {
-        transform: translate(-20px, 20px) scale(1.1);
-    }
+        body.dark-mode {
+            background-color: #2c2c2c;
+            color: #f0f0f0;
+        }
 
-    .container button.button_diamond:hover {
-        transform: translateY(7px) rotate(-24deg) scale(1.1);
-    }
+        body.dark-mode .container {
+            background-color: #3c3c3c;
+            color: #f0f0f0;
+        }
 
-    .hidden {
-        display: none;
-    }
+        body.dark-mode input {
+            background-color: #5c5c5c;
+            color: #f0f0f0;
+            border: 1px solid #7c7c7c;
+        }
 
-    .icon {
-        width: 50px;
-        height: 50px;
-        cursor: pointer;
-        margin-top: 20px;
-    }
+        body.dark-mode .container button {
+            background-color: #8c4aad;
+        }
 
-    .footer-text {
-        margin-top: 20px;
-        font-size: 16px;
-        color: #888;
-    }
+        body.dark-mode .container button:hover {
+            background-color: #9f54d9;
+        }
 
-    .contact-icons {
-        margin-top: 10px;
-    }
+        .video-container {
+            padding: 10px 0;
+            position: relative;
+            margin-bottom: 15px;
+            text-align: center;
+            max-height: 70vh; /* Limit the height to fit in the viewport */
+            overflow: auto; /* Enable scrolling if content overflows */
+        }
 
-    .contact-icons a {
-        display: inline-block;
-        margin: 0 10px;
-    }
+        .video-title {
+            font-size: 17px;
+            margin-bottom: 10px;
+        }
 
-    .contact-icons img {
-        width: 30px;
-        height: 30px;
-    }
+        .video-container iframe {
+            border-radius: 8px;
+            width: 100%;
+            height: auto;
+        }
 
-    .contact-message {
-        font-size: 18px;
-        color: black;
-        margin-bottom: 10px;
-    }
+        .theme-switch-wrapper {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+        }
 
-    body.dark-mode .contact-message {
-        color: #f0f0f0;
-    }
+        .theme-switch {
+            display: none;
+        }
 
-    body.dark-mode {
-        background-color: #2c2c2c;
-        color: #f0f0f0;
-    }
+        .theme-switch-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
 
-    body.dark-mode .container {
-        background-color: #3c3c3c;
-        color: #f0f0f0;
-    }
+        .theme-switch-label .sun-icon,
+        .theme-switch-label .moon-icon {
+            font-size: 24px;
+            transition: opacity 0.5s;
+        }
 
-    body.dark-mode .container img {
-        background-color: #3c3c3c;
-    }
+        .theme-switch:checked + .theme-switch-label .sun-icon {
+            opacity: 0;
+        }
 
-    body.dark-mode input {
-        background-color: #5c5c5c;
-        color: #f0f0f0;
-        border: 1px solid #7c7c7c;
-    }
+        .theme-switch:not(:checked) + .theme-switch-label .moon-icon {
+            opacity: 0;
+        }
 
-    body.dark-mode .container button {
-        background-color: #8c4aad;
-    }
+        .menu-content {
+            background-color: #2c2c2c;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
+        }
 
-    body.dark-mode .container button:hover {
-        background-color: #9f54d9;
-    }
+        .menu-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
 
-    .video-container {
-        padding: 10px 0;
-        position: relative;
-        margin-bottom: 15px;
-        text-align: center;
-        max-height: 70vh; /* Limit the height to fit in the viewport */
-        overflow: auto; /* Enable scrolling if content overflows */
-    }
+        .menu-button:hover {
+            background-color: #45a049;
+        }
 
-    .video-title {
-        font-size: 17px;
-        margin-bottom: 10px;
-    }
+        .menu-content ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
 
-    .video-container iframe {
-        border-radius: 8px;
-        width: 100%;
-        height: auto;
-        max-height: 100%;
-    }
+        .menu-content ul li {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
 
-    .video-footer-text {
-        margin-top: 5px;
-        font-size: 16px;
-        color: #888;
-    }
+        .menu-content ul li:hover {
+            background-color: #444;
+            border-radius: 4px;
+        }
 
-    body.dark-mode .video-footer-text {
-        color: #f0f0f0;
-    }
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
 
-    .theme-switch-wrapper {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        display: flex;
-        align-items: center;
-    }
+        body.dark-mode .user-info {
+            background-color: #444;
+        }
 
-    .theme-switch {
-        display: none;
-    }
+        .user-info img {
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            margin-right: 15px;
+        }
 
-    .theme-switch-label {
-        display: flex;
-        align-items: center;
-        cursor: pointer;
-    }
-
-    .theme-switch-label .sun-icon,
-    .theme-switch-label .moon-icon {
-        font-size: 24px;
-        transition: opacity 0.5s;
-    }
-
-    .theme-switch:checked + .theme-switch-label .sun-icon {
-        opacity: 0;
-    }
-
-    .theme-switch:not(:checked) + .theme-switch-label .moon-icon {
-        opacity: 0;
-    }
-
-    .menu-content {
-    background-color: #2c2c2c;
-    color: white;
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    max-height: 200px; /* Set the maximum height of the menu */
-    overflow-y: auto;  /* Enable vertical scrolling */
-}
-
-
-    .menu-button {
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        cursor: pointer;
-        border-radius: 4px;
-        margin-bottom: 20px;
-    }
-
-    .menu-button:hover {
-        background-color: #45a049;
-    }
-
-    .menu-content ul {
-        list-style-type: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .menu-content ul li {
-        padding: 10px 15px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-    }
-
-    .menu-content ul li:hover {
-        background-color: #444;
-        border-radius: 4px;
-    }
-
-    .user-info {
-        display: flex;
-        align-items: center;
-        margin-bottom: 20px;
-        padding: 10px;
-        background-color: #f9f9f9;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    body.dark-mode .user-info {
-        background-color: #444;
-    }
-
-    .user-info img {
-        border-radius: 50%;
-        width: 50px;
-        height: 50px;
-        margin-right: 15px;
-    }
-
-    .user-info p {
-        margin: 0;
-        font-size: 16px;
-        font-weight: bold;
-    }
+        .user-info p {
+            margin: 0;
+            font-size: 16px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -360,71 +278,28 @@
         <img src="https://i.ibb.co/G2dH87P/Clipped-image-20240718-232638.png" alt="Medal Image" class="medallion">
         <h2 id="video-heading">The Process platform</h2>
         <button class="menu-button" onclick="document.getElementById('video-menu').classList.toggle('hidden')">Select Video</button>
-<div id="video-menu" class="menu-content hidden">
-    <ul>
-        <li onclick="showVideo('video1')">حصة التأهيل</li>
-        <li onclick="showVideo('video2')">حل واجب حصة 1</li>
-        <li onclick="showVideo('video4')">باقي حل اسئلة حصة 2</li>
-        <li onclick="showVideo('video3')">حل واجب حصة 2</li>
-        <li onclick="showVideo('video6')">حل واجب حصة 3</li>
+        <div id="video-menu" class="menu-content hidden">
+            <ul>
+                <li onclick="showVideo('video1')">حل واجب حصة 1 </li>
+                <li onclick="showVideo('video2')">حل واجب حصة 2</li>
 
-    </ul>
-</div>
-
+            </ul>
+        </div>
         <div id="video1" class="video-container hidden">
-    <h1 class="video-title">حصة التأهيل</h1>
-    <div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%;">
-        <iframe src="https://drive.google.com/file/d/1mwmNKYtvwn318OhJEIC6nFOHnaOCr1ne/preview" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0;" allowfullscreen scrolling="no" allow="encrypted-media;"></iframe>
-    </div>
-       
+            <h1 class="video-title">حل واجب حصة 1</h1>
+            <div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%;">
+                <iframe src="https://drive.google.com/file/d/1iiNJqMrDUKkTptUQVymPbMqEyf0UowBB/preview" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0;" allowfullscreen scrolling="no" allow="encrypted-media;"></iframe>
+            </div>
+            <iframe src="https://drive.google.com/file/d/1L5UPraDEgW_Kmh32eOaOU5uYK8UqER4V/preview" width="640" height="480" allow="autoplay"></iframe>
         </div>
         <div id="video2" class="video-container hidden">
-    <h1 class="video-title">حل واجب حصة 1 </h1>
-    <div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%;"><iframe src="https://drive.google.com/file/d/1k03hdmxGtL6Vfd9O-cxuywaVrINwdJJp/preview" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0;" allowfullscreen scrolling="no" allow="encrypted-media;"></iframe>
-    </div>
-    
-<iframe src="https://drive.google.com/file/d/1G3Oq-lDSpLcnaCRyLgd7x0CcamC-rjBY/preview" width="640" height="480" allow="autoplay"></iframe>
-</div>
-<div id="video3" class="video-container hidden">
-    <h1 class="video-title">حل واجب حصة 2</h1>
-    
-    
-    <div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%;"><iframe src="https://drive.google.com/file/d/1Y0s1hTTgV-8drqiN_05yVOM6NiKvb2x2/preview" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0;" allowfullscreen scrolling="no" allow="encrypted-media;"></iframe></div>
-    
-<iframe src="https://drive.google.com/file/d/1HdGZJTZ4SDURmuIaEZyMLqLrzNuvpqPP/preview" width="640" height="480" allow="autoplay"></iframe>
-  </div>
-
-<div id="video4" class="video-container hidden">
-    <h1 class="video-title">باقي حل اسئلة حصة 2</h1>
-<div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%;"><iframe src="https://drive.google.com/file/d/1Awo0t3OaoAwpESJCJG56MED6dZEXrsZ7/preview" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0;" allowfullscreen scrolling="no" allow="encrypted-media;"></iframe>
-</div>
-
-<div id="video6" class="video-container hidden">
-    <h1 class="video-title">حل واجب حصة 3 (part1)</h1>
-<div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%;"><iframe src="https://drive.google.com/file/d/12bMN-bgiBlK9uMKfHmqa8tDE8jKgo0E_/preview" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0;" allowfullscreen scrolling="no" allow="encrypted-media;"></iframe></div>
+            <h1 class="video-title">حل واجب حصة 2</h1>
+            <div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%;"><iframe src="https://drive.google.com/file/d/1kv5eqpNmC_X2ByBbfoLcXn6WUnA0eYVB/preview" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0;" allowfullscreen scrolling="no" allow="encrypted-media;"></iframe>
+            </div>
+            <iframe src="https://drive.google.com/file/d/1Qb7N0TRJ8Cj4gkZ2nK9ZhSgAp7NC6636/preview" width="640" height="480" allow="autoplay"></iframe>
+            </div>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-</div>
-
-  </div>
         <p class="contact-message">لو واجهتك مشكلة ابعتلي</p>
         <div class="contact-icons">
             <a href="https://www.facebook.com/mamro8529?mibextid=ZbWKwL" title="Facebook">
@@ -450,36 +325,59 @@
 
     <script>
         const userDetails = {
-            'mora': { name: 'administrator', icon: 'https://i.ibb.co/7KQqmM3/download.png '},
-            
-            '48261': { name: 'زياد احمد يوسف', icon: 'https://api.multiavatar.com/12ac8e37b20a4556f1.svg'},
-            '75934': { name: 'جنى عبدالعليم', icon: 'https://api.multiavatar.com/54c54768ceb0c3f83a.svg'},
-            '21687': { name: 'روان إيهاب', icon: 'https://api.multiavatar.com/155a84d30e3e3cca7e.svg'},
-            '39472': { name: 'محمد عبدالعظيم', icon: 'https://api.multiavatar.com/147b5eefb657e22dc2.svg'},
-            '58210': { name: 'سلمى وائل', icon: 'https://api.multiavatar.com/95bf4a24efb7c2748c.svg'},
-            '70493': { name: 'فيروز محمد', icon: 'https://api.multiavatar.com/59e284ef4c6c59b44b.svg'},
-            '13856': { name: 'نورهان محمد', icon: 'https://api.multiavatar.com/d6698e2ee87a543c08.svg'},
-            '94720': { name: 'سندس محمد', icon: 'https://api.multiavatar.com/19b4a93ea61f0b650e.svg'},
-            '58391': { name: 'ملك محمد', icon: 'https://api.multiavatar.com/2422f12d6e1bb1d40b.svg'},
-            '62047': { name: 'منه الله جمال', icon: 'https://api.multiavatar.com/12de69a625c83e5ca8.svg'},
-            '86284o': { name: 'حبيبية شعبان', icon: 'https://api.multiavatar.com/1eae35ecc479f6edd1.svg'},
-            '49696': { name: 'ادم عمرو', icon: 'https://api.multiavatar.com/f84f24bcc7b72eebf0.svg' },
-            '81659': { name: 'نور عبدالرحمن', icon: 'https://api.multiavatar.com/20ba7ccc9a755d9743.svg' },
-            '10781': { name: 'ياسمين السيد', icon: 'https://api.multiavatar.com/2422f12d6e1bb1d40b.svg' },
-            '44889': { name: 'محمد سليم', icon: 'https://api.multiavatar.com/94a0dd6577ca3c7291.svg' },
-            '39639': { name: 'ايمان محمد ', icon: 'https://api.multiavatar.com/e736fdd76d2f8bb555.svg' },
-            '29474': { name: 'محمد ايهاب عبد الفتاح ', icon: 'https://api.multiavatar.com/7995823da6025e8a33.svg' },
-            '86074': { name: 'نيفين حمدي محمد', icon: 'https://api.multiavatar.com/12de69a625c83e5ca8.svg' },
-            '30693': { name: 'رحمه ماجد', icon: 'https://api.multiavatar.com/1eae35ecc479f6edd1.svg' },
-            '99'   : { name: 'teto', icon: 'https://api.multiavatar.com/Lucas.svg' },
-            '41715': { name: 'احمد حسام', icon: 'https://api.multiavatar.com/Guadalajara.svg' },
-            '58471': { name: 'عبدالرحمن شعبان', icon: 'https://api.multiavatar.com/ba66683f68073901ea.svg' },
-            '18054': { name: 'حنين السيد سليمان', icon: 'https://api.multiavatar.com/9b8b2ae7d917ccd9ce.svg' },
-            '20321': { name: 'بسنت محمد', icon: 'https://api.multiavatar.com/240315fc1890fd05ae.svg' },
-            '52182': { name: 'عمر وليد جمال', icon: 'https://api.multiavatar.com/4db29acccc604fe610.svg' }
+            'mora mo': { name: 'administrator', icon: 'https://i.ibb.co/7KQqmM3/download.png'},
+            //private
+            '16075': { name: 'امنية ايمن ', icon: 'https://api.multiavatar.com/a1b9a98b131af9380c.svg'},
+            '70126': { name: 'مازن محمد', icon: 'https://api.multiavatar.com/988a824d7b64800149.svg'},
+            '16840': { name: 'سما ابراهيم', icon: 'https://api.multiavatar.com/e736fdd76d2f8bb555.svg'},
+            '15032': { name: 'تسنيم محمد', icon: 'https://api.multiavatar.com/1eae35ecc479f6edd1.svg'},
+            '88105': { name: 'سندي عصام', icon: 'https://api.multiavatar.com/9b8b2ae7d917ccd9ce.svg'},
+            '72137': { name: 'رودينا ايمن', icon: 'https://api.multiavatar.com/240315fc1890fd05ae.svg'},
+            '80135': { name: 'محمد اشرف', icon: 'https://api.multiavatar.com/f84f24bcc7b72eebf0.svg'},
+            '80650': { name: 'احمد ايمن رأفت', icon: 'https://api.multiavatar.com/5504deeeaae32c00b6.svg'},
+            '23069': { name: 'يوسف حسن ', icon: 'https://api.multiavatar.com/76d730110bb25b52e5.svg'},
+            '66908': { name: 'احمد محمد عبداللطيف', icon: 'https://api.multiavatar.com/c91bc1e60640f2bd7a.svg'},
+            '69756': { name: 'احمد ياسر', icon: 'https://api.multiavatar.com/e60abda884983d5404.svg'},
+            '50808': { name: 'احمد حسين', icon: 'https://api.multiavatar.com/390264ffe38ec2ed41.svg'},
+            '84536': { name: 'زياد خالد', icon: 'https://api.multiavatar.com/4a955a93363ada217b.svg'},
+            '41596': { name: 'نورالدين هيثم', icon: 'https://api.multiavatar.com/cbfb555bf65d9c5b93.svg'},
+            '11633': { name: 'يوسف ايمن ابوضيف', icon: 'https://api.multiavatar.com/f4fd82c786f12ce4c0.svg'},
+            '28411': { name: 'رحيق سيد', icon: 'https://api.multiavatar.com/098db318e1715a48dd.svg'},
+            '73057': { name: 'عمر هاني', icon: 'https://api.multiavatar.com/5423b44a5f0baed737.svg'},
+
+
+
+            '25695': { name: 'فيرا عصام عدلي', icon: 'https://api.multiavatar.com/2969b18bac7b3cec76.svg'},
+            '63855o': { name: 'عبدالرحمن محمود عبدالحسيب', icon: 'https://api.multiavatar.com/f0a9ab062cd811e549.svg'},
+            '25654': { name: 'اسلام محمد شعراوي ', icon: 'https://api.multiavatar.com/3a565be8bfd4e264e4.svg'},
+            '28126': { name: 'يوسف محمد', icon: 'https://api.multiavatar.com/9b840c355db11594e1.svg'},
+            '56193o': { name: 'حبيبة محمد', icon: 'https://api.multiavatar.com/19b4a93ea61f0b650e.svg'},
+            '75516o': { name: 'حنين مصطفى', icon: 'https://api.multiavatar.com/ad62e7d97f6967fc85.svg'},
+            '53336o': { name: 'مريم اشرف', icon: 'https://api.multiavatar.com/2969b18bac7b3cec76.svg'},
+            '48389': { name: 'سندس صلاح', icon: 'https://api.multiavatar.com/36aa46f54891ced0b5.svg'},
+            '28354o': { name: 'مريم احمد', icon: 'https://api.multiavatar.com/cd15833a17efc52a72.svg'},
+            '75539o': { name: 'جنى طارق', icon: 'https://api.multiavatar.com/eb9203245d22ab2c3f.svg'},
+            '58951o': { name: 'سارة عماد', icon: 'https://api.multiavatar.com/9447fc5ea452de05be.svg'},
+            '89089o': { name: 'جنة محمد', icon: 'https://api.multiavatar.com/9359ac6f0b88e61eb6.svg'},
+            '41292o': { name: 'مريم سعيد', icon: 'https://api.multiavatar.com/2947fd65b9978407f2.svg'},
+            '32859': { name: 'مريم عاطف', icon: 'https://api.multiavatar.com/1b103906df1bff448d.svg'},
+            '44746o': { name: 'سعيد سعد', icon: 'https://api.multiavatar.com/94a0dd6577ca3c7291.svg'},
+            '30223': { name: 'سيف الدين تامر', icon: 'https://api.multiavatar.com/7995823da6025e8a33.svg'},
+            '21428o': { name: 'محمد احمد', icon: 'https://api.multiavatar.com/Guadalajara.svg'},
+            '20608o': { name: 'زياد احمد', icon: 'https://api.multiavatar.com/4db29acccc604fe610.svg'},
+           '48392o': { name: 'عمار اشرف', icon: 'https://api.multiavatar.com/c8313188a97258e27c.svg'},
+            '69897o': { name: 'اروى احمد', icon: 'https://api.multiavatar.com/e71c17c25671802202.svg'},
+            '82128o': { name: 'زياد إيهاب', icon: 'https://api.multiavatar.com/f84f24bcc7b72eebf0.svg'},
+           '89303o': { name: 'حمدي محمد ', icon: 'https://api.multiavatar.com/9b840c355db11594e1.svg' },
+            '80546o': { name: 'مازن احمد ', icon: 'https://api.multiavatar.com/94a0dd6577ca3c7291.svg' },
+            '32546o': { name: 'لوجين وائل ', icon: 'https://api.multiavatar.com/20ba7ccc9a755d9743.svg' },
+            '23756o': { name: 'ضحى محمد', icon: 'https://api.multiavatar.com/2422f12d6e1bb1d40b.svg' },
+            '67084': { name: 'هنا سعد', icon: 'https://api.multiavatar.com/12de69a625c83e5ca8.svg' },
+
+            '99': { name: 'Teto', icon: 'https://api.multiavatar.com/7995823da6025e8a33.svg' }
         };
 
-        const activeUsers = {}; // Define activeUsers
+        const activeUsers = {};
 
         function login() {
             const username = document.getElementById('username').value.trim();
