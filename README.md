@@ -67,9 +67,9 @@
     
     <nav>
         <ul>
-            <li><a href="https://eng-mora.github.io/The_Process/" target="_blank">Home</a></li>
             <li><a href="#videos">Videos</a></li>
             <li><a href="https://linktr.ee/the_process_Eng.tarek" target="_blank">Contact</a></li>
+            <li><a href="https://eng-mora.github.io/The_Process/" target="_blank">Home</a></li>
 
         </ul>
     </nav>
