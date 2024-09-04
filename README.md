@@ -96,5 +96,8 @@
         <section id="contact">
             <h2>Contact Us</h2>
             <p>If you have any questions or need further information, feel free to contact us at <a href="mailto:info@educationwebsite.com">mamrro8529@gmail.com</a>.</p>
+            <p>Developed by Eng: Amr Mohamed</p>
+
+
         </section>
     </main>
