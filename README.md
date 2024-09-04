@@ -13,8 +13,9 @@
         header {
             background-color: #8B008B;
             color: white;
-            padding: 15px;
+            padding: 30px; /* Increased padding */
             text-align: center;
+            font-size: 2.5em; /* Increased font size */
         }
         nav {
             background-color: #580058;
