@@ -81,17 +81,16 @@
         </section>
         
         <section id="videos" class="video-container">
-            <h2>Educational Videos</h2>
-            <!-- Wistia Video 1 -->
-            <div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 60%;"><iframe src="https://fast.wistia.net/embed/iframe/xuqh31qejk" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0;" allowfullscreen scrolling="no" allow="encrypted-media;"></iframe></div>
-            <h2>About Our Educational Platform</h2>
-            <!-- Wistia Video 2 -->
-            <div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 55.9375%;"><iframe src="https://fast.wistia.net/embed/iframe/iu5pz1rqv3" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0;" allowfullscreen scrolling="no" allow="encrypted-media;"></iframe></div>
-            <h2>About Our Educational Platform</h2>
-            <!-- Wistia Video 3 -->
-            <div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 60%;"><iframe src="https://fast.wistia.net/embed/iframe/89kzetd3dy" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0;" allowfullscreen scrolling="no" allow="encrypted-media;"></iframe></div>
+            <h2>شرح حصة 3 عربي (part1)</h2>
+            <div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%;"><iframe src="https://drive.google.com/file/d/1-VIltXMBLLQNwbVbwhTHO2ovmYSsT0wU/preview" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0;" allowfullscreen scrolling="no" allow="encrypted-media;"></iframe></div>
+            <h2>شرح حصة 3 عربي (part2)</h2>
+            <div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%;"><iframe src="https://drive.google.com/file/d/15Mo7htyDhT7f9Beu9TwCiIMuxGO-dNRc/preview" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0;" allowfullscreen scrolling="no" allow="encrypted-media;"></iframe></div>
+            <h2>شرح حصة 3 لغات (part1)</h2>
+            <div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%;"><iframe src="https://drive.google.com/file/d/1K23MDswnSetWJRpvkhgbdzAF9HEp6syq/preview" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0;" allowfullscreen scrolling="no" allow="encrypted-media;"></iframe></div>
+            <h2>شرح حصة 3 لغات (part2)</h2>
+                        <div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%;"><iframe src="https://drive.google.com/file/d/1f0f8Q3hTneh5tnT1piVaIe4xE8EceBHg/preview" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0;" allowfullscreen scrolling="no" allow="encrypted-media;"></iframe></div>
+
         </section>
-        
         <section id="contact">
             <h2>Contact Us</h2>
             <p>If you have any questions or need further information, feel free to contact us at <a href="mailto:info@educationwebsite.com">mamrro8529@gmail.com</a>.</p>
