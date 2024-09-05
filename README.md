@@ -169,18 +169,20 @@
     </main>
 
     <div class="login-container" id="loginContainer">
-        <h1>Login to The Process platform</h1>
-        <form id="loginForm">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" required>
-            
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" required>
-            
-            <button type="submit">Login</button>
-            <div id="errorMessage" class="error"></div>
-        </form>
-    </div>
+    <img src="https://i.ibb.co/nmgZDmT/Whats-App-Image-2024-09-04-at-15-05-46-removebg-preview.png" alt="Login Image" style="width: 350px; margin-bottom: 20px;">
+    <h1>Login to The Process platform</h1>
+    <form id="loginForm">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required>
+        
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required>
+        
+        <button type="submit">Login</button>
+        <div id="errorMessage" class="error"></div>
+    </form>
+</div>
+
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -255,3 +257,4 @@
             showLogin();
         });
     </script>
+
