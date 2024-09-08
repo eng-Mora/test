@@ -169,7 +169,7 @@
     </main>
 
     <div class="login-container" id="loginContainer">
-    <img src="https://i.ibb.co/nmgZDmT/Whats-App-Image-2024-09-04-at-15-05-46-removebg-preview.png" alt="Login Image" style="width: 60%; max-width: 300px; margin-bottom: 20px;">
+    <img src="https://i.ibb.co/nmgZDmT/Whats-App-Image-2024-09-04-at-15-05-46-removebg-preview.png" alt="Login Image" style="width: 70%; max-width: 300px; margin-bottom: 20px;">
     <h1>Login to The Process platform</h1>
     <form id="loginForm">
         <label for="username">Username</label>
