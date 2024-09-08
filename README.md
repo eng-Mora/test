@@ -58,20 +58,21 @@
             max-width: 800px;
             margin-bottom: 20px;
         }
-        .login-container {
-            background-color: #ffffff;
-            padding: 2.5rem;
-            border-radius: 12px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-            width: 100%;
-            max-width: 360px;
-            text-align: center;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            display: block;
-        }
+       .login-container {
+    background-color: #ffffff;
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 500px; 
+    text-align: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: block;
+}
+
         .login-container.active {
             display: block;
         }
@@ -169,7 +170,7 @@
     </main>
 
     <div class="login-container" id="loginContainer">
-    <img src="https://i.ibb.co/nmgZDmT/Whats-App-Image-2024-09-04-at-15-05-46-removebg-preview.png" alt="Login Image" style="width: 80%; max-width: 360px; margin-bottom: 20px;">
+    <img src="https://i.ibb.co/nmgZDmT/Whats-App-Image-2024-09-04-at-15-05-46-removebg-preview.png" alt="Login Image" style="width: 60%; max-width: 300px; margin-bottom: 20px;">
     <h1>Login to The Process platform</h1>
     <form id="loginForm">
         <label for="username">Username</label>
