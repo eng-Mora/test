@@ -262,28 +262,47 @@
     }
 
     .menu-content {
-            background-color: #34495e;
-            color: white;
-            padding: 10px;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-            width: 250px;
-            max-height: 300px; /* Maximum height before scrolling */
-            overflow-y: auto; /* Enable scrolling */
-        }
-        .menu-content ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        .menu-content li {
-            padding: 10px;
-            cursor: pointer;
-        }
-        .menu-content li:hover {
-            background-color: #2c3e50;
-        }
-        .hidden {
-            display: none;
-        }
+    background-color: #8c4aad;
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-height: 200px; /* Set the maximum height of the menu */
+    overflow-y: auto;  /* Enable vertical scrolling */
+}
+
+
+    .menu-button {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        border-radius: 4px;
+        margin-bottom: 20px;
+    }
+
+    .menu-button:hover {
+        background-color: #45a049;
+    }
+
+    .menu-content ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .menu-content ul li {
+        padding: 10px 15px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .menu-content ul li:hover {
+        background-color: #444;
+        border-radius: 4px;
+    }
+
     .user-info {
         display: flex;
         align-items: center;
@@ -304,7 +323,6 @@
         height: 50px;
         margin-right: 15px;
     }
-
 
     .user-info p {
         margin: 0;
@@ -616,4 +634,3 @@
 
         document.getElementById('theme-switch').addEventListener('change', toggleDarkMode);
     </script>
-
