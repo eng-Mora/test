@@ -449,11 +449,11 @@
         </div>
 
 <div id="video8" class="video-container hidden">
-    <h1 class="video-title">part 1</h1>
+    <h1 class="video-title">    part 1     </h1>
     <div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%;"><iframe src="https://drive.google.com/file/d/13L0ifCf-T6YGnpCwavxXPB-RVbVHmg8P/preview" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0;" allowfullscreen scrolling="no" allow="encrypted-media;"></iframe></div>
-    <h1 class="video-title">part 2</h1>
+    <h1 class="video-title">       part 2          </h1>
     <div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%;"><iframe src="https://drive.google.com/file/d/1PSEE0hTo8j8sKnyiA7n7L5th61yxb7yj/preview" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0;" allowfullscreen scrolling="no" allow="encrypted-media;"></iframe></div>
-    <h1 class="video-title">part 3</h1>
+    <h1 class="video-title">        part 3         </h1>
     <div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%;"><iframe src="https://drive.google.com/file/d/1dKYEF4dDpvMqNJ_mCLGpPDSholq7R5Rm/preview" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0;" allowfullscreen scrolling="no" allow="encrypted-media;"></iframe>
     </div>
     </div>
