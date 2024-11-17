@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Exam Portal a </title>
+    <title>Student Exam Portal</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -44,6 +44,20 @@
         }
         .btn:hover {
             background-color: #27ae60;
+        }
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .results-table th, .results-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        .results-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -97,12 +111,22 @@
     <div id="results-page" class="container" style="display: none;">
         <h2>Exam Results</h2>
         <p id="results"></p>
-        <button id="view-all-results" class="btn">View All Results</button>
+        <button id="view-all-results" class="btn" style="display: none;">View All Results</button>
     </div>
 
     <div id="all-results-page" class="container" style="display: none;">
         <h2>All Exam Results</h2>
-        <div id="all-results"></div>
+        <table class="results-table">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Student Name</th>
+                    <th>Score</th>
+                    <th>Total Questions</th>
+                </tr>
+            </thead>
+            <tbody id="results-table-body"></tbody>
+        </table>
         <button onclick="location.reload()" class="btn">Back to Login</button>
     </div>
 
@@ -115,8 +139,8 @@
         const allResultsPage = document.getElementById('all-results-page');
         const studentInfo = document.getElementById('student-info');
         const results = document.getElementById('results');
-        const allResults = document.getElementById('all-results');
         const viewAllResultsButton = document.getElementById('view-all-results');
+        const resultsTableBody = document.getElementById('results-table-body');
 
         // Hardcoded username-to-name mapping
         const studentData = {
@@ -145,6 +169,11 @@
                 loginPage.style.display = 'none';
                 examPage.style.display = 'block';
                 studentInfo.textContent = `Username: ${username} | Student Name: ${studentData[username]}`;
+
+                // Show "View All Results" button only for user 2526
+                if (username === "2526") {
+                    viewAllResultsButton.style.display = 'block';
+                }
             } else if (loggedInUsers.has(username)) {
                 alert('This user has already taken the exam!');
             } else {
@@ -199,13 +228,15 @@
             allResultsPage.style.display = 'block';
 
             const savedResults = JSON.parse(localStorage.getItem('examResults')) || [];
-            allResults.innerHTML = savedResults.length
+            resultsTableBody.innerHTML = savedResults.length
                 ? savedResults.map(result => `
-                    <p>
-                        Username: ${result.username}, 
-                        Name: ${result.studentName}, 
-                        Score: ${result.score}/${result.totalQuestions}
-                    </p>`).join('')
-                : '<p>No results available.</p>';
+                    <tr>
+                        <td>${result.username}</td>
+                        <td>${result.studentName}</td>
+                        <td>${result.score}</td>
+                        <td>${result.totalQuestions}</td>
+                    </tr>
+                `).join('')
+                : '<tr><td colspan="4">No results available.</td></tr>';
         });
     </script>
