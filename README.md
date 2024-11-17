@@ -45,20 +45,6 @@
         .btn:hover {
             background-color: #27ae60;
         }
-        .results-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-        .results-table th, .results-table td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: center;
-        }
-        .results-table th {
-            background-color: #f2f2f2;
-            font-weight: bold;
-        }
     </style>
 </head>
 <body>
@@ -116,17 +102,7 @@
 
     <div id="all-results-page" class="container" style="display: none;">
         <h2>All Exam Results</h2>
-        <table class="results-table">
-            <thead>
-                <tr>
-                    <th>Username</th>
-                    <th>Student Name</th>
-                    <th>Score</th>
-                    <th>Total Questions</th>
-                </tr>
-            </thead>
-            <tbody id="results-table-body"></tbody>
-        </table>
+        <div id="all-results"></div>
         <button onclick="location.reload()" class="btn">Back to Login</button>
     </div>
 
@@ -139,8 +115,8 @@
         const allResultsPage = document.getElementById('all-results-page');
         const studentInfo = document.getElementById('student-info');
         const results = document.getElementById('results');
+        const allResults = document.getElementById('all-results');
         const viewAllResultsButton = document.getElementById('view-all-results');
-        const resultsTableBody = document.getElementById('results-table-body');
 
         // Hardcoded username-to-name mapping
         const studentData = {
@@ -228,15 +204,14 @@
             allResultsPage.style.display = 'block';
 
             const savedResults = JSON.parse(localStorage.getItem('examResults')) || [];
-            resultsTableBody.innerHTML = savedResults.length
+            allResults.innerHTML = savedResults.length
                 ? savedResults.map(result => `
-                    <tr>
-                        <td>${result.username}</td>
-                        <td>${result.studentName}</td>
-                        <td>${result.score}</td>
-                        <td>${result.totalQuestions}</td>
-                    </tr>
-                `).join('')
-                : '<tr><td colspan="4">No results available.</td></tr>';
+                    <p>
+                        Username: ${result.username}, 
+                        Name: ${result.studentName}, 
+                        Score: ${result.score}/${result.totalQuestions}
+                    </p>`).join('')
+                : '<p>No results available.</p>';
         });
     </script>
+
