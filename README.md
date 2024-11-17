@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Exam Portal</title>
+    <title>Student Exam Portal a </title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -97,6 +97,13 @@
     <div id="results-page" class="container" style="display: none;">
         <h2>Exam Results</h2>
         <p id="results"></p>
+        <button id="view-all-results" class="btn">View All Results</button>
+    </div>
+
+    <div id="all-results-page" class="container" style="display: none;">
+        <h2>All Exam Results</h2>
+        <div id="all-results"></div>
+        <button onclick="location.reload()" class="btn">Back to Login</button>
     </div>
 
     <script>
@@ -105,8 +112,11 @@
         const loginPage = document.getElementById('login-page');
         const examPage = document.getElementById('exam-page');
         const resultsPage = document.getElementById('results-page');
+        const allResultsPage = document.getElementById('all-results-page');
         const studentInfo = document.getElementById('student-info');
         const results = document.getElementById('results');
+        const allResults = document.getElementById('all-results');
+        const viewAllResultsButton = document.getElementById('view-all-results');
 
         // Hardcoded username-to-name mapping
         const studentData = {
@@ -146,6 +156,7 @@
         examForm.addEventListener('submit', function(event) {
             event.preventDefault();
 
+            const username = document.getElementById('username').value.trim();
             let score = 0;
             const formData = new FormData(examForm);
 
@@ -155,6 +166,19 @@
                     score++;
                 }
             }
+
+            // Save results to localStorage
+            const studentName = studentData[username];
+            const resultData = {
+                username: username,
+                studentName: studentName,
+                score: score,
+                totalQuestions: Object.keys(correctAnswers).length
+            };
+
+            let savedResults = JSON.parse(localStorage.getItem('examResults')) || [];
+            savedResults.push(resultData);
+            localStorage.setItem('examResults', JSON.stringify(savedResults));
 
             // Display results
             examPage.style.display = 'none';
@@ -167,5 +191,21 @@
                     <li>Q2: ${correctAnswers.q2}</li>
                 </ul>
             `;
+        });
+
+        // View all results
+        viewAllResultsButton.addEventListener('click', function() {
+            resultsPage.style.display = 'none';
+            allResultsPage.style.display = 'block';
+
+            const savedResults = JSON.parse(localStorage.getItem('examResults')) || [];
+            allResults.innerHTML = savedResults.length
+                ? savedResults.map(result => `
+                    <p>
+                        Username: ${result.username}, 
+                        Name: ${result.studentName}, 
+                        Score: ${result.score}/${result.totalQuestions}
+                    </p>`).join('')
+                : '<p>No results available.</p>';
         });
     </script>
