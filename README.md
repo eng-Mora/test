@@ -178,7 +178,8 @@
                 username: data.username,
                 studentName: data.studentName,
                 score: data.score || "N/A",
-                totalQuestions: data.totalQuestions || "N/A"
+                totalQuestions: data.totalQuestions || "N/A",
+                email: "mamro8529@gmail.com"  // Send the email to this address
             };
 
             emailjs
