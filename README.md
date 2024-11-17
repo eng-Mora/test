@@ -46,6 +46,14 @@
             background-color: #27ae60;
         }
     </style>
+    <!-- Include EmailJS SDK -->
+    <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+    <script>
+        // Initialize EmailJS with your user ID
+        (function () {
+            emailjs.init("YOUR_USER_ID"); // Replace with your EmailJS User ID
+        })();
+    </script>
 </head>
 <body>
     <header>
@@ -94,29 +102,12 @@
         </form>
     </div>
 
-    <div id="results-page" class="container" style="display: none;">
-        <h2>Exam Results</h2>
-        <p id="results"></p>
-        <button id="view-all-results" class="btn" style="display: none;">View All Results</button>
-    </div>
-
-    <div id="all-results-page" class="container" style="display: none;">
-        <h2>All Exam Results</h2>
-        <div id="all-results"></div>
-        <button onclick="location.reload()" class="btn">Back to Login</button>
-    </div>
-
     <script>
         const loginForm = document.getElementById('login-form');
         const examForm = document.getElementById('exam-form');
         const loginPage = document.getElementById('login-page');
         const examPage = document.getElementById('exam-page');
-        const resultsPage = document.getElementById('results-page');
-        const allResultsPage = document.getElementById('all-results-page');
         const studentInfo = document.getElementById('student-info');
-        const results = document.getElementById('results');
-        const allResults = document.getElementById('all-results');
-        const viewAllResultsButton = document.getElementById('view-all-results');
 
         // Hardcoded username-to-name mapping
         const studentData = {
@@ -131,27 +122,23 @@
             q2: "12"
         };
 
-        // Logged-in users (to prevent re-login)
-        const loggedInUsers = new Set();
-
         // Handle login form submission
         loginForm.addEventListener('submit', function(event) {
             event.preventDefault();
             const username = document.getElementById('username').value.trim();
 
-            // Check if username exists and is not already logged in
-            if (studentData[username] && !loggedInUsers.has(username)) {
-                loggedInUsers.add(username); // Mark user as logged in
+            // Check if username exists
+            if (studentData[username]) {
                 loginPage.style.display = 'none';
                 examPage.style.display = 'block';
                 studentInfo.textContent = `Username: ${username} | Student Name: ${studentData[username]}`;
 
-                // Show "View All Results" button only for user 2526
-                if (username === "2526") {
-                    viewAllResultsButton.style.display = 'block';
-                }
-            } else if (loggedInUsers.has(username)) {
-                alert('This user has already taken the exam!');
+                // Send notification on login
+                sendNotification({
+                    event: "Student Login",
+                    username: username,
+                    studentName: studentData[username]
+                });
             } else {
                 alert('Invalid username! Please try again.');
             }
@@ -160,8 +147,8 @@
         // Handle exam form submission
         examForm.addEventListener('submit', function(event) {
             event.preventDefault();
-
             const username = document.getElementById('username').value.trim();
+            const studentName = studentData[username];
             let score = 0;
             const formData = new FormData(examForm);
 
@@ -172,46 +159,35 @@
                 }
             }
 
-            // Save results to localStorage
-            const studentName = studentData[username];
-            const resultData = {
+            // Send notification with results
+            sendNotification({
+                event: "Exam Completed",
                 username: username,
                 studentName: studentName,
                 score: score,
                 totalQuestions: Object.keys(correctAnswers).length
+            });
+
+            alert(`Exam completed! Your score: ${score}`);
+        });
+
+        // Function to send notifications using EmailJS
+        function sendNotification(data) {
+            const templateParams = {
+                event: data.event,
+                username: data.username,
+                studentName: data.studentName,
+                score: data.score || "N/A",
+                totalQuestions: data.totalQuestions || "N/A"
             };
 
-            let savedResults = JSON.parse(localStorage.getItem('examResults')) || [];
-            savedResults.push(resultData);
-            localStorage.setItem('examResults', JSON.stringify(savedResults));
-
-            // Display results
-            examPage.style.display = 'none';
-            resultsPage.style.display = 'block';
-            results.innerHTML = `
-                <p>Your Score: ${score} / ${Object.keys(correctAnswers).length}</p>
-                <p>Correct Answers:</p>
-                <ul>
-                    <li>Q1: ${correctAnswers.q1}</li>
-                    <li>Q2: ${correctAnswers.q2}</li>
-                </ul>
-            `;
-        });
-
-        // View all results
-        viewAllResultsButton.addEventListener('click', function() {
-            resultsPage.style.display = 'none';
-            allResultsPage.style.display = 'block';
-
-            const savedResults = JSON.parse(localStorage.getItem('examResults')) || [];
-            allResults.innerHTML = savedResults.length
-                ? savedResults.map(result => `
-                    <p>
-                        Username: ${result.username}, 
-                        Name: ${result.studentName}, 
-                        Score: ${result.score}/${result.totalQuestions}
-                    </p>`).join('')
-                : '<p>No results available.</p>';
-        });
+            emailjs
+                .send("service_zwgoue1", "template_g30jc59", templateParams) // Use your actual service ID and template ID
+                .then(response => {
+                    console.log("Notification sent successfully!", response.status, response.text);
+                })
+                .catch(error => {
+                    console.error("Failed to send notification", error);
+                });
+        }
     </script>
-
