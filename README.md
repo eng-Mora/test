@@ -330,7 +330,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Video selection handler
     videoSelector.addEventListener('change', function() {
     // Hide all videos initially
-    for (let i = 1; i <= 12; i++) {
+    for (let i = 1; i <= 17; i++) {
         let video = document.getElementById('video' + i);
         if (video) {
             video.style.display = 'none';
@@ -349,4 +349,5 @@ document.addEventListener('DOMContentLoaded', function () {
     showLogin();
 });
 </script>
-
+</body>
+</html>
