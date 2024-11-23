@@ -159,26 +159,104 @@
                 <option value="video10">Voltmeter </option>
                 <option value="video11">Ohmmeter </option>
                 <option value="video12">Important on devices</option>
-                <option value="video13">شرح حصة 3 عربي (part1)</option>
-                <option value="video14">شرح حصة 3 عربي (part2)</option>
-                <option value="video15">شرح حصة 3 عربي (part2)</option>
-                <option value="video16">شرح حصة 3 عربي (part1)</option>
-                <option value="video17">شرح حصة 3 عربي (part2)</option>
-                <option value="video18">شرح حصة 3 عربي (part2)</option>
+                <option value="video13">Lecture 1 exercises</option>
+                <option value="video14">Lecture 2 exercises</option>
+                <option value="video15">Lecture 3 exercises</option>
+                <option value="video16">Lecture 4 exercises</option>
+                
                 
             </select>
             
             
             
             <div class="video" id="video1" style="display: none;">
-                <h1 class="video-title">شرح حصة 3 عربي (part1)</h1>
-               <iframe class='sproutvideo-player' src='https://videos.sproutvideo.com/embed/a791d0b21912e9c02e/6e552af326935c85' width='640' height='384' frameborder='0' allowfullscreen referrerpolicy='no-referrer-when-downgrade' title='Video Player'></iframe>
-            </div>
+                <h1 class="video-title">Magnetic flux</h1>
+     <iframe class='sproutvideo-player' src='https://videos.sproutvideo.com/embed/4491d0b21912ebcdcd/5b1354c14c4caf23' width='640' height='384' frameborder='0' allowfullscreen referrerpolicy='no-referrer-when-downgrade' title='Video Player'></iframe>
+                 </div>
 
             <div class="video" id="video2" style="display: none;">
-            <h1 class="video-title">شرح حصة 3 عربي (part2)</h1>
-                <iframe src="https://drive.google.com/file/d/15Mo7htyDhT7f9Beu9TwCiIMuxGO-dNRc/preview" style="width: 100%; height: 400px; border: 0;" allowfullscreen></iframe>
+            <h1 class="video-title">Flux density due to current passing in straight wire</h1>
+               <iframe class='sproutvideo-player' src='https://videos.sproutvideo.com/embed/0691d0b21913e3ce8f/d1eaa9f23748c0f6' width='640' height='384' frameborder='0' allowfullscreen referrerpolicy='no-referrer-when-downgrade' title='Video Player'></iframe>
             </div>
+            
+              <div class="video" id="video3" style="display: none;">
+            <h1 class="video-title"> Total flux density</h1>
+               <iframe class='sproutvideo-player' src='https://videos.sproutvideo.com/embed/ac91d0b21919e3c625/2c11e91cf89b2b46' width='640' height='384' frameborder='0' allowfullscreen referrerpolicy='no-referrer-when-downgrade' title='Video Player'></iframe>
+            </div>
+          
+              <div class="video" id="video4" style="display: none;">
+            <h1 class="video-title">Cicular coil </h1>
+                <iframe class='sproutvideo-player' src='https://videos.sproutvideo.com/embed/d391d0b21913e3cf5a/d2d31be031c54418' width='640' height='384' frameborder='0' allowfullscreen referrerpolicy='no-referrer-when-downgrade' title='Video Player'></iframe>
+            </div>
+            
+              <div class="video" id="video5" style="display: none;">
+            <h1 class="video-title"> Solenoid</h1>
+                <iframe class='sproutvideo-player' src='https://videos.sproutvideo.com/embed/4d91d0b21919e0c0c4/19b1d081cb748686' width='640' height='384' frameborder='0' allowfullscreen referrerpolicy='no-referrer-when-downgrade' title='Video Player'></iframe>
+            </div>
+            
+              <div class="video" id="video6" style="display: none;">
+            <h1 class="video-title">Magnetic force </h1>
+                <iframe class='sproutvideo-player' src='https://videos.sproutvideo.com/embed/a791d0b21912e9c02e/6e552af326935c85' width='640' height='384' frameborder='0' allowfullscreen referrerpolicy='no-referrer-when-downgrade' title='Video Player'></iframe>
+            </div>
+            
+              <div class="video" id="video7" style="display: none;">
+            <h1 class="video-title"> Torque</h1>
+            <iframe class='sproutvideo-player' src='https://videos.sproutvideo.com/embed/4d91d0b21919e1c1c4/8ba79be3b5512c60' width='640' height='384' frameborder='0' allowfullscreen referrerpolicy='no-referrer-when-downgrade' title='Video Player'></iframe>
+            </div>
+            
+              <div class="video" id="video8" style="display: none;">
+            <h1 class="video-title"> Galvanometer</h1>
+                <iframe class='sproutvideo-player' src='https://videos.sproutvideo.com/embed/a791d0b21913e3cb2e/25b6cdffb9b1ce15' width='640' height='384' frameborder='0' allowfullscreen referrerpolicy='no-referrer-when-downgrade' title='Video Player'></iframe>
+            </div>
+            
+              <div class="video" id="video9" style="display: none;">
+            <h1 class="video-title">Ammeter </h1>
+               <iframe class='sproutvideo-player' src='https://videos.sproutvideo.com/embed/7091d0b21913e2c9f9/1ae4cbdba0a59c18' width='640' height='384' frameborder='0' allowfullscreen referrerpolicy='no-referrer-when-downgrade' title='Video Player'></iframe>
+            </div>
+            
+              <div class="video" id="video10" style="display: none;">
+            <h1 class="video-title"> Voltmeter</h1>
+                <iframe class='sproutvideo-player' src='https://videos.sproutvideo.com/embed/7091d0b21913edc6f9/61e35b224ebf56cd' width='640' height='384' frameborder='0' allowfullscreen referrerpolicy='no-referrer-when-downgrade' title='Video Player'></iframe>
+            </div>
+             
+              <div class="video" id="video11" style="display: none;">
+            <h1 class="video-title"> Ohmmeter</h1>
+                <iframe class='sproutvideo-player' src='https://videos.sproutvideo.com/embed/4d91d0b2191aebc8c4/7c62f5e3fda8db71' width='640' height='384' frameborder='0' allowfullscreen referrerpolicy='no-referrer-when-downgrade' title='Video Player'></iframe>
+            </div>
+              <div class="video" id="video12" style="display: none;">
+            <h1 class="video-title"> Important on devices</h1>
+                <iframe class='sproutvideo-player' src='https://videos.sproutvideo.com/embed/4491d0b21913e3c4cd/0123a282367449b8' width='640' height='384' frameborder='0' allowfullscreen referrerpolicy='no-referrer-when-downgrade' title='Video Player'></iframe>
+            </div>
+            
+                          <div class="video" id="video13" style="display: none;">
+            <h1 class="video-title"> Lecture 1 exercises</h1>
+             <h1 class="video-title"> part 1</h1>
+              <iframe class='sproutvideo-player' src='https://videos.sproutvideo.com/embed/a791d0b2181de5c22e/5ce15a2882fe9e9f' width='640' height='384' frameborder='0' allowfullscreen referrerpolicy='no-referrer-when-downgrade' title='Video Player'></iframe>
+                        <h1 class="video-title"> part 2</h1>
+           <iframe class='sproutvideo-player' src='https://videos.sproutvideo.com/embed/1191d0b2191ae0cf98/3ceef39c1b3baae7' width='640' height='384' frameborder='0' allowfullscreen referrerpolicy='no-referrer-when-downgrade' title='Video Player'></iframe> 
+                         <h1 class="video-title"> part 3</h1>
+<iframe class='sproutvideo-player' src='https://videos.sproutvideo.com/embed/ac91d0b21812efc025/be5244c31fade634' width='640' height='384' frameborder='0' allowfullscreen referrerpolicy='no-referrer-when-downgrade' title='Video Player'></iframe>
+           </div>
+
+                          <div class="video" id="video14" style="display: none;">
+            <h1 class="video-title"> Lecture 2 exercises</h1>
+           <iframe class='sproutvideo-player' src='https://videos.sproutvideo.com/embed/7991d0b21812e3cdf0/ea0a150b4abf0b0d' width='640' height='1067' frameborder='0' allowfullscreen referrerpolicy='no-referrer-when-downgrade' title='Video Player'></iframe>
+           </div>
+
+                          <div class="video" id="video15" style="display: none;">
+            <h1 class="video-title"> Lecture 3 exercises</h1>
+           <iframe class='sproutvideo-player' src='https://videos.sproutvideo.com/embed/0691d0b21813ecc08f/5cb19cdd1e073420' width='640' height='384' frameborder='0' allowfullscreen referrerpolicy='no-referrer-when-downgrade' title='Video Player'></iframe>
+                      </div>
+                      <div class="video" id="video16" style="display: none;">
+            <h1 class="video-title"> Lecture 4 exercises</h1>
+                        <h1 class="video-title"> part 1</h1>
+<iframe class='sproutvideo-player' src='https://videos.sproutvideo.com/embed/ac91d0b2191be4c325/515d4ea967fbc5a1' width='640' height='384' frameborder='0' allowfullscreen referrerpolicy='no-referrer-when-downgrade' title='Video Player'></iframe>
+                                   <h1 class="video-title"> part 2</h1>
+<iframe class='sproutvideo-player' src='https://videos.sproutvideo.com/embed/7091d0b2191beac9f9/9a7288fba7f931fd' width='640' height='384' frameborder='0' allowfullscreen referrerpolicy='no-referrer-when-downgrade' title='Video Player'></iframe>
+                                              <h1 class="video-title"> part 3</h1>
+<iframe class='sproutvideo-player' src='https://videos.sproutvideo.com/embed/4d91d0b2191ae2c1c4/0e573682c16b932e' width='640' height='384' frameborder='0' allowfullscreen referrerpolicy='no-referrer-when-downgrade' title='Video Player'></iframe>
+                      </div>
+
         </section>
         
         <section id="contact">
@@ -251,15 +329,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Video selection handler
     videoSelector.addEventListener('change', function() {
-        if (videoSelector.value === 'video1') {
-            video1.style.display = 'block';
-            video2.style.display = 'none';
-        } else if (videoSelector.value === 'video2') {
-            video2.style.display = 'block';
-            video1.style.display = 'none';
+    // Hide all videos initially
+    for (let i = 1; i <= 12; i++) {
+        let video = document.getElementById('video' + i);
+        if (video) {
+            video.style.display = 'none';
         }
-    });
+    }
+
+    // Show the selected video
+    let selectedVideo = videoSelector.value;
+    let videoToShow = document.getElementById(selectedVideo);
+    if (videoToShow) {
+        videoToShow.style.display = 'block';
+    }
+});
+
 
     showLogin();
 });
 </script>
+
