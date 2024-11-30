@@ -216,8 +216,7 @@
             
               <div class="video" id="video10" style="display: none;">
             <h1 class="video-title"> Voltmeter</h1>
-                <iframe class='sproutvideo-player' src='https://videos.sproutvideo.com/embed/7091d0b21913edc6f9/61e35b224ebf56cd' width='640' height='384' frameborder='0' allowfullscreen referrerpolicy='no-referrer-when-downgrade' title='Video Player'></iframe>
-            </div>
+<div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%;"><iframe src="https://drive.google.com/file/d/1M-5z44sdEw1oP2u3p4WSYEe6gaCarnmB/preview" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0;" allowfullscreen scrolling="no" allow="encrypted-media;"></iframe></div>            
              
               <div class="video" id="video11" style="display: none;">
             <h1 class="video-title"> Ohmmeter</h1>
@@ -236,22 +235,19 @@
            <iframe class='sproutvideo-player' src='https://videos.sproutvideo.com/embed/1191d0b2191ae0cf98/3ceef39c1b3baae7' width='640' height='384' frameborder='0' allowfullscreen referrerpolicy='no-referrer-when-downgrade' title='Video Player'></iframe> 
                          <h1 class="video-title"> part 3</h1>
 <iframe class='sproutvideo-player' src='https://videos.sproutvideo.com/embed/ac91d0b21812efc025/be5244c31fade634' width='640' height='384' frameborder='0' allowfullscreen referrerpolicy='no-referrer-when-downgrade' title='Video Player'></iframe>
-             <h1 class="video-title"> Answers </h1>
-<iframe src="https://drive.google.com/file/d/1HRHFQLfHd2o9IP6VWlQxP9fb_Emc4OLp/preview" width="640" height="480" allow="autoplay"></iframe>
+
            </div>
 
                           <div class="video" id="video14" style="display: none;">
             <h1 class="video-title"> Lecture 2 exercises</h1>
            <iframe class='sproutvideo-player' src='https://videos.sproutvideo.com/embed/7991d0b21812e3cdf0/ea0a150b4abf0b0d' width='640' height='1067' frameborder='0' allowfullscreen referrerpolicy='no-referrer-when-downgrade' title='Video Player'></iframe>
-                        <h1 class="video-title"> Answers </h1>
-<iframe src="https://drive.google.com/file/d/1pcHjD3Huv8Pidjv-HeOH6Ye2xyzDAa5U/preview" width="640" height="480" allow="autoplay"></iframe>
+                      
            </div>
 
                           <div class="video" id="video15" style="display: none;">
             <h1 class="video-title"> Lecture 3 exercises</h1>
            <iframe class='sproutvideo-player' src='https://videos.sproutvideo.com/embed/0691d0b21813ecc08f/5cb19cdd1e073420' width='640' height='384' frameborder='0' allowfullscreen referrerpolicy='no-referrer-when-downgrade' title='Video Player'></iframe>
-                                   <h1 class="video-title"> Answers </h1>
-<iframe src="https://drive.google.com/file/d/1TZi6TNlsyrpIuqdMH1t9Di1QuoP6IS-Y/preview" width="640" height="480" allow="autoplay"></iframe>
+
                       </div>
                       <div class="video" id="video16" style="display: none;">
             <h1 class="video-title"> Lecture 4 exercises</h1>
@@ -261,8 +257,7 @@
 <iframe class='sproutvideo-player' src='https://videos.sproutvideo.com/embed/7091d0b2191beac9f9/9a7288fba7f931fd' width='640' height='384' frameborder='0' allowfullscreen referrerpolicy='no-referrer-when-downgrade' title='Video Player'></iframe>
                                               <h1 class="video-title"> part 3</h1>
 <iframe class='sproutvideo-player' src='https://videos.sproutvideo.com/embed/4d91d0b2191ae2c1c4/0e573682c16b932e' width='640' height='384' frameborder='0' allowfullscreen referrerpolicy='no-referrer-when-downgrade' title='Video Player'></iframe>
-                                   <h1 class="video-title"> Answers </h1>
-<iframe src="https://drive.google.com/file/d/1sJFO881mbgaIQpjSaulS10k9gj6W3_xW/preview" width="640" height="480" allow="autoplay"></iframe>
+
                       </div>
         </section>
         
