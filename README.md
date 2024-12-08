@@ -323,13 +323,46 @@
             degree = "N/A";
             motivationalMessage = "Keep pushing, you're doing great!🤩";
             break;
+        case "19153":
+            name = "Shahd Saeed";
+           degree = "N/A";
+           motivationalMessage = "Great job, stay on track!🤩";
+            break;
+       case "08724":
+            name = "Abdulwahab Abdulrahman";
+            degree = "N/A";
+            motivationalMessage = "Good effort, stay motivated!🤩";
+            break;
+       case "30693":
+            name = "Rahma Majed";
+           degree = "N/A";
+           motivationalMessage = "Awesome job, keep it up!🤩";
+           break;
+     case "35804":
+           name = "Reem Khalid";
+           degree = "N/A";
+           motivationalMessage = "Keep going, you're doing great!🤩";
+            break;
+    case "50808":
+           name = "Ahmed Hussein";
+           degree = "N/A";
+          motivationalMessage = "Good job, keep pushing!🤩";
+           break;
+   case "20531":
+           name = "Sandy Essam";
+           degree = "N/A";
+           motivationalMessage = "Well done, stay strong!🤩";
+           break;
+   case "20321":
+            name = "Basant Mohamed";
+           degree = "N/A";
+           motivationalMessage = "Great work, keep believing!🤩";
+          break;
         default:
             name = "Unknown";
             degree = "N/A";
             motivationalMessage = "Keep going, you’ve got this!🤩";
     }
-
-
 
             resultDiv.innerHTML = `
                 <div class="result">
