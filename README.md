@@ -178,7 +178,7 @@ switch (code) {
         degree = "N/A";
         motivationalMessage = "Excellent, stay motivated!🤩";
         break;
-    case "32859":
+    case "32532":
         name = "Mariam Atef";
         degree = "N/A";
         motivationalMessage = "Great effort, keep pushing!🤩";
