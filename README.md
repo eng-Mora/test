@@ -320,7 +320,7 @@ switch (code) {
         break;
     case "25695":
         name = "Vera Essam Adly";
-        degree = "14+4=<span style='color:#ff2e63;'>18</span>/60";
+        degree = "21+4=<span style='color:#ff2e63;'>25</span>/60";
         motivationalMessage = "Great job, stay strong!🤩";
         break;
     case "80135":
@@ -345,7 +345,7 @@ switch (code) {
         break;
     case "04596":
         name = "Ahmed Sameh Saeed";
-        degree = "16+4=<span style='color:#ff2e63;'>20</span>/60";
+        degree = "21+4=<span style='color:#ff2e63;'>25</span>/60";
         motivationalMessage = "Great job, stay on track!🤩";
         break;
     case "41729":
@@ -385,7 +385,7 @@ switch (code) {
         break;
     case "20321":
         name = "Basant Mohamed";
-        degree = "14+4=<span style='color:#ff2e63;'>18</span>/60";
+        degree = "21+4=<span style='color:#ff2e63;'>25</span>/60";
         motivationalMessage = "Keep it up, you're making progress!🤩";
         break;
     case "70126":
