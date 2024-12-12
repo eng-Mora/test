@@ -388,6 +388,11 @@ switch (code) {
         degree = "14+4=<span style='color:#ff2e63;'>18</span>/60";
         motivationalMessage = "Keep it up, you're making progress!🤩";
         break;
+    case "70126":
+        name = "Mazen Mohamed";
+        degree = "42+0=<span style='color:#ff2e63;'>42</span>/60";
+        motivationalMessage = "Keep it up, you're making progress!🤩";
+        break        
     default:
         name = "Unknown";
         degree = "N/A";
