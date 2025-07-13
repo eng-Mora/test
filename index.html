@@ -9,9 +9,105 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- All HTML content -->
-    <!-- Split placeholder - content injected below -->
-    <!-- JavaScript -->
+    
+    <main id="main" style="display:none;">
+        <section id="home">
+            <div style="text-align: center;">
+                <img src="https://i.ibb.co/QFVsZJ8V/image-removebg-preview-6.png" alt="Educational Process Platform">
+                <h2>The Process Platform</h2>
+                <p style="color: var(--secondary-color); margin-top: 1rem;">"كل ثانية بتذاكر فيها دلوقتي، بتقربك خطوة من حلمك. خليك قوي، وافتكر دايمًا إن التعب بيروح، لكن النتيجة بتفضل."
+                بالتوفيق يا ريس❤️ </p>
+            </div>
+        </section>
+
+        <section id="videos" class="video-container">
+            <!-- This section will be automatically populated after login -->
+            <div style="text-align: center; padding: 2rem;">
+                <h3>Welcome to the Educational Videos Platform</h3>
+                <p>Please login to access the available educational content</p>
+            </div>
+        </section>
+        
+        <section id="contact">
+            <h2>Contact Us</h2>
+            <p>If you have any questions or need further information, feel free to contact us at</p>
+            <p><a href="mailto:mamrro8529@gmail.com">mamrro8529@gmail.com</a></p>
+            
+            <div class="social-icons">
+                <button style="background-color: transparent; border: none; padding: 10px;">
+                    <a href="https://www.facebook.com/mamro8529?mibextid=ZbWKwL" target="_blank" style="color: black; font-size: 30px;">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                </button>
+                <button style="background-color: transparent; border: none; padding: 10px;">
+                    <a href="https://wa.me/message/5LRM2DVHPZQFM1" target="_blank" style="color: black; font-size: 30px;">
+                        <i class="fab fa-whatsapp"></i>
+                    </a>
+                </button>
+                <button style="background-color: transparent; border: none; padding: 10px;">
+                    <a href="http://t.me/Mora_mo1" target="_blank" style="color: black; font-size: 30px;">
+                        <i class="fab fa-telegram-plane"></i>
+                    </a>
+                </button>
+            </div>
+            
+            <div class="developer-credit">
+                <p>Developed by <a href="mailto:mamrro8529@gmail.com">Eng: Amr Mohamed</a></p>
+            </div>
+        </section>
+    </main>
+
+    <div class="login-container" id="loginContainer">
+        <div class="form-container">
+            <div class="left-section">
+                <h1>Hello, Welcome!</h1>
+                <p>Don't have an account?</p>
+                <button class="register-btn">Register</button>
+            </div>
+            <div class="right-section">
+                <h2>Login</h2>
+                <form id="loginForm">
+                    <div class="input-group">
+                        <input type="text" id="username" name="username" required placeholder="Enter access code">
+                        <i class="fas fa-user icon"></i>
+                    </div>
+                    <button type="submit" class="login-btn">LOGIN</button>
+                    
+                    <div class="social-login-btns">
+                        <button type="button" class="social-btn google" onclick="window.open('https://www.google.com', '_blank')">
+                            <i class="fas fa-book-open"></i> منصة المراجعات
+                        </button>
+                        <button type="button" class="social-btn facebook" onclick="window.open('https://www.facebook.com', '_blank')">
+                            <i class="fas fa-chart-line"></i> درجات الشوامل
+                        </button>
+                    </div>
+                    
+                    <div id="errorMessage" class="error"></div>
+                </form>
+                <p class="or">Developed by Eng: Amr Mohamed</p>
+                <p class="or">لو واجهتك مشكلة ابعتلي</p>
+
+                <div class="social-icons">
+                    <button style="background-color: transparent; border: none; padding: 10px;">
+                        <a href="https://www.facebook.com/mamro8529?mibextid=ZbWKwL" target="_blank" style="color: black; font-size: 30px;">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                    </button>
+                    <button style="background-color: transparent; border: none; padding: 10px;">
+                        <a href="https://wa.me/message/5LRM2DVHPZQFM1" target="_blank" style="color: black; font-size: 30px;">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                    </button>
+                    <button style="background-color: transparent; border: none; padding: 10px;">
+                        <a href="http://t.me/Mora_mo1" target="_blank" style="color: black; font-size: 30px;">
+                            <i class="fab fa-telegram-plane"></i>
+                        </a>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
