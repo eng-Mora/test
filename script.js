@@ -31,6 +31,25 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
+    // دالة لحفظ حالة تسجيل الدخول
+    function saveLoginState(username) {
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('username', username);
+    }
+
+    // دالة للتحقق من حالة تسجيل الدخول
+    function checkLoginState() {
+        const isLoggedIn = localStorage.getItem('isLoggedIn');
+        const username = localStorage.getItem('username');
+
+        if (isLoggedIn === 'true' && username) {
+            loadVideoContent('CODE1', username);
+            showMainContent();
+        } else {
+            showLogin();
+        }
+    }
+
     function showLogin() {
         loginContainer.style.display = 'flex';
         mainContent.style.display = 'none';
@@ -206,6 +225,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (code) {
             errorMessage.textContent = '';
+            saveLoginState(username); // حفظ حالة تسجيل الدخول
             loadVideoContent(code, username);
             showMainContent();
             
@@ -216,5 +236,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    showLogin();
+    // عند تحميل الصفحة، التحقق من حالة تسجيل الدخول
+    checkLoginState();
 });
