@@ -212,7 +212,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const errorMessage = document.getElementById('errorMessage');
 
         const validUsernames = {
-            'CODE1': ['45454']
+            'CODE1': ['45454','222']
         };
 
         let code = '';
