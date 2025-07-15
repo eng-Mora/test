@@ -60,7 +60,6 @@ document.addEventListener('DOMContentLoaded', function () {
         mainContent.style.display = 'block';
     }
 
-    function loadVideoContent(code, username) {
         
 
         const welcomeBanner = `
