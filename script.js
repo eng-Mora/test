@@ -60,26 +60,33 @@ document.addEventListener('DOMContentLoaded', function () {
         mainContent.style.display = 'block';
     }
 
+    function loadVideoContent(code, username) {
+        // الحصول على بيانات الطالب إذا كان موجوداً
+        const student = studentsData[username];
         
-
-        const welcomeBanner = `
-        <div class="welcome-banner">
-            <div class="welcome-text">
-                <h3>مرحباً ${student.name}</h3>
-                <p>${student.welcomeMessage}</p>
-            </div>
-            <div class="profile-img-container">
-                <img src="${student.image}" alt="صورة البروفايل">
-                <div class="show-details">اظهار التفاصيل</div>
-                <div class="profile-info" id="profileInfo">
-                    <p><strong>الاسم:</strong> ${student.name}</p>
-                    <p><strong>رقم التليفون:</strong> ${student.phone}</p>
-                    <p><strong>البريد الإلكتروني:</strong> ${student.email}</p>
-                    <p><strong>لغة الدراسة:</strong> ${student.language}</p>
+        let welcomeBanner = '';
+        
+        // فقط إذا كان الطالب لديه بيانات نعرض شريط الترحيب
+        if (student) {
+            welcomeBanner = `
+            <div class="welcome-banner">
+                <div class="welcome-text">
+                    <h3>مرحباً ${student.name}</h3>
+                    <p>${student.welcomeMessage}</p>
+                </div>
+                <div class="profile-img-container">
+                    <img src="${student.image}" alt="صورة البروفايل">
+                    <div class="show-details">اظهار التفاصيل</div>
+                    <div class="profile-info" id="profileInfo">
+                        <p><strong>الاسم:</strong> ${student.name}</p>
+                        <p><strong>رقم التليفون:</strong> ${student.phone}</p>
+                        <p><strong>البريد الإلكتروني:</strong> ${student.email}</p>
+                        <p><strong>لغة الدراسة:</strong> ${student.language}</p>
+                    </div>
                 </div>
             </div>
-        </div>
-        `;
+            `;
+        }
 
         let videoHTML = welcomeBanner;
         
@@ -170,7 +177,9 @@ document.addEventListener('DOMContentLoaded', function () {
             profileImgContainer.addEventListener('click', function(e) {
                 e.stopPropagation();
                 const profileInfo = document.getElementById('profileInfo');
-                profileInfo.classList.toggle('active');
+                if (profileInfo) {
+                    profileInfo.classList.toggle('active');
+                }
             });
         }
 
@@ -203,7 +212,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const errorMessage = document.getElementById('errorMessage');
 
         const validUsernames = {
-            'CODE1': ['45454','222']
+            'CODE1': ['45454', '18234', '19543'] // أضفنا جميع الأرقام المسجلة
         };
 
         let code = '';
