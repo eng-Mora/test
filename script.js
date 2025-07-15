@@ -61,15 +61,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function loadVideoContent(code, username) {
-        // الحصول على بيانات الطالب أو استخدام بيانات افتراضية إذا لم يكن موجوداً
-        const student = studentsData[username] || {
-            name: 'طالب جديد',
-            phone: 'غير متوفر',
-            email: 'غير متوفر',
-            language: 'عربي',
-            image: 'https://via.placeholder.com/60',
-            welcomeMessage: 'مرحباً بك في المنصة التعليمية'
-        };
+        
 
         const welcomeBanner = `
         <div class="welcome-banner">
