@@ -61,27 +61,24 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // دالة لتسجيل الخروج
-    function logout() {
+    window.logout = function() {
         localStorage.removeItem('isLoggedIn');
         localStorage.removeItem('username');
-        showLogin();
         window.location.reload();
-    }
+    };
 
     function loadVideoContent(code, username) {
-        // الحصول على بيانات الطالب إذا كان موجوداً
         const student = studentsData[username];
         
         let welcomeBanner = '';
         
-        // فقط إذا كان الطالب لديه بيانات نعرض شريط الترحيب
         if (student) {
             welcomeBanner = `
             <div class="welcome-banner">
                 <div class="welcome-text">
                     <h3>مرحباً ${student.name}</h3>
                     <p>${student.welcomeMessage}</p>
-                    <button onclick="logout()" class="logout-btn">تسجيل الخروج</button>
+                    <button onclick="window.logout()" class="logout-btn">تسجيل الخروج</button>
                 </div>
                 <div class="profile-img-container">
                     <img src="${student.image}" alt="صورة البروفايل">
