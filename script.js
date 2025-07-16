@@ -60,6 +60,14 @@ document.addEventListener('DOMContentLoaded', function () {
         mainContent.style.display = 'block';
     }
 
+    // دالة لتسجيل الخروج
+    function logout() {
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('username');
+        showLogin();
+        window.location.reload();
+    }
+
     function loadVideoContent(code, username) {
         // الحصول على بيانات الطالب إذا كان موجوداً
         const student = studentsData[username];
@@ -73,6 +81,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <div class="welcome-text">
                     <h3>مرحباً ${student.name}</h3>
                     <p>${student.welcomeMessage}</p>
+                    <button onclick="logout()" class="logout-btn">تسجيل الخروج</button>
                 </div>
                 <div class="profile-img-container">
                     <img src="${student.image}" alt="صورة البروفايل">
