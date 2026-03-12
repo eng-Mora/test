@@ -91,12 +91,15 @@
 
             const entries = Object.entries(data);
             if (entries.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2rem;color:#888">لا يوجد طلاب بعد. ابدأ بإضافة طالب جديد 👆</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:2rem;color:#888">لا يوجد طلاب بعد. ابدأ بإضافة طالب جديد 👆</td></tr>`;
                 return;
             }
 
             entries.forEach(([code, student]) => {
                 const tr = document.createElement('tr');
+                const vcBadge = student.videoCode 
+                    ? `<span style="background:#e8f4fd;color:#007bff;padding:2px 8px;border-radius:10px;font-size:0.8rem;font-weight:700">${student.videoCode}</span>`
+                    : `<span style="background:#fde8e8;color:#dc3545;padding:2px 8px;border-radius:10px;font-size:0.8rem">غير محدد ⚠️</span>`;
                 tr.innerHTML = `
                     <td>
                         <img src="${student.image || 'https://api.dicebear.com/7.x/bottts/svg?seed=' + code}" 
@@ -105,6 +108,7 @@
                     </td>
                     <td><strong>${student.name}</strong></td>
                     <td><code class="code-badge">${code}</code></td>
+                    <td>${vcBadge}</td>
                     <td>${student.phone || '-'}</td>
                     <td><span class="email-text">${student.email || '-'}</span></td>
                     <td>
@@ -148,6 +152,7 @@
             document.getElementById('studentLanguage').value = s.language || 'لغات';
             document.getElementById('studentImage').value = s.image || '';
             document.getElementById('studentWelcome').value = s.welcomeMessage || '';
+            document.getElementById('studentVideoCode').value = s.videoCode || '';
             document.getElementById('saveBtn').textContent = 'تحديث الطالب';
             document.getElementById('formError').textContent = '';
             document.getElementById('studentModal').style.display = 'flex';
@@ -165,9 +170,15 @@
             const language = document.getElementById('studentLanguage').value;
             const image = document.getElementById('studentImage').value.trim();
             const welcome = document.getElementById('studentWelcome').value.trim();
+            const videoCode = document.getElementById('studentVideoCode').value.trim();
 
             if (!code || !name) {
                 document.getElementById('formError').textContent = '⚠️ كود الدخول والاسم مطلوبين!';
+                return;
+            }
+
+            if (!videoCode) {
+                document.getElementById('formError').textContent = '⚠️ كود الفيديو مطلوب! (CODE1, CODE2, ...)';
                 return;
             }
 
@@ -183,6 +194,7 @@
                 language,
                 image: image || `https://api.dicebear.com/7.x/bottts/svg?seed=${code}`,
                 welcomeMessage: welcome || '☝🏽شد حيلك يا باشا… دي آخر محطة قبل الحلم الكبير',
+                videoCode,
                 createdAt: editingCode ? (allStudents[editingCode]?.createdAt || Date.now()) : Date.now(),
                 updatedAt: Date.now()
             };
@@ -787,6 +799,7 @@
                         <th>صورة</th>
                         <th>الاسم</th>
                         <th>كود الدخول</th>
+                        <th>كود الفيديو</th>
                         <th>التليفون</th>
                         <th>الإيميل</th>
                         <th>القسم</th>
@@ -839,6 +852,25 @@
         <div class="form-group">
             <label>💬 رسالة الترحيب (اختياري)</label>
             <input type="text" id="studentWelcome" placeholder="☝🏽شد حيلك يا باشا…">
+        </div>
+        <div class="form-group">
+            <label>🎬 كود الفيديو * <small style="color:#888;font-weight:400">(يحدد المحتوى اللي يشوفه الطالب)</small></label>
+            <select id="studentVideoCode">
+                <option value="">-- اختر كود الفيديو --</option>
+                <option value="CODE1">CODE1 — ثالثة ثانوي عربي (فيزياء كهربية + حديثة)</option>
+                <option value="CODE2">CODE2 — ثالثة ثانوي لغات (فيزياء كهربية + حديثة)</option>
+                <option value="CODE3">CODE3 — مراجعة الفصل الأول عربي</option>
+                <option value="CODE4">CODE4 — مراجعة الفصل الأول لغات</option>
+                <option value="CODE5">CODE5 — تانية ثانوي لغات</option>
+                <option value="CODE6">CODE6 — مراجعة الفصل الثاني عربي</option>
+                <option value="CODE7">CODE7 — Chapter 2 لغات</option>
+                <option value="CODE8">CODE8 — الفصل الثالث عربي</option>
+                <option value="CODE9">CODE9 — Chapter 3 لغات</option>
+                <option value="CODE10">CODE10 — Final Revision لغات</option>
+                <option value="CODE11">CODE11 — مراجعة نصف السنة عربي</option>
+                <option value="CODE12">CODE12 — Mid-Year Review لغات</option>
+                <option value="CODE13">CODE13 — تانية ثانوي لغات (Homework)</option>
+            </select>
         </div>
         <div id="formError"></div>
         <div class="modal-footer">
