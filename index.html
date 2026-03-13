@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎬 إدارة الفيديوهات - The Process</title>
+<title> إدارة الفيديوهات - The Process</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 <style>
@@ -85,6 +85,11 @@ tbody tr:last-child td{border-bottom:none;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 .toast.warn{background:var(--danger);}
 
+.tab-nav{display:flex;gap:.5rem;margin-bottom:1.5rem;background:#fff;border-radius:14px;padding:.5rem;box-shadow:0 2px 10px rgba(0,0,0,.06);}
+.tab-btn{flex:1;padding:.75rem 1rem;border:none;border-radius:10px;font-family:Tajawal,sans-serif;font-size:1rem;font-weight:700;cursor:pointer;color:#777;background:transparent;transition:all .2s;}
+.tab-btn.active{background:var(--primary);color:#fff;box-shadow:0 4px 12px rgba(128,0,0,.25);}
+.tab-btn:not(.active):hover{background:#f5f5f5;color:#333;}
+
 @media(max-width:600px){
     .selector-card{flex-direction:column;}
     header{padding:1rem;}
@@ -100,7 +105,7 @@ tbody tr:last-child td{border-bottom:none;}
         <h1>إدارة الفيديوهات</h1>
         <p>The Process — Video Manager</p>
         <input type="password" id="adminPass" class="auth-input" placeholder="كلمة المرور">
-        <button class="auth-btn" onclick="submitAuth()"><i class="fas fa-lock-open"></i> دخول</button>
+        <button class="auth-btn" id="authBtn"><i class="fas fa-lock-open"></i> دخول</button>
         <div id="authError"></div>
     </div>
 </div>
@@ -112,6 +117,18 @@ tbody tr:last-child td{border-bottom:none;}
     </header>
 
     <div class="container">
+        <!-- Tab Nav -->
+        <div class="tab-nav">
+            <button class="tab-btn active" id="tabHomework" onclick="switchTab('homework')">
+                📚 فيديوهات الواجب
+            </button>
+            <button class="tab-btn" id="tabReview" onclick="switchTab('review')">
+                🎯 فيديوهات المراجعة
+            </button>
+        </div>
+
+        <!-- HOMEWORK PANEL -->
+        <div id="panelHomework">
         <div class="hint">
             <strong>خطوات إضافة فيديو جديد:</strong><br>
             ١ — اختر الـ CODE (مثلاً CODE1) ← ٢ — اختر الفصل ← ٣ — اضغط "تحميل" ← ٤ — اضغط "+ فيديو جديد"<br>
@@ -166,6 +183,109 @@ tbody tr:last-child td{border-bottom:none;}
                     <tbody id="videoBody"></tbody>
                 </table>
             </div>
+        </div>
+    </div>
+        </div><!-- end panelHomework -->
+
+        <!-- REVIEW PANEL -->
+        <div id="panelReview" style="display:none">
+            <div class="hint" style="border-color:#6f42c1;background:#f8f0ff;">
+                <strong style="color:#6f42c1">🎯 فيديوهات المراجعة:</strong><br>
+                كل Review Code له فيديوهاته الخاصة + قائمة أكواد الطلاب المسموح ليهم يشوفوه.<br>
+                الطالب بيدخل بالكود ده مباشرة ويشوف فيديوهات المراجعة بس.
+            </div>
+
+            <!-- Review Codes List -->
+            <div class="table-card" style="margin-bottom:1.5rem">
+                <div class="table-header">
+                    <h2>🗂️ Review Codes</h2>
+                    <button class="btn-add" style="background:#6f42c1" onclick="openAddReviewCode()">
+                        <i class="fas fa-plus"></i> Review Code جديد
+                    </button>
+                </div>
+                <div style="overflow-x:auto">
+                    <table>
+                        <thead><tr>
+                            <th>الكود</th>
+                            <th>الوصف</th>
+                            <th>عدد الفيديوهات</th>
+                            <th>عدد الأكواد المسموح بيها</th>
+                            <th>إجراءات</th>
+                        </tr></thead>
+                        <tbody id="reviewCodesBody">
+                            <tr><td colspan="5" style="text-align:center;padding:2rem;color:#aaa">
+                                <i class="fas fa-spinner fa-spin"></i> جاري التحميل...
+                            </td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Review Videos Section (shown when a code is selected) -->
+            <div id="reviewVideosSection" style="display:none">
+                <div class="table-card">
+                    <div class="table-header">
+                        <h2 id="reviewVideosTitle">فيديوهات</h2>
+                        <div style="display:flex;gap:.5rem">
+                            <button class="btn-add" style="background:#555;font-size:.85rem" onclick="openManageAccessCodes()">
+                                <i class="fas fa-key"></i> أكواد الوصول
+                            </button>
+                            <button class="btn-add" style="background:#6f42c1" onclick="openAddReviewVideo()">
+                                <i class="fas fa-plus"></i> فيديو جديد
+                            </button>
+                        </div>
+                    </div>
+                    <div style="overflow-x:auto">
+                        <table>
+                            <thead><tr>
+                                <th>الترتيب</th><th>العنوان</th><th>الرابط</th><th>الأجزاء</th><th>إجراءات</th>
+                            </tr></thead>
+                            <tbody id="reviewVideoBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div><!-- end panelReview -->
+
+</div>
+</div>
+
+<!-- Review Code Modal -->
+<div class="modal-overlay" id="reviewCodeModal" style="display:none" onclick="if(event.target===this)closeReviewCodeModal()">
+    <div class="modal">
+        <h2 id="reviewCodeModalTitle" style="color:#6f42c1">➕ Review Code جديد</h2>
+        <div class="form-group">
+            <label>🔑 الكود (مثال: REV_CODE1) *</label>
+            <input type="text" id="rcCode" placeholder="REV_CODE1" dir="ltr" style="font-family:monospace;font-size:1rem">
+        </div>
+        <div class="form-group">
+            <label>📝 وصف (اختياري)</label>
+            <input type="text" id="rcDesc" placeholder="مثال: مراجعة الفصل الأول عربي">
+        </div>
+        <div id="rcError" style="color:#dc3545;font-size:.85rem;min-height:1.2rem"></div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeReviewCodeModal()">إلغاء</button>
+            <button class="btn-save" style="background:#6f42c1" onclick="saveReviewCode()">💾 حفظ</button>
+        </div>
+    </div>
+</div>
+
+<!-- Access Codes Modal -->
+<div class="modal-overlay" id="accessCodesModal" style="display:none" onclick="if(event.target===this)closeAccessCodesModal()">
+    <div class="modal" style="max-width:520px">
+        <h2 style="color:#6f42c1">🔑 أكواد الوصول</h2>
+        <p style="color:#777;font-size:.88rem;margin-bottom:1rem">
+            الأكواد دي هي اللي بيدخل بيها الطالب عشان يشوف فيديوهات المراجعة دي.<br>
+            كل كود في سطر لوحده.
+        </p>
+        <div class="form-group">
+            <label>📋 الأكواد (كل كود في سطر)</label>
+            <textarea id="accessCodesInput" rows="8" style="width:100%;padding:.7rem 1rem;border:2px solid #e0e0e0;border-radius:10px;font-family:monospace;font-size:.9rem;resize:vertical;direction:ltr" placeholder="12345&#10;67890&#10;11111"></textarea>
+        </div>
+        <div id="acError" style="color:#dc3545;font-size:.85rem;min-height:1.2rem"></div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeAccessCodesModal()">إلغاء</button>
+            <button class="btn-save" style="background:#6f42c1" onclick="saveAccessCodes()">💾 حفظ الأكواد</button>
         </div>
     </div>
 </div>
@@ -251,7 +371,7 @@ let currentCode = null, currentChapter = null, allVideos = {}, editingId = null;
 let unsubscribe = null;
 
 // Auth
-window.submitAuth = function() {
+function submitAuth() {
     if (document.getElementById('adminPass').value === PASS) {
         sessionStorage.setItem('vidAuth','yes');
         document.getElementById('authScreen').style.display = 'none';
@@ -260,12 +380,17 @@ window.submitAuth = function() {
         document.getElementById('authError').textContent = '❌ كلمة المرور غلط!';
         document.getElementById('adminPass').value = '';
     }
-};
-document.getElementById('adminPass').addEventListener('keydown', e => { if(e.key==='Enter') window.submitAuth(); });
-if (sessionStorage.getItem('vidAuth') === 'yes') {
-    document.getElementById('authScreen').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
 }
+
+// Attach events after DOM ready (module scripts run after DOM is parsed)
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('authBtn').addEventListener('click', submitAuth);
+    document.getElementById('adminPass').addEventListener('keydown', e => { if(e.key==='Enter') submitAuth(); });
+    if (sessionStorage.getItem('vidAuth') === 'yes') {
+        document.getElementById('authScreen').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+    }
+});
 
 // Code change
 window.onCodeChange = function() {
@@ -417,6 +542,249 @@ function showToast(msg, type='') {
     t.className = 'toast show'+(type?' '+type:'');
     setTimeout(()=>t.classList.remove('show'),3000);
 }
+
+// ── TABS ─────────────────────────────────────────────────────
+window.switchTab = function(tab) {
+    document.getElementById('panelHomework').style.display   = tab==='homework' ? 'block':'none';
+    document.getElementById('panelReview').style.display     = tab==='review'   ? 'block':'none';
+    document.getElementById('tabHomework').classList.toggle('active', tab==='homework');
+    document.getElementById('tabReview').classList.toggle('active',   tab==='review');
+    if (tab==='review') loadReviewCodes();
+};
+
+// ── REVIEW CODES ─────────────────────────────────────────────
+let currentReviewCode = null, reviewVideos = {}, editingReviewVid = null, editingRcId = null;
+
+function loadReviewCodes() {
+    onValue(ref(db,'reviews'), snap => {
+        const data = snap.val() || {};
+        const tbody = document.getElementById('reviewCodesBody');
+        const entries = Object.entries(data);
+        if (!entries.length) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:2rem;color:#aaa">لا يوجد Review Codes بعد</td></tr>`;
+            return;
+        }
+        tbody.innerHTML = '';
+        entries.forEach(([rcId, rc]) => {
+            const vidCount  = Object.keys(rc.videos  || {}).length;
+            const codeCount = Object.keys(rc.accessCodes || {}).length;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong style="font-family:monospace;color:#6f42c1">${rc.code||rcId}</strong></td>
+                <td style="color:#777;font-size:.88rem">${rc.desc||'—'}</td>
+                <td><span class="parts-badge">${vidCount} فيديو</span></td>
+                <td><span class="order-badge">${codeCount} كود</span></td>
+                <td>
+                    <button onclick="selectReviewCode('${rcId}')" style="background:#f0e8fd;color:#6f42c1;border:none;padding:.35rem .8rem;border-radius:7px;cursor:pointer;font-family:Tajawal,sans-serif;font-size:.85rem;font-weight:700">
+                        <i class="fas fa-folder-open"></i> فتح
+                    </button>
+                    <button class="btn-delete" onclick="deleteReviewCode('${rcId}','${(rc.code||rcId).replace(/'/g,'')}')"><i class="fas fa-trash"></i></button>
+                </td>`;
+            tbody.appendChild(tr);
+        });
+    }, {onlyOnce:true});
+}
+
+window.selectReviewCode = function(rcId) {
+    currentReviewCode = rcId;
+    get(ref(db,`reviews/${rcId}`)).then(snap => {
+        const rc = snap.val() || {};
+        reviewVideos = rc.videos || {};
+        document.getElementById('reviewVideosTitle').textContent = `🎯 ${rc.code||rcId} — ${rc.desc||''}`;
+        document.getElementById('reviewVideosSection').style.display = 'block';
+        renderReviewVideos();
+        document.getElementById('reviewVideosSection').scrollIntoView({behavior:'smooth',block:'start'});
+    });
+};
+
+function renderReviewVideos() {
+    const tbody = document.getElementById('reviewVideoBody');
+    const entries = Object.entries(reviewVideos).sort((a,b)=>(a[1].order||0)-(b[1].order||0));
+    if (!entries.length) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:3rem;color:#aaa">
+            <i class="fas fa-video" style="font-size:2.5rem;display:block;margin-bottom:1rem;color:#ccc"></i>
+            لا يوجد فيديوهات — اضغط "+ فيديو جديد"
+        </td></tr>`;
+        return;
+    }
+    tbody.innerHTML = '';
+    entries.forEach(([vid,v]) => {
+        const parts = v.url2 ? 2 : 1;
+        const short = (v.url1||'').replace('https://drive.google.com/file/d/','').substring(0,28);
+        const safeTitle = (v.title||'').replace(/'/g,'&apos;').replace(/"/g,'&quot;');
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><span class="order-badge">${v.order||0}</span></td>
+            <td><strong>${v.title||''}</strong></td>
+            <td><span class="url-preview" title="${v.url1||''}">${short}…</span></td>
+            <td><span class="parts-badge">${parts} جزء</span></td>
+            <td>
+                <button class="btn-up"    onclick="moveReviewVideo('${vid}',-1)"><i class="fas fa-arrow-up"></i></button>
+                <button class="btn-down"  onclick="moveReviewVideo('${vid}',1)"><i class="fas fa-arrow-down"></i></button>
+                <button class="btn-edit"  onclick="editReviewVideo('${vid}')"><i class="fas fa-edit"></i></button>
+                <button class="btn-delete" onclick="deleteReviewVideo('${vid}','${safeTitle}')"><i class="fas fa-trash"></i></button>
+            </td>`;
+        tbody.appendChild(tr);
+    });
+}
+
+// Add Review Code
+window.openAddReviewCode = function() {
+    editingRcId = null;
+    document.getElementById('reviewCodeModalTitle').textContent = '➕ Review Code جديد';
+    document.getElementById('rcCode').value = '';
+    document.getElementById('rcDesc').value = '';
+    document.getElementById('rcError').textContent = '';
+    document.getElementById('reviewCodeModal').style.display = 'flex';
+};
+
+window.closeReviewCodeModal = function() {
+    document.getElementById('reviewCodeModal').style.display = 'none';
+};
+
+window.saveReviewCode = async function() {
+    const code = document.getElementById('rcCode').value.trim().toUpperCase().replace(/[\s]+/g,'_');
+    const desc = document.getElementById('rcDesc').value.trim();
+    const err  = document.getElementById('rcError');
+    if (!code) { err.textContent = '⚠️ الكود مطلوب!'; return; }
+    const rcId = editingRcId || `rc_${Date.now()}`;
+    try {
+        await set(ref(db,`reviews/${rcId}/code`), code);
+        await set(ref(db,`reviews/${rcId}/desc`), desc);
+        closeReviewCodeModal();
+        showToast('✅ تم الحفظ!');
+        loadReviewCodes();
+    } catch(e) { err.textContent = '❌ '+e.message; }
+};
+
+window.deleteReviewCode = async function(rcId, code) {
+    if (!confirm(`هتحذف Review Code:
+"${code}" وكل فيديوهاته؟`)) return;
+    await remove(ref(db,`reviews/${rcId}`));
+    document.getElementById('reviewVideosSection').style.display = 'none';
+    showToast('🗑️ تم الحذف!','warn');
+    loadReviewCodes();
+};
+
+// Access Codes
+window.openManageAccessCodes = function() {
+    if (!currentReviewCode) return;
+    get(ref(db,`reviews/${currentReviewCode}/accessCodes`)).then(snap => {
+        const data = snap.val() || {};
+        const codes = Object.values(data).join('
+');
+        document.getElementById('accessCodesInput').value = codes;
+        document.getElementById('acError').textContent = '';
+        document.getElementById('accessCodesModal').style.display = 'flex';
+    });
+};
+
+window.closeAccessCodesModal = function() {
+    document.getElementById('accessCodesModal').style.display = 'none';
+};
+
+window.saveAccessCodes = async function() {
+    const raw   = document.getElementById('accessCodesInput').value;
+    const codes = raw.split('
+').map(c=>c.trim()).filter(Boolean);
+    const err   = document.getElementById('acError');
+    if (!codes.length) { err.textContent = '⚠️ حط كود واحد على الأقل!'; return; }
+    const obj = {};
+    codes.forEach((c,i) => obj[`c${i}`] = c);
+    try {
+        await set(ref(db,`reviews/${currentReviewCode}/accessCodes`), obj);
+        closeAccessCodesModal();
+        showToast(`✅ تم حفظ ${codes.length} كود!`);
+    } catch(e) { err.textContent = '❌ '+e.message; }
+};
+
+// Review Videos CRUD
+window.openAddReviewVideo = function() {
+    editingReviewVid = null;
+    document.getElementById('modalTitle').textContent = '➕ فيديو مراجعة جديد';
+    document.getElementById('vTitle').value = '';
+    document.getElementById('vUrl1').value  = '';
+    document.getElementById('vUrl2').value  = '';
+    document.getElementById('vOrder').value = nextReviewOrder();
+    document.getElementById('part2Row').style.display = 'none';
+    document.getElementById('toggleBtn').textContent  = '+ إضافة جزء ثاني';
+    document.getElementById('formError').textContent  = '';
+    // reuse same modal but save goes to review path
+    window._saveTarget = 'review';
+    document.getElementById('videoModal').style.display = 'flex';
+};
+
+function nextReviewOrder() {
+    const orders = Object.values(reviewVideos).map(v=>v.order||0);
+    return orders.length ? Math.max(...orders)+1 : 1;
+}
+
+window.editReviewVideo = function(vid) {
+    const v = reviewVideos[vid]; if (!v) return;
+    editingReviewVid = vid;
+    document.getElementById('modalTitle').textContent = '✏️ تعديل فيديو المراجعة';
+    document.getElementById('vTitle').value = v.title||'';
+    document.getElementById('vUrl1').value  = v.url1 ||'';
+    document.getElementById('vUrl2').value  = v.url2 ||'';
+    document.getElementById('vOrder').value = v.order||1;
+    const has2 = !!v.url2;
+    document.getElementById('part2Row').style.display = has2?'block':'none';
+    document.getElementById('toggleBtn').textContent  = has2?'- إزالة جزء ثاني':'+ إضافة جزء ثاني';
+    document.getElementById('formError').textContent  = '';
+    window._saveTarget = 'review';
+    document.getElementById('videoModal').style.display = 'flex';
+};
+
+window.moveReviewVideo = async function(vid, dir) {
+    const entries = Object.entries(reviewVideos).sort((a,b)=>(a[1].order||0)-(b[1].order||0));
+    const idx = entries.findIndex(e=>e[0]===vid);
+    const si  = idx+dir;
+    if (si<0||si>=entries.length) return;
+    const [aId,aV]=[entries[idx]], [bId,bV]=[entries[si]];
+    await set(ref(db,`reviews/${currentReviewCode}/videos/${aId[0]}/order`), bV[1].order||0);
+    await set(ref(db,`reviews/${currentReviewCode}/videos/${bId[0]}/order`), aV[1].order||0);
+    get(ref(db,`reviews/${currentReviewCode}/videos`)).then(s=>{ reviewVideos=s.val()||{}; renderReviewVideos(); });
+};
+
+window.deleteReviewVideo = async function(vid, title) {
+    if (!confirm(`هتحذف:
+"${title}"؟`)) return;
+    await remove(ref(db,`reviews/${currentReviewCode}/videos/${vid}`));
+    delete reviewVideos[vid];
+    renderReviewVideos();
+    showToast('🗑️ تم الحذف!','warn');
+};
+
+// Override saveVideo to handle both homework and review targets
+const _origSaveVideo = window.saveVideo;
+window.saveVideo = async function() {
+    if (window._saveTarget !== 'review') { await _origSaveVideo(); return; }
+    const title = document.getElementById('vTitle').value.trim();
+    const url1  = document.getElementById('vUrl1').value.trim();
+    const url2  = document.getElementById('vUrl2').value.trim();
+    const order = parseInt(document.getElementById('vOrder').value) || nextReviewOrder();
+    const errEl = document.getElementById('formError');
+    if (!title) { errEl.textContent='⚠️ العنوان مطلوب!'; return; }
+    if (!url1)  { errEl.textContent='⚠️ رابط الجزء الأول مطلوب!'; return; }
+    const data = { title, url1:toEmbed(url1), order, updatedAt:Date.now() };
+    if (url2) data.url2 = toEmbed(url2);
+    const vid = editingReviewVid || `v${Date.now()}`;
+    try {
+        await set(ref(db,`reviews/${currentReviewCode}/videos/${vid}`), data);
+        reviewVideos[vid] = data;
+        window.closeModal();
+        window._saveTarget = null;
+        renderReviewVideos();
+        showToast(editingReviewVid ? '✅ تم التحديث!':'✅ تم إضافة الفيديو!');
+    } catch(e) { errEl.textContent='❌ '+e.message; }
+};
+
+// Reset _saveTarget when closing modal for homework
+const _origCloseModal = window.closeModal;
+window.closeModal = function() {
+    window._saveTarget = null;
+    _origCloseModal();
+};
 </script>
 </body>
 </html>
