@@ -1,790 +1,985 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title> إدارة الفيديوهات - The Process</title>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-<style>
-:root {
-    --primary:#800000; --primary-light:#a00000; --gold:#D4AF37;
-    --bg:#f0f2f5; --card:#fff; --border:#e0e0e0;
-    --text:#333; --muted:#777; --danger:#dc3545;
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);direction:rtl;min-height:100vh;}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛡️ لوحة تحكم المشرف - The Process</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-#authScreen{position:fixed;inset:0;background:linear-gradient(135deg,#0B0C2A,#1a1a4e 50%,#800000);display:flex;align-items:center;justify-content:center;z-index:9999;}
-.auth-card{background:#fff;border-radius:20px;padding:3rem 2.5rem;width:360px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4);}
-.auth-card h1{color:var(--primary);margin-bottom:.5rem;}
-.auth-card p{color:var(--muted);margin-bottom:1.5rem;font-size:.95rem;}
-.auth-input{width:100%;padding:.85rem 1rem;border:2px solid var(--border);border-radius:10px;font-family:Tajawal,sans-serif;font-size:1rem;margin-bottom:1rem;direction:ltr;text-align:center;letter-spacing:2px;}
-.auth-input:focus{outline:none;border-color:var(--primary);}
-.auth-btn{width:100%;padding:.85rem;background:var(--primary);color:#fff;border:none;border-radius:10px;font-family:Tajawal,sans-serif;font-size:1.05rem;font-weight:700;cursor:pointer;}
-.auth-btn:hover{background:var(--primary-light);}
-#authError{color:var(--danger);margin-top:.7rem;font-size:.9rem;}
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, set, push, remove, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-#app{display:none;}
-header{background:linear-gradient(135deg,#800000,#2c3e50);color:#fff;padding:1.2rem 2rem;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,.2);}
-.header-title{font-size:1.4rem;font-weight:800;}
-.header-title span{color:var(--gold);}
-.back-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:.5rem 1.2rem;border-radius:8px;cursor:pointer;font-family:Tajawal,sans-serif;font-size:.9rem;}
-.back-btn:hover{background:rgba(255,255,255,.25);}
+        const firebaseConfig = {
+            apiKey: "AIzaSyBXsX0v_7p8CHDFiTUm4XkQsoZIqGueAOk",
+            authDomain: "the-process-5d196.firebaseapp.com",
+            databaseURL: "https://the-process-5d196-default-rtdb.firebaseio.com",
+            projectId: "the-process-5d196",
+            storageBucket: "the-process-5d196.firebasestorage.app",
+            messagingSenderId: "96415822332",
+            appId: "1:96415822332:web:2be476bee2e474383d8279",
+            measurementId: "G-QMZ40P6HBG"
+        };
 
-.container{max-width:960px;margin:0 auto;padding:2rem 1rem;}
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-.selector-card{background:var(--card);border-radius:16px;padding:1.5rem 2rem;box-shadow:0 4px 20px rgba(0,0,0,.07);margin-bottom:2rem;display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-end;}
-.sel-group{display:flex;flex-direction:column;gap:.4rem;flex:1;min-width:180px;}
-.sel-group label{font-size:.85rem;font-weight:700;color:var(--muted);}
-.sel-group select{padding:.7rem 1rem;border:2px solid var(--border);border-radius:10px;font-family:Tajawal,sans-serif;font-size:.95rem;color:var(--text);background:#fff;cursor:pointer;}
-.sel-group select:focus{outline:none;border-color:var(--primary);}
-.btn-load{padding:.75rem 2rem;background:var(--primary);color:#fff;border:none;border-radius:10px;font-family:Tajawal,sans-serif;font-size:1rem;font-weight:700;cursor:pointer;white-space:nowrap;}
-.btn-load:hover{background:var(--primary-light);}
+        // ===== Admin Password =====
+        const ADMIN_PASSWORD = "mora.admin.2026";
 
-.table-card{background:var(--card);border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,.07);overflow:hidden;}
-.table-header{padding:1.2rem 1.5rem;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--border);}
-.table-header h2{font-size:1.1rem;color:var(--primary);}
-.btn-add{padding:.6rem 1.5rem;background:var(--primary);color:#fff;border:none;border-radius:10px;font-family:Tajawal,sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;}
-.btn-add:hover{background:var(--primary-light);}
-table{width:100%;border-collapse:collapse;}
-thead tr{background:#f8f9fa;}
-th,td{padding:.8rem 1rem;text-align:right;border-bottom:1px solid var(--border);font-size:.9rem;}
-th{font-weight:700;color:var(--muted);font-size:.82rem;}
-tbody tr:hover{background:#fafafa;}
-tbody tr:last-child td{border-bottom:none;}
-.order-badge{background:#e8f5e9;color:#2e7d32;padding:2px 10px;border-radius:10px;font-size:.8rem;font-weight:700;}
-.parts-badge{background:#e8f4fd;color:#007bff;padding:2px 10px;border-radius:10px;font-size:.8rem;font-weight:700;}
-.url-preview{font-size:.78rem;color:var(--muted);direction:ltr;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;}
-.btn-edit{background:#e8f4fd;color:#007bff;border:none;padding:.35rem .65rem;border-radius:7px;cursor:pointer;margin:0 2px;}
-.btn-edit:hover{background:#007bff;color:#fff;}
-.btn-delete{background:#fde8e8;color:var(--danger);border:none;padding:.35rem .65rem;border-radius:7px;cursor:pointer;margin:0 2px;}
-.btn-delete:hover{background:var(--danger);color:#fff;}
-.btn-up,.btn-down{background:#f5f5f5;color:#555;border:none;padding:.35rem .55rem;border-radius:7px;cursor:pointer;margin:0 1px;font-size:.8rem;}
-.btn-up:hover,.btn-down:hover{background:#ddd;}
+        // ===== State =====
+        let allStudents = {};
+        let editingCode = null;
 
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1000;padding:1rem;}
-.modal{background:#fff;border-radius:16px;padding:2rem;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;}
-.modal h2{color:var(--primary);margin-bottom:1.5rem;font-size:1.25rem;}
-.form-group{margin-bottom:1rem;}
-.form-group label{display:block;font-weight:700;margin-bottom:.4rem;font-size:.88rem;color:#555;}
-.form-group input,.form-group select{width:100%;padding:.7rem 1rem;border:2px solid var(--border);border-radius:10px;font-family:Tajawal,sans-serif;font-size:.95rem;color:var(--text);}
-.form-group input:focus,.form-group select:focus{outline:none;border-color:var(--primary);}
-.toggle-part2-btn{background:none;border:1.5px dashed var(--primary);color:var(--primary);padding:.4rem 1.2rem;border-radius:8px;cursor:pointer;font-family:Tajawal,sans-serif;font-size:.9rem;font-weight:700;margin-bottom:1rem;}
-.modal-footer{display:flex;gap:1rem;justify-content:flex-end;margin-top:1.5rem;}
-.btn-save{padding:.7rem 2rem;background:var(--primary);color:#fff;border:none;border-radius:10px;cursor:pointer;font-family:Tajawal,sans-serif;font-size:1rem;font-weight:700;}
-.btn-save:hover{background:var(--primary-light);}
-.btn-cancel{padding:.7rem 1.5rem;background:#f0f0f0;color:var(--text);border:none;border-radius:10px;cursor:pointer;font-family:Tajawal,sans-serif;font-size:1rem;}
-.btn-cancel:hover{background:#ddd;}
-#formError{color:var(--danger);font-size:.85rem;margin-top:.5rem;min-height:1.2rem;}
+        // ===== Auth =====
+        function checkAuth() {
+            const authed = sessionStorage.getItem('adminAuthed');
+            if (authed === 'yes') {
+                showPanel();
+            } else {
+                document.getElementById('authScreen').style.display = 'flex';
+                document.getElementById('adminPanel').style.display = 'none';
+            }
+        }
 
-.hint{background:#fff8e1;border:1px solid #ffe082;border-radius:10px;padding:1rem 1.2rem;margin-bottom:1.5rem;font-size:.88rem;color:#795548;line-height:1.7;}
-.hint strong{color:var(--primary);}
+        window.submitAuth = function() {
+            const pass = document.getElementById('adminPass').value;
+            if (pass === ADMIN_PASSWORD) {
+                sessionStorage.setItem('adminAuthed', 'yes');
+                showPanel();
+                loadStudents();
+            } else {
+                document.getElementById('authError').textContent = '❌ كلمة المرور غلط!';
+                document.getElementById('adminPass').value = '';
+            }
+        };
 
-.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(100px);background:#2c3e50;color:#fff;padding:.8rem 2rem;border-radius:30px;font-size:1rem;font-weight:600;z-index:9999;opacity:0;transition:all .3s;}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-.toast.warn{background:var(--danger);}
+        window.logout = function() {
+            sessionStorage.removeItem('adminAuthed');
+            location.reload();
+        };
 
-.tab-nav{display:flex;gap:.5rem;margin-bottom:1.5rem;background:#fff;border-radius:14px;padding:.5rem;box-shadow:0 2px 10px rgba(0,0,0,.06);}
-.tab-btn{flex:1;padding:.75rem 1rem;border:none;border-radius:10px;font-family:Tajawal,sans-serif;font-size:1rem;font-weight:700;cursor:pointer;color:#777;background:transparent;transition:all .2s;}
-.tab-btn.active{background:var(--primary);color:#fff;box-shadow:0 4px 12px rgba(128,0,0,.25);}
-.tab-btn:not(.active):hover{background:#f5f5f5;color:#333;}
+        function showPanel() {
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+            loadStudents();
+        }
 
-@media(max-width:600px){
-    .selector-card{flex-direction:column;}
-    header{padding:1rem;}
-    th:nth-child(3),td:nth-child(3){display:none;}
-}
-</style>
+        // ===== Load Students =====
+        function loadStudents() {
+            const studentsRef = ref(db, 'students');
+            onValue(studentsRef, (snapshot) => {
+                allStudents = snapshot.val() || {};
+                renderTable(allStudents);
+                updateStats(allStudents);
+            });
+        }
+
+        function updateStats(data) {
+            const all = Object.values(data);
+            document.getElementById('totalCount').textContent = all.length;
+            document.getElementById('arabicCount').textContent = all.filter(s => s.language === 'عربي').length;
+            document.getElementById('languageCount').textContent = all.filter(s => s.language === 'لغات').length;
+        }
+
+        // ===== Render Table =====
+        function renderTable(data) {
+            const tbody = document.getElementById('studentsBody');
+            tbody.innerHTML = '';
+
+            const entries = Object.entries(data);
+            if (entries.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:2rem;color:#888">لا يوجد طلاب بعد. ابدأ بإضافة طالب جديد 👆</td></tr>`;
+                return;
+            }
+
+            entries.forEach(([code, student]) => {
+                const tr = document.createElement('tr');
+                if (student.banned) tr.classList.add('banned-row');
+                const vcBadge = student.videoCode 
+                    ? `<span style="background:#e8f4fd;color:#007bff;padding:2px 8px;border-radius:10px;font-size:0.8rem;font-weight:700">${student.videoCode}</span>`
+                    : `<span style="background:#fde8e8;color:#dc3545;padding:2px 8px;border-radius:10px;font-size:0.8rem">غير محدد ⚠️</span>`;
+                tr.innerHTML = `
+                    <td>
+                        <img src="${student.image || 'https://api.dicebear.com/7.x/bottts/svg?seed=' + code}" 
+                             alt="${student.name}" class="student-avatar"
+                             onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=${code}'">
+                    </td>
+                    <td><strong>${student.name}</strong>${student.banned ? ' <span class="banned-badge">🚫 محظور</span>' : ''}</td>
+                    <td><code class="code-badge">${code}</code></td>
+                    <td>${vcBadge}</td>
+                    <td>${student.phone || '-'}</td>
+                    <td><span class="email-text">${student.email || '-'}</span></td>
+                    <td>
+                        <span class="lang-badge ${student.language === 'عربي' ? 'arabic' : 'language'}">
+                            ${student.language}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn-edit" onclick="editStudent('${code}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="${student.banned ? 'btn-unban' : 'btn-ban'}" onclick="toggleBan('${code}', '${student.name}', ${!!student.banned})">
+                            <i class="fas ${student.banned ? 'fa-unlock' : 'fa-ban'}"></i>
+                        </button>
+                        <button class="btn-delete" onclick="deleteStudent('${code}', '${student.name}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // ===== Add Student =====
+        window.openAddModal = function() {
+            editingCode = null;
+            document.getElementById('modalTitle').textContent = '➕ إضافة طالب جديد';
+            document.getElementById('accessCode').value = '';
+            document.getElementById('accessCode').disabled = false;
+            document.getElementById('studentName').value = '';
+            document.getElementById('studentPhone').value = '';
+            document.getElementById('studentEmail').value = '';
+            document.getElementById('studentLanguage').value = 'لغات';
+            document.getElementById('studentImage').value = '';
+            document.getElementById('studentWelcome').value = '';
+            document.getElementById('studentVideoCode').value = '';
+            document.getElementById('saveBtn').textContent = 'حفظ الطالب';
+            document.getElementById('formError').textContent = '';
+            document.getElementById('studentModal').style.display = 'flex';
+        };
+
+        window.editStudent = function(code) {
+            editingCode = code;
+            const s = allStudents[code];
+            document.getElementById('modalTitle').textContent = '✏️ تعديل بيانات الطالب';
+            document.getElementById('accessCode').value = code;
+            document.getElementById('accessCode').disabled = true;
+            document.getElementById('studentName').value = s.name || '';
+            document.getElementById('studentPhone').value = s.phone || '';
+            document.getElementById('studentEmail').value = s.email || '';
+            document.getElementById('studentLanguage').value = s.language || 'لغات';
+            document.getElementById('studentImage').value = s.image || '';
+            document.getElementById('studentWelcome').value = s.welcomeMessage || '';
+            document.getElementById('studentVideoCode').value = s.videoCode || '';
+            document.getElementById('saveBtn').textContent = 'تحديث الطالب';
+            document.getElementById('formError').textContent = '';
+            document.getElementById('studentModal').style.display = 'flex';
+        };
+
+        window.closeModal = function() {
+            document.getElementById('studentModal').style.display = 'none';
+        };
+
+        window.saveStudent = function() {
+            const code = document.getElementById('accessCode').value.trim();
+            const name = document.getElementById('studentName').value.trim();
+            const phone = document.getElementById('studentPhone').value.trim();
+            const email = document.getElementById('studentEmail').value.trim();
+            const language = document.getElementById('studentLanguage').value;
+            const image = document.getElementById('studentImage').value.trim();
+            const welcome = document.getElementById('studentWelcome').value.trim();
+            const videoCode = document.getElementById('studentVideoCode').value.trim();
+
+            if (!code || !name) {
+                document.getElementById('formError').textContent = '⚠️ كود الدخول والاسم مطلوبين!';
+                return;
+            }
+
+            if (!videoCode) {
+                document.getElementById('formError').textContent = '⚠️ كود الفيديو مطلوب! (CODE1, CODE2, ...)';
+                return;
+            }
+
+            if (!editingCode && allStudents[code]) {
+                document.getElementById('formError').textContent = '⚠️ الكود ده موجود بالفعل!';
+                return;
+            }
+
+            const studentData = {
+                name,
+                phone: phone || '',
+                email: email || '',
+                language,
+                image: image || `https://api.dicebear.com/7.x/bottts/svg?seed=${code}`,
+                welcomeMessage: welcome || '☝🏽شد حيلك يا باشا… دي آخر محطة قبل الحلم الكبير',
+                videoCode,
+                createdAt: editingCode ? (allStudents[editingCode]?.createdAt || Date.now()) : Date.now(),
+                updatedAt: Date.now()
+            };
+
+            const studentRef = ref(db, `students/${code}`);
+            set(studentRef, studentData)
+                .then(() => {
+                    closeModal();
+                    showToast(editingCode ? '✅ تم تحديث الطالب!' : '✅ تم إضافة الطالب!');
+                })
+                .catch(err => {
+                    document.getElementById('formError').textContent = '❌ خطأ: ' + err.message;
+                });
+        };
+
+        // ===== Ban / Unban Student =====
+        window.toggleBan = function(code, name, isBanned) {
+            document.getElementById('banStudentName').textContent = name + ' (' + code + ')';
+            document.getElementById('banModal').style.display = 'flex';
+            document.getElementById('banModalTitle').textContent = isBanned ? '🔓 رفع الحظر' : '🚫 حظر الطالب';
+            document.getElementById('banModalDesc').textContent = isBanned
+                ? 'هترجعله الأكسس وهيقدر يدخل المنصة تاني.'
+                : 'الطالب مش هيقدر يدخل المنصة، بس بياناته هتفضل موجودة.';
+            document.getElementById('banActionBtn').textContent = isBanned ? 'رفع الحظر' : 'حظر';
+            document.getElementById('banActionBtn').className = isBanned ? 'btn-save' : 'btn-danger';
+            document.getElementById('banActionBtn').onclick = function() {
+                const studentRef = ref(db, 'students/' + code);
+                update(studentRef, { banned: !isBanned })
+                    .then(() => {
+                        document.getElementById('banModal').style.display = 'none';
+                        showToast(isBanned ? '✅ تم رفع الحظر!' : '🚫 تم حظر الطالب!', isBanned ? 'success' : 'warning');
+                    });
+            };
+        };
+
+        window.closeBanModal = function() {
+            document.getElementById('banModal').style.display = 'none';
+        };
+
+        window.deleteStudent = function(code, name) {
+            document.getElementById('confirmName').textContent = name + ' (' + code + ')';
+            document.getElementById('confirmModal').style.display = 'flex';
+            document.getElementById('confirmDeleteBtn').onclick = function() {
+                const studentRef = ref(db, `students/${code}`);
+                remove(studentRef)
+                    .then(() => {
+                        closeConfirm();
+                        showToast('🗑️ تم حذف الطالب!', 'warning');
+                    });
+            };
+        };
+
+        window.closeConfirm = function() {
+            document.getElementById('confirmModal').style.display = 'none';
+        };
+
+        // ===== Search =====
+        window.searchStudents = function() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = {};
+            for (const [code, s] of Object.entries(allStudents)) {
+                if (s.name?.toLowerCase().includes(q) || code.includes(q) || s.phone?.includes(q)) {
+                    filtered[code] = s;
+                }
+            }
+            renderTable(filtered);
+        };
+
+        // ===== Filter =====
+        window.filterByLanguage = function(lang) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            if (!lang) { renderTable(allStudents); return; }
+            const filtered = {};
+            for (const [code, s] of Object.entries(allStudents)) {
+                if (s.language === lang) filtered[code] = s;
+            }
+            renderTable(filtered);
+        };
+
+        // ===== Toast =====
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.className = 'toast show ' + type;
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // ===== Export =====
+        window.exportData = function() {
+            const json = JSON.stringify(allStudents, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'students_backup_' + new Date().toISOString().split('T')[0] + '.json';
+            a.click();
+        };
+
+        // ===== Import from old script =====
+        window.importBulk = function() {
+            const raw = document.getElementById('bulkInput').value.trim();
+            if (!raw) return;
+            try {
+                const data = JSON.parse(raw);
+                const promises = [];
+                for (const [code, student] of Object.entries(data)) {
+                    const sRef = ref(db, `students/${code}`);
+                    promises.push(set(sRef, {
+                        ...student,
+                        createdAt: Date.now(),
+                        updatedAt: Date.now()
+                    }));
+                }
+                Promise.all(promises).then(() => {
+                    showToast(`✅ تم استيراد ${promises.length} طالب!`);
+                    document.getElementById('bulkInput').value = '';
+                    document.getElementById('importModal').style.display = 'none';
+                });
+            } catch (e) {
+                alert('❌ الداتا مش JSON صح!');
+            }
+        };
+
+        window.openImport = function() {
+            document.getElementById('importModal').style.display = 'flex';
+        };
+        window.closeImport = function() {
+            document.getElementById('importModal').style.display = 'none';
+        };
+
+        // ===== Enter key for auth =====
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const authScreen = document.getElementById('authScreen');
+                if (authScreen.style.display !== 'none') submitAuth();
+            }
+        });
+
+        // ===== Init =====
+        checkAuth();
+    </script>
+
+    <style>
+        :root {
+            --primary: #800000;
+            --primary-light: #a00000;
+            --secondary: #2c3e50;
+            --accent: #D4AF37;
+            --bg: #f0f2f5;
+            --card: #ffffff;
+            --border: #e0e0e0;
+            --text: #333;
+            --text-light: #777;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            direction: rtl;
+            min-height: 100vh;
+        }
+
+        /* ===== Auth Screen ===== */
+        #authScreen {
+            position: fixed; inset: 0;
+            background: linear-gradient(135deg, #0B0C2A 0%, #1a1a4e 50%, #800000 100%);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999;
+        }
+
+        .auth-card {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem 2.5rem;
+            width: 380px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+
+        .auth-card h1 { color: var(--primary); margin-bottom: 0.5rem; font-size: 1.8rem; }
+        .auth-card p { color: var(--text-light); margin-bottom: 2rem; }
+
+        .auth-input {
+            width: 100%;
+            padding: 0.9rem 1.2rem;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            direction: ltr;
+            text-align: center;
+            letter-spacing: 2px;
+            transition: border-color 0.3s;
+        }
+        .auth-input:focus { outline: none; border-color: var(--primary); }
+
+        .auth-btn {
+            width: 100%;
+            padding: 0.9rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .auth-btn:hover { background: var(--primary-light); }
+        #authError { color: var(--danger); margin-top: 0.8rem; font-size: 0.9rem; }
+
+        /* ===== Admin Panel ===== */
+        #adminPanel { display: none; }
+
+        header {
+            background: linear-gradient(135deg, #800000, #2c3e50);
+            color: white;
+            padding: 1.2rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            position: sticky; top: 0; z-index: 100;
+        }
+
+        .header-title { font-size: 1.4rem; font-weight: 800; }
+        .header-title span { color: var(--accent); }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.5rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+        }
+        .logout-btn:hover { background: rgba(255,255,255,0.25); }
+
+        .container { max-width: 1300px; margin: 0 auto; padding: 2rem; }
+
+        /* ===== Stats ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card);
+            border-radius: 14px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            border-top: 4px solid var(--primary);
+        }
+        .stat-card:nth-child(2) { border-top-color: #28a745; }
+        .stat-card:nth-child(3) { border-top-color: #007bff; }
+
+        .stat-number { font-size: 2.5rem; font-weight: 800; color: var(--primary); line-height: 1; }
+        .stat-card:nth-child(2) .stat-number { color: #28a745; }
+        .stat-card:nth-child(3) .stat-number { color: #007bff; }
+        .stat-label { color: var(--text-light); font-size: 0.9rem; margin-top: 0.4rem; }
+
+        /* ===== Controls ===== */
+        .controls {
+            background: var(--card);
+            border-radius: 14px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1; min-width: 200px;
+            display: flex; align-items: center;
+            background: var(--bg);
+            border-radius: 10px;
+            padding: 0.6rem 1rem;
+            gap: 0.5rem;
+        }
+        .search-box input {
+            border: none; background: transparent;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 0.95rem;
+            flex: 1;
+            color: var(--text);
+        }
+        .search-box input:focus { outline: none; }
+        .search-box i { color: var(--text-light); }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            border: 2px solid var(--border);
+            background: transparent;
+            font-family: 'Tajawal', sans-serif;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .filter-btn.active, .filter-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .actions { margin-right: auto; display: flex; gap: 0.7rem; }
+
+        .btn-primary {
+            padding: 0.6rem 1.3rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            display: flex; align-items: center; gap: 0.4rem;
+            transition: background 0.3s;
+        }
+        .btn-primary:hover { background: var(--primary-light); }
+
+        .btn-secondary {
+            padding: 0.6rem 1.3rem;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            display: flex; align-items: center; gap: 0.4rem;
+            transition: background 0.3s;
+        }
+        .btn-secondary:hover { background: #3d5166; }
+
+        /* ===== Table ===== */
+        .table-card {
+            background: var(--card);
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+
+        thead th {
+            background: linear-gradient(135deg, #800000, #2c3e50);
+            color: white;
+            padding: 1rem 0.8rem;
+            text-align: right;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+        tbody tr:hover { background: #fef9f9; }
+
+        tbody td { padding: 0.8rem; font-size: 0.9rem; vertical-align: middle; }
+
+        .student-avatar {
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            object-fit: cover;
+        }
+
+        .code-badge {
+            background: #f0f0f0;
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-family: monospace;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .email-text { font-size: 0.8rem; color: var(--text-light); }
+
+        .lang-badge {
+            padding: 0.25rem 0.7rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .lang-badge.arabic { background: #fff3cd; color: #856404; }
+        .lang-badge.language { background: #cce5ff; color: #004085; }
+
+        .btn-edit, .btn-delete {
+            border: none;
+            padding: 0.4rem 0.7rem;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            margin: 0 2px;
+        }
+        .btn-edit { background: #e8f4fd; color: #007bff; }
+        .btn-edit:hover { background: #007bff; color: white; }
+        .btn-delete { background: #fde8e8; color: var(--danger); }
+        .btn-delete:hover { background: var(--danger); color: white; }
+        .btn-ban { background: #fff3cd; color: #856404; }
+        .btn-ban:hover { background: #ffc107; color: white; }
+        .btn-unban { background: #d4edda; color: #155724; }
+        .btn-unban:hover { background: #28a745; color: white; }
+
+        .banned-row { background: #fff5f5 !important; opacity: 0.75; }
+        .banned-row:hover { background: #ffecec !important; }
+        .banned-badge {
+            background: #dc3545;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 7px;
+            border-radius: 10px;
+            font-weight: 700;
+            margin-right: 5px;
+        }
+
+        /* ===== Modals ===== */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            width: 100%; max-width: 550px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .modal h2 { color: var(--primary); margin-bottom: 1.5rem; font-size: 1.3rem; }
+
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 0.4rem; font-size: 0.9rem; color: var(--secondary); }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 0.95rem;
+            transition: border-color 0.3s;
+            color: var(--text);
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none; border-color: var(--primary);
+        }
+        .form-group input:disabled { background: #f0f0f0; cursor: not-allowed; }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+        .modal-footer { display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem; }
+
+        .btn-save {
+            padding: 0.7rem 2rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            transition: background 0.3s;
+        }
+        .btn-save:hover { background: var(--primary-light); }
+
+        .btn-cancel {
+            padding: 0.7rem 1.5rem;
+            background: #f0f0f0;
+            color: var(--text);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 1rem;
+            transition: background 0.3s;
+        }
+        .btn-cancel:hover { background: #ddd; }
+
+        #formError { color: var(--danger); font-size: 0.85rem; margin-top: 0.5rem; }
+
+        /* Confirm Modal */
+        .confirm-modal { max-width: 380px; text-align: center; }
+        .confirm-modal .icon { font-size: 3rem; margin-bottom: 1rem; }
+        .confirm-modal p { color: var(--text-light); margin-bottom: 0.5rem; }
+        .confirm-modal strong { color: var(--danger); }
+
+        .btn-danger {
+            padding: 0.7rem 1.5rem;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        /* Import Modal */
+        .bulk-textarea {
+            width: 100%;
+            height: 200px;
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            resize: vertical;
+            direction: ltr;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--secondary);
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.warning { background: var(--danger); }
+
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .form-grid { grid-template-columns: 1fr; }
+            .controls { flex-direction: column; }
+            header { padding: 1rem; }
+            .container { padding: 1rem; }
+            table { font-size: 0.8rem; }
+            tbody td { padding: 0.6rem 0.4rem; }
+        }
+    </style>
 </head>
 <body>
 
+<!-- Auth Screen -->
 <div id="authScreen">
     <div class="auth-card">
-        <div style="font-size:3rem;margin-bottom:.5rem">🎬</div>
-        <h1>إدارة الفيديوهات</h1>
-        <p>The Process — Video Manager</p>
-        <input type="password" id="adminPass" class="auth-input" placeholder="كلمة المرور">
-        <button class="auth-btn" id="authBtn"><i class="fas fa-lock-open"></i> دخول</button>
+        <div style="font-size: 3rem; margin-bottom: 0.5rem;">🛡️</div>
+        <h1>لوحة التحكم</h1>
+        <p>The Process Admin Panel</p>
+        <input type="password" id="adminPass" class="auth-input" placeholder="••••••••••••">
+        <button class="auth-btn" onclick="submitAuth()">
+            <i class="fas fa-lock-open"></i> دخول
+        </button>
         <div id="authError"></div>
     </div>
 </div>
 
-<div id="app">
+<!-- Admin Panel -->
+<div id="adminPanel">
     <header>
-        <div class="header-title">🎬 إدارة <span>الفيديوهات</span></div>
-        <a href="admin.html" style="text-decoration:none"><button class="back-btn"><i class="fas fa-arrow-right"></i> لوحة التحكم</button></a>
+        <div class="header-title">🛡️ لوحة تحكم <span>The Process</span></div>
+        <button class="logout-btn" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> خروج
+        </button>
     </header>
 
     <div class="container">
-        <!-- Tab Nav -->
-        <div class="tab-nav">
-            <button class="tab-btn active" id="tabHomework" onclick="switchTab('homework')">
-                📚 فيديوهات الواجب
-            </button>
-            <button class="tab-btn" id="tabReview" onclick="switchTab('review')">
-                🎯 فيديوهات المراجعة
-            </button>
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalCount">0</div>
+                <div class="stat-label">📚 إجمالي الطلاب</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="arabicCount">0</div>
+                <div class="stat-label">🌿 قسم عربي</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="languageCount">0</div>
+                <div class="stat-label">🌐 قسم لغات</div>
+            </div>
         </div>
 
-        <!-- HOMEWORK PANEL -->
-        <div id="panelHomework">
-        <div class="hint">
-            <strong>خطوات إضافة فيديو جديد:</strong><br>
-            ١ — اختر الـ CODE (مثلاً CODE1) ← ٢ — اختر الفصل ← ٣ — اضغط "تحميل" ← ٤ — اضغط "+ فيديو جديد"<br>
-            الرابط من Google Drive بأي شكل (share / view / embed) — هيتحول تلقائياً ✅
+        <!-- Controls -->
+        <div class="controls">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="ابحث باسم الطالب أو الكود أو التليفون..." oninput="searchStudents()">
+            </div>
+            <button class="filter-btn active" onclick="filterByLanguage('')">الكل</button>
+            <button class="filter-btn" onclick="filterByLanguage('عربي')">عربي</button>
+            <button class="filter-btn" onclick="filterByLanguage('لغات')">لغات</button>
+            <div class="actions">
+                <button class="btn-secondary" onclick="openImport()">
+                    <i class="fas fa-file-import"></i> استيراد
+                </button>
+                <button class="btn-secondary" onclick="exportData()">
+                    <i class="fas fa-download"></i> تصدير
+                </button>
+                <button class="btn-primary" onclick="openAddModal()">
+                    <i class="fas fa-plus"></i> طالب جديد
+                </button>
+            </div>
         </div>
 
-        <div class="selector-card">
-            <div class="sel-group">
-                <label><i class="fas fa-layer-group"></i> الـ CODE</label>
-                <select id="codeSelect" onchange="onCodeChange()">
-                    <option value="">-- اختر --</option>
-                    <option value="CODE1">CODE1 — ثالثة ثانوي عربي</option>
-                    <option value="CODE2">CODE2 — ثالثة ثانوي لغات</option>
-                    <option value="CODE3">CODE3 — مراجعة الفصل الأول عربي</option>
-                    <option value="CODE4">CODE4 — مراجعة الفصل الأول لغات</option>
-                    <option value="CODE5">CODE5 — تانية ثانوي لغات</option>
-                    <option value="CODE6">CODE6 — مراجعة الفصل الثاني عربي</option>
-                    <option value="CODE7">CODE7 — Chapter 2 لغات</option>
-                    <option value="CODE8">CODE8 — الفصل الثالث عربي</option>
-                    <option value="CODE9">CODE9 — Chapter 3 لغات</option>
-                    <option value="CODE10">CODE10 — Final Revision لغات</option>
-                    <option value="CODE11">CODE11 — مراجعة نصف السنة عربي</option>
-                    <option value="CODE12">CODE12 — Mid-Year Review لغات</option>
-                    <option value="CODE13">CODE13 — تانية ثانوي لغات</option>
-                </select>
-            </div>
-            <div class="sel-group">
-                <label><i class="fas fa-book-open"></i> الفصل</label>
-                <select id="chapterSelect">
-                    <option value="">-- اختر الـ CODE أولاً --</option>
-                </select>
-            </div>
-            <button class="btn-load" onclick="loadVideos()"><i class="fas fa-search"></i> تحميل</button>
-        </div>
-
-        <div class="table-card" id="tableCard" style="display:none">
-            <div class="table-header">
-                <h2 id="tableTitle">الفيديوهات</h2>
-                <button class="btn-add" onclick="openAddModal()"><i class="fas fa-plus"></i> فيديو جديد</button>
-            </div>
-            <div style="overflow-x:auto">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>الترتيب</th>
-                            <th>العنوان</th>
-                            <th>الرابط</th>
-                            <th>الأجزاء</th>
-                            <th>إجراءات</th>
-                        </tr>
-                    </thead>
-                    <tbody id="videoBody"></tbody>
-                </table>
-            </div>
+        <!-- Table -->
+        <div class="table-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>صورة</th>
+                        <th>الاسم</th>
+                        <th>كود الدخول</th>
+                        <th>كود الفيديو</th>
+                        <th>التليفون</th>
+                        <th>الإيميل</th>
+                        <th>القسم</th>
+                        <th>إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="studentsBody">
+                    <tr><td colspan="7" style="text-align:center;padding:3rem;color:#888">
+                        <i class="fas fa-spinner fa-spin"></i> جاري التحميل...
+                    </td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
-        </div><!-- end panelHomework -->
-
-        <!-- REVIEW PANEL -->
-        <div id="panelReview" style="display:none">
-            <div class="hint" style="border-color:#6f42c1;background:#f8f0ff;">
-                <strong style="color:#6f42c1">🎯 فيديوهات المراجعة:</strong><br>
-                كل Review Code له فيديوهاته الخاصة + قائمة أكواد الطلاب المسموح ليهم يشوفوه.<br>
-                الطالب بيدخل بالكود ده مباشرة ويشوف فيديوهات المراجعة بس.
-            </div>
-
-            <!-- Review Codes List -->
-            <div class="table-card" style="margin-bottom:1.5rem">
-                <div class="table-header">
-                    <h2>🗂️ Review Codes</h2>
-                    <button class="btn-add" style="background:#6f42c1" onclick="openAddReviewCode()">
-                        <i class="fas fa-plus"></i> Review Code جديد
-                    </button>
-                </div>
-                <div style="overflow-x:auto">
-                    <table>
-                        <thead><tr>
-                            <th>الكود</th>
-                            <th>الوصف</th>
-                            <th>عدد الفيديوهات</th>
-                            <th>عدد الأكواد المسموح بيها</th>
-                            <th>إجراءات</th>
-                        </tr></thead>
-                        <tbody id="reviewCodesBody">
-                            <tr><td colspan="5" style="text-align:center;padding:2rem;color:#aaa">
-                                <i class="fas fa-spinner fa-spin"></i> جاري التحميل...
-                            </td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Review Videos Section (shown when a code is selected) -->
-            <div id="reviewVideosSection" style="display:none">
-                <div class="table-card">
-                    <div class="table-header">
-                        <h2 id="reviewVideosTitle">فيديوهات</h2>
-                        <div style="display:flex;gap:.5rem">
-                            <button class="btn-add" style="background:#555;font-size:.85rem" onclick="openManageAccessCodes()">
-                                <i class="fas fa-key"></i> أكواد الوصول
-                            </button>
-                            <button class="btn-add" style="background:#6f42c1" onclick="openAddReviewVideo()">
-                                <i class="fas fa-plus"></i> فيديو جديد
-                            </button>
-                        </div>
-                    </div>
-                    <div style="overflow-x:auto">
-                        <table>
-                            <thead><tr>
-                                <th>الترتيب</th><th>العنوان</th><th>الرابط</th><th>الأجزاء</th><th>إجراءات</th>
-                            </tr></thead>
-                            <tbody id="reviewVideoBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div><!-- end panelReview -->
-
-</div>
 </div>
 
-<!-- Review Code Modal -->
-<div class="modal-overlay" id="reviewCodeModal" style="display:none" onclick="if(event.target===this)closeReviewCodeModal()">
+<!-- Add/Edit Student Modal -->
+<div class="modal-overlay" id="studentModal" style="display:none" onclick="if(event.target===this)closeModal()">
     <div class="modal">
-        <h2 id="reviewCodeModalTitle" style="color:#6f42c1">➕ Review Code جديد</h2>
-        <div class="form-group">
-            <label>🔑 الكود (مثال: REV_CODE1) *</label>
-            <input type="text" id="rcCode" placeholder="REV_CODE1" dir="ltr" style="font-family:monospace;font-size:1rem">
-        </div>
-        <div class="form-group">
-            <label>📝 وصف (اختياري)</label>
-            <input type="text" id="rcDesc" placeholder="مثال: مراجعة الفصل الأول عربي">
-        </div>
-        <div id="rcError" style="color:#dc3545;font-size:.85rem;min-height:1.2rem"></div>
-        <div class="modal-footer">
-            <button class="btn-cancel" onclick="closeReviewCodeModal()">إلغاء</button>
-            <button class="btn-save" style="background:#6f42c1" onclick="saveReviewCode()">💾 حفظ</button>
-        </div>
-    </div>
-</div>
-
-<!-- Access Codes Modal -->
-<div class="modal-overlay" id="accessCodesModal" style="display:none" onclick="if(event.target===this)closeAccessCodesModal()">
-    <div class="modal" style="max-width:520px">
-        <h2 style="color:#6f42c1">🔑 أكواد الوصول</h2>
-        <p style="color:#777;font-size:.88rem;margin-bottom:1rem">
-            الأكواد دي هي اللي بيدخل بيها الطالب عشان يشوف فيديوهات المراجعة دي.<br>
-            كل كود في سطر لوحده.
-        </p>
-        <div class="form-group">
-            <label>📋 الأكواد (كل كود في سطر)</label>
-            <textarea id="accessCodesInput" rows="8" style="width:100%;padding:.7rem 1rem;border:2px solid #e0e0e0;border-radius:10px;font-family:monospace;font-size:.9rem;resize:vertical;direction:ltr" placeholder="12345&#10;67890&#10;11111"></textarea>
-        </div>
-        <div id="acError" style="color:#dc3545;font-size:.85rem;min-height:1.2rem"></div>
-        <div class="modal-footer">
-            <button class="btn-cancel" onclick="closeAccessCodesModal()">إلغاء</button>
-            <button class="btn-save" style="background:#6f42c1" onclick="saveAccessCodes()">💾 حفظ الأكواد</button>
-        </div>
-    </div>
-</div>
-
-<!-- Modal -->
-<div class="modal-overlay" id="videoModal" style="display:none" onclick="if(event.target===this)closeModal()">
-    <div class="modal">
-        <h2 id="modalTitle">➕ فيديو جديد</h2>
-        <div class="form-group">
-            <label>📝 عنوان الفيديو *</label>
-            <input type="text" id="vTitle" placeholder="مثال: حل واجب حصة 24">
-        </div>
-        <div class="form-group">
-            <label>🔢 رقم الترتيب * <small style="color:#999;font-weight:400">(1 = أول فيديو في الفصل)</small></label>
-            <input type="number" id="vOrder" min="1" placeholder="1" style="width:130px">
-        </div>
-        <div class="form-group">
-            <label>🔗 رابط Drive — الجزء الأول *</label>
-            <input type="text" id="vUrl1" placeholder="https://drive.google.com/file/d/..." dir="ltr">
-        </div>
-        <button class="toggle-part2-btn" id="toggleBtn" onclick="togglePart2()">+ إضافة جزء ثاني</button>
-        <div id="part2Row" style="display:none">
+        <h2 id="modalTitle">➕ إضافة طالب جديد</h2>
+        <div class="form-grid">
             <div class="form-group">
-                <label>🔗 رابط Drive — الجزء الثاني</label>
-                <input type="text" id="vUrl2" placeholder="https://drive.google.com/file/d/..." dir="ltr">
+                <label>🔑 كود الدخول *</label>
+                <input type="text" id="accessCode" placeholder="مثال: 17606" dir="ltr">
             </div>
+            <div class="form-group">
+                <label>👤 اسم الطالب *</label>
+                <input type="text" id="studentName" placeholder="اسم الطالب">
+            </div>
+            <div class="form-group">
+                <label>📱 رقم التليفون</label>
+                <input type="text" id="studentPhone" placeholder="01XXXXXXXXX" dir="ltr">
+            </div>
+            <div class="form-group">
+                <label>📧 الإيميل</label>
+                <input type="email" id="studentEmail" placeholder="example@gmail.com" dir="ltr">
+            </div>
+            <div class="form-group">
+                <label>📚 القسم</label>
+                <select id="studentLanguage">
+                    <option value="لغات">لغات</option>
+                    <option value="عربي">عربي</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>🖼️ رابط الصورة</label>
+                <input type="text" id="studentImage" placeholder="https://... (اختياري)" dir="ltr">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>💬 رسالة الترحيب (اختياري)</label>
+            <input type="text" id="studentWelcome" placeholder="☝🏽شد حيلك يا باشا…">
+        </div>
+        <div class="form-group">
+            <label>🎬 كود الفيديو * <small style="color:#888;font-weight:400">(يحدد المحتوى اللي يشوفه الطالب)</small></label>
+            <select id="studentVideoCode">
+                <option value="">-- اختر كود الفيديو --</option>
+                <option value="CODE1">CODE1 — ثالثة ثانوي عربي (فيزياء كهربية + حديثة)</option>
+                <option value="CODE2">CODE2 — ثالثة ثانوي لغات (فيزياء كهربية + حديثة)</option>
+                <option value="CODE3">CODE3 — مراجعة الفصل الأول عربي</option>
+                <option value="CODE4">CODE4 — مراجعة الفصل الأول لغات</option>
+                <option value="CODE5">CODE5 — تانية ثانوي لغات</option>
+                <option value="CODE6">CODE6 — مراجعة الفصل الثاني عربي</option>
+                <option value="CODE7">CODE7 — Chapter 2 لغات</option>
+                <option value="CODE8">CODE8 — الفصل الثالث عربي</option>
+                <option value="CODE9">CODE9 — Chapter 3 لغات</option>
+                <option value="CODE10">CODE10 — Final Revision لغات</option>
+                <option value="CODE11">CODE11 — مراجعة نصف السنة عربي</option>
+                <option value="CODE12">CODE12 — Mid-Year Review لغات</option>
+                <option value="CODE13">CODE13 — تانية ثانوي لغات (Homework)</option>
+            </select>
         </div>
         <div id="formError"></div>
         <div class="modal-footer">
             <button class="btn-cancel" onclick="closeModal()">إلغاء</button>
-            <button class="btn-save"   onclick="saveVideo()">💾 حفظ</button>
+            <button class="btn-save" id="saveBtn" onclick="saveStudent()">حفظ الطالب</button>
         </div>
     </div>
 </div>
 
+<!-- Confirm Delete Modal -->
+<div class="modal-overlay" id="confirmModal" style="display:none" onclick="if(event.target===this)closeConfirm()">
+    <div class="modal confirm-modal">
+        <div class="icon">🗑️</div>
+        <h2 style="color:var(--danger)">تأكيد الحذف</h2>
+        <p>هتحذف الطالب:</p>
+        <p><strong id="confirmName"></strong></p>
+        <p style="margin-top:0.5rem">مش هينفع ترجعه بعد كده!</p>
+        <div class="modal-footer" style="justify-content:center;margin-top:1.5rem">
+            <button class="btn-cancel" onclick="closeConfirm()">إلغاء</button>
+            <button class="btn-danger" id="confirmDeleteBtn">حذف</button>
+        </div>
+    </div>
+</div>
+
+<!-- Import Modal -->
+<div class="modal-overlay" id="importModal" style="display:none" onclick="if(event.target===this)closeImport()">
+    <div class="modal" style="max-width:600px">
+        <h2>📥 استيراد طلاب بالجملة</h2>
+        <p style="color:#666;margin-bottom:1rem;font-size:0.9rem">
+            الصق JSON بالشكل ده:
+            <code style="background:#f0f0f0;padding:0.2rem 0.5rem;border-radius:4px;font-size:0.8rem">{"17606": {"name": "محمد", "phone": "01XXXXXXXX", "email": "...", "language": "لغات", "image": "..."}}</code>
+        </p>
+        <textarea class="bulk-textarea" id="bulkInput" placeholder='{"CODE": {"name": "...", "phone": "...", "email": "...", "language": "لغات", "image": "..."}}'></textarea>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeImport()">إلغاء</button>
+            <button class="btn-save" onclick="importBulk()">
+                <i class="fas fa-file-import"></i> استيراد
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Ban/Unban Modal -->
+<div class="modal-overlay" id="banModal" style="display:none" onclick="if(event.target===this)closeBanModal()">
+    <div class="modal confirm-modal">
+        <div class="icon" id="banModalIcon">🚫</div>
+        <h2 id="banModalTitle" style="color:var(--danger)">حظر الطالب</h2>
+        <p id="banModalDesc"></p>
+        <p><strong id="banStudentName"></strong></p>
+        <div class="modal-footer" style="justify-content:center;margin-top:1.5rem">
+            <button class="btn-cancel" onclick="closeBanModal()">إلغاء</button>
+            <button class="btn-danger" id="banActionBtn">حظر</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, set, remove, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-const app = initializeApp({
-    apiKey:"AIzaSyBXsX0v_7p8CHDFiTUm4XkQsoZIqGueAOk",
-    authDomain:"the-process-5d196.firebaseapp.com",
-    databaseURL:"https://the-process-5d196-default-rtdb.firebaseio.com",
-    projectId:"the-process-5d196",
-    storageBucket:"the-process-5d196.firebasestorage.app",
-    messagingSenderId:"96415822332",
-    appId:"1:96415822332:web:2be476bee2e474383d8279"
-});
-const db = getDatabase(app);
-
-const PASS = "mora.admin.2026";
-
-const CHAPTERS = {
-    CODE1: ['الفصل الأول','الفصل الثاني','الفصل الثالث','الفصل الرابع','الفصل الخامس','الفصل السادس'],
-    CODE2: ['Chapter 1','Chapter 2','Chapter 3','Chapter 4','Chapter 5','Chapter 6'],
-    CODE3: ['مراجعة الفصل الأول'],
-    CODE4: ['Chapter 1 Revision'],
-    CODE5: ['Homework'],
-    CODE6: ['مراجعة الفصل الثاني'],
-    CODE7: ['Chapter 2'],
-    CODE8: ['الفصل الثالث'],
-    CODE9: ['Chapter 3'],
-    CODE10:['Final Revision'],
-    CODE11:['مراجعة نصف السنة'],
-    CODE12:['Mid-Year Review'],
-    CODE13:['Homework'],
-};
-
-function toEmbed(url) {
-    if (!url) return '';
-    url = url.trim();
-    if (url.includes('/preview')) return url;
-    const m = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-    if (m) return `https://drive.google.com/file/d/${m[1]}/preview`;
-    const m2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-    if (m2) return `https://drive.google.com/file/d/${m2[1]}/preview`;
-    return url;
-}
-
-let currentCode = null, currentChapter = null, allVideos = {}, editingId = null;
-let unsubscribe = null;
-
-// Auth
-function submitAuth() {
-    if (document.getElementById('adminPass').value === PASS) {
-        sessionStorage.setItem('vidAuth','yes');
-        document.getElementById('authScreen').style.display = 'none';
-        document.getElementById('app').style.display = 'block';
-    } else {
-        document.getElementById('authError').textContent = '❌ كلمة المرور غلط!';
-        document.getElementById('adminPass').value = '';
-    }
-}
-
-// Attach events after DOM ready (module scripts run after DOM is parsed)
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('authBtn').addEventListener('click', submitAuth);
-    document.getElementById('adminPass').addEventListener('keydown', e => { if(e.key==='Enter') submitAuth(); });
-    if (sessionStorage.getItem('vidAuth') === 'yes') {
-        document.getElementById('authScreen').style.display = 'none';
-        document.getElementById('app').style.display = 'block';
-    }
-});
-
-// Code change
-window.onCodeChange = function() {
-    const code = document.getElementById('codeSelect').value;
-    const sel  = document.getElementById('chapterSelect');
-    sel.innerHTML = '';
-    if (!code) { sel.innerHTML = '<option value="">-- اختر الـ CODE أولاً --</option>'; return; }
-    (CHAPTERS[code]||[]).forEach((ch,i) => {
-        const o = document.createElement('option');
-        o.value = i+1; o.textContent = ch;
-        sel.appendChild(o);
-    });
-};
-
-// Load
-window.loadVideos = function() {
-    const code = document.getElementById('codeSelect').value;
-    const idx  = document.getElementById('chapterSelect').value;
-    const name = document.getElementById('chapterSelect').selectedOptions[0]?.text || '';
-    if (!code || !idx) { showToast('اختر الـ CODE والفصل أولاً','warn'); return; }
-
-    currentCode = code; currentChapter = idx;
-    document.getElementById('tableTitle').textContent = `${code} — ${name}`;
-    document.getElementById('tableCard').style.display = 'block';
-    document.getElementById('videoBody').innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:#aaa"><i class="fas fa-spinner fa-spin"></i></td></tr>';
-
-    if (unsubscribe) unsubscribe();
-    unsubscribe = onValue(ref(db, `videos/${code}/ch${idx}`), snap => {
-        allVideos = snap.val() || {};
-        renderTable();
-    });
-};
-
-function renderTable() {
-    const tbody = document.getElementById('videoBody');
-    const entries = Object.entries(allVideos).sort((a,b)=>(a[1].order||0)-(b[1].order||0));
-    if (!entries.length) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:3rem;color:#aaa">
-            <i class="fas fa-video" style="font-size:2.5rem;display:block;margin-bottom:1rem;color:#ccc"></i>
-            لا يوجد فيديوهات في هذا الفصل بعد — اضغط "+ فيديو جديد"
-        </td></tr>`;
-        return;
-    }
-    tbody.innerHTML = '';
-    entries.forEach(([vid,v]) => {
-        const parts  = v.url2 ? 2 : 1;
-        const short  = (v.url1||'').replace('https://drive.google.com/file/d/','').substring(0,30);
-        const safeTitleAttr = (v.title||'').replace(/'/g,'&apos;').replace(/"/g,'&quot;');
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td><span class="order-badge">${v.order||0}</span></td>
-            <td><strong>${v.title||''}</strong></td>
-            <td><span class="url-preview" title="${v.url1||''}">${short}…</span></td>
-            <td><span class="parts-badge">${parts} جزء</span></td>
-            <td>
-                <button class="btn-up"    onclick="moveVideo('${vid}',-1)"><i class="fas fa-arrow-up"></i></button>
-                <button class="btn-down"  onclick="moveVideo('${vid}',1)"><i class="fas fa-arrow-down"></i></button>
-                <button class="btn-edit"  onclick="editVideo('${vid}')"><i class="fas fa-edit"></i></button>
-                <button class="btn-delete" onclick="deleteVideo('${vid}','${safeTitleAttr}')"><i class="fas fa-trash"></i></button>
-            </td>`;
-        tbody.appendChild(tr);
-    });
-}
-
-window.moveVideo = async function(vid, dir) {
-    const entries = Object.entries(allVideos).sort((a,b)=>(a[1].order||0)-(b[1].order||0));
-    const idx = entries.findIndex(e=>e[0]===vid);
-    const si  = idx + dir;
-    if (si<0||si>=entries.length) return;
-    const [aId,aV] = entries[idx], [bId,bV] = entries[si];
-    const base = `videos/${currentCode}/ch${currentChapter}`;
-    await set(ref(db,`${base}/${aId}/order`), bV.order||0);
-    await set(ref(db,`${base}/${bId}/order`), aV.order||0);
-};
-
-window.openAddModal = function() {
-    editingId = null;
-    document.getElementById('modalTitle').textContent = '➕ فيديو جديد';
-    document.getElementById('vTitle').value  = '';
-    document.getElementById('vUrl1').value   = '';
-    document.getElementById('vUrl2').value   = '';
-    document.getElementById('vOrder').value  = nextOrder();
-    document.getElementById('part2Row').style.display = 'none';
-    document.getElementById('toggleBtn').textContent  = '+ إضافة جزء ثاني';
-    document.getElementById('formError').textContent  = '';
-    document.getElementById('videoModal').style.display = 'flex';
-};
-
-function nextOrder() {
-    const orders = Object.values(allVideos).map(v=>v.order||0);
-    return orders.length ? Math.max(...orders)+1 : 1;
-}
-
-window.editVideo = function(vid) {
-    const v = allVideos[vid]; if(!v) return;
-    editingId = vid;
-    document.getElementById('modalTitle').textContent = '✏️ تعديل الفيديو';
-    document.getElementById('vTitle').value  = v.title ||'';
-    document.getElementById('vUrl1').value   = v.url1  ||'';
-    document.getElementById('vUrl2').value   = v.url2  ||'';
-    document.getElementById('vOrder').value  = v.order ||1;
-    const has2 = !!v.url2;
-    document.getElementById('part2Row').style.display = has2 ? 'block':'none';
-    document.getElementById('toggleBtn').textContent  = has2 ? '- إزالة جزء ثاني':'+ إضافة جزء ثاني';
-    document.getElementById('formError').textContent  = '';
-    document.getElementById('videoModal').style.display = 'flex';
-};
-
-window.togglePart2 = function() {
-    const row = document.getElementById('part2Row');
-    const btn = document.getElementById('toggleBtn');
-    const open = row.style.display === 'none';
-    row.style.display = open ? 'block':'none';
-    btn.textContent   = open ? '- إزالة جزء ثاني':'+ إضافة جزء ثاني';
-    if (!open) document.getElementById('vUrl2').value = '';
-};
-
-window.closeModal = function() {
-    document.getElementById('videoModal').style.display = 'none';
-};
-
-window.saveVideo = async function() {
-    const title = document.getElementById('vTitle').value.trim();
-    const url1  = document.getElementById('vUrl1').value.trim();
-    const url2  = document.getElementById('vUrl2').value.trim();
-    const order = parseInt(document.getElementById('vOrder').value) || nextOrder();
-    const errEl = document.getElementById('formError');
-    if (!title) { errEl.textContent='⚠️ العنوان مطلوب!'; return; }
-    if (!url1)  { errEl.textContent='⚠️ رابط الجزء الأول مطلوب!'; return; }
-    const data = { title, url1:toEmbed(url1), order, updatedAt:Date.now() };
-    if (url2) data.url2 = toEmbed(url2);
-    const vid  = editingId || `v${Date.now()}`;
-    try {
-        await set(ref(db,`videos/${currentCode}/ch${currentChapter}/${vid}`), data);
-        closeModal();
-        showToast(editingId ? '✅ تم التحديث!':'✅ تم إضافة الفيديو!');
-    } catch(e) { errEl.textContent = '❌ '+e.message; }
-};
-
-window.deleteVideo = async function(vid, title) {
-    if (!confirm(`هتحذف الفيديو:\n"${title}"؟`)) return;
-    await remove(ref(db,`videos/${currentCode}/ch${currentChapter}/${vid}`));
-    showToast('🗑️ تم الحذف!','warn');
-};
-
-function showToast(msg, type='') {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = 'toast show'+(type?' '+type:'');
-    setTimeout(()=>t.classList.remove('show'),3000);
-}
-
-// ── TABS ─────────────────────────────────────────────────────
-window.switchTab = function(tab) {
-    document.getElementById('panelHomework').style.display   = tab==='homework' ? 'block':'none';
-    document.getElementById('panelReview').style.display     = tab==='review'   ? 'block':'none';
-    document.getElementById('tabHomework').classList.toggle('active', tab==='homework');
-    document.getElementById('tabReview').classList.toggle('active',   tab==='review');
-    if (tab==='review') loadReviewCodes();
-};
-
-// ── REVIEW CODES ─────────────────────────────────────────────
-let currentReviewCode = null, reviewVideos = {}, editingReviewVid = null, editingRcId = null;
-
-function loadReviewCodes() {
-    onValue(ref(db,'reviews'), snap => {
-        const data = snap.val() || {};
-        const tbody = document.getElementById('reviewCodesBody');
-        const entries = Object.entries(data);
-        if (!entries.length) {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:2rem;color:#aaa">لا يوجد Review Codes بعد</td></tr>`;
-            return;
-        }
-        tbody.innerHTML = '';
-        entries.forEach(([rcId, rc]) => {
-            const vidCount  = Object.keys(rc.videos  || {}).length;
-            const codeCount = Object.keys(rc.accessCodes || {}).length;
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><strong style="font-family:monospace;color:#6f42c1">${rc.code||rcId}</strong></td>
-                <td style="color:#777;font-size:.88rem">${rc.desc||'—'}</td>
-                <td><span class="parts-badge">${vidCount} فيديو</span></td>
-                <td><span class="order-badge">${codeCount} كود</span></td>
-                <td>
-                    <button onclick="selectReviewCode('${rcId}')" style="background:#f0e8fd;color:#6f42c1;border:none;padding:.35rem .8rem;border-radius:7px;cursor:pointer;font-family:Tajawal,sans-serif;font-size:.85rem;font-weight:700">
-                        <i class="fas fa-folder-open"></i> فتح
-                    </button>
-                    <button class="btn-delete" onclick="deleteReviewCode('${rcId}','${(rc.code||rcId).replace(/'/g,'')}')"><i class="fas fa-trash"></i></button>
-                </td>`;
-            tbody.appendChild(tr);
-        });
-    }, {onlyOnce:true});
-}
-
-window.selectReviewCode = function(rcId) {
-    currentReviewCode = rcId;
-    get(ref(db,`reviews/${rcId}`)).then(snap => {
-        const rc = snap.val() || {};
-        reviewVideos = rc.videos || {};
-        document.getElementById('reviewVideosTitle').textContent = `🎯 ${rc.code||rcId} — ${rc.desc||''}`;
-        document.getElementById('reviewVideosSection').style.display = 'block';
-        renderReviewVideos();
-        document.getElementById('reviewVideosSection').scrollIntoView({behavior:'smooth',block:'start'});
-    });
-};
-
-function renderReviewVideos() {
-    const tbody = document.getElementById('reviewVideoBody');
-    const entries = Object.entries(reviewVideos).sort((a,b)=>(a[1].order||0)-(b[1].order||0));
-    if (!entries.length) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:3rem;color:#aaa">
-            <i class="fas fa-video" style="font-size:2.5rem;display:block;margin-bottom:1rem;color:#ccc"></i>
-            لا يوجد فيديوهات — اضغط "+ فيديو جديد"
-        </td></tr>`;
-        return;
-    }
-    tbody.innerHTML = '';
-    entries.forEach(([vid,v]) => {
-        const parts = v.url2 ? 2 : 1;
-        const short = (v.url1||'').replace('https://drive.google.com/file/d/','').substring(0,28);
-        const safeTitle = (v.title||'').replace(/'/g,'&apos;').replace(/"/g,'&quot;');
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td><span class="order-badge">${v.order||0}</span></td>
-            <td><strong>${v.title||''}</strong></td>
-            <td><span class="url-preview" title="${v.url1||''}">${short}…</span></td>
-            <td><span class="parts-badge">${parts} جزء</span></td>
-            <td>
-                <button class="btn-up"    onclick="moveReviewVideo('${vid}',-1)"><i class="fas fa-arrow-up"></i></button>
-                <button class="btn-down"  onclick="moveReviewVideo('${vid}',1)"><i class="fas fa-arrow-down"></i></button>
-                <button class="btn-edit"  onclick="editReviewVideo('${vid}')"><i class="fas fa-edit"></i></button>
-                <button class="btn-delete" onclick="deleteReviewVideo('${vid}','${safeTitle}')"><i class="fas fa-trash"></i></button>
-            </td>`;
-        tbody.appendChild(tr);
-    });
-}
-
-// Add Review Code
-window.openAddReviewCode = function() {
-    editingRcId = null;
-    document.getElementById('reviewCodeModalTitle').textContent = '➕ Review Code جديد';
-    document.getElementById('rcCode').value = '';
-    document.getElementById('rcDesc').value = '';
-    document.getElementById('rcError').textContent = '';
-    document.getElementById('reviewCodeModal').style.display = 'flex';
-};
-
-window.closeReviewCodeModal = function() {
-    document.getElementById('reviewCodeModal').style.display = 'none';
-};
-
-window.saveReviewCode = async function() {
-    const code = document.getElementById('rcCode').value.trim().toUpperCase().replace(/[\s]+/g,'_');
-    const desc = document.getElementById('rcDesc').value.trim();
-    const err  = document.getElementById('rcError');
-    if (!code) { err.textContent = '⚠️ الكود مطلوب!'; return; }
-    const rcId = editingRcId || `rc_${Date.now()}`;
-    try {
-        await set(ref(db,`reviews/${rcId}/code`), code);
-        await set(ref(db,`reviews/${rcId}/desc`), desc);
-        closeReviewCodeModal();
-        showToast('✅ تم الحفظ!');
-        loadReviewCodes();
-    } catch(e) { err.textContent = '❌ '+e.message; }
-};
-
-window.deleteReviewCode = async function(rcId, code) {
-    if (!confirm(`هتحذف Review Code:
-"${code}" وكل فيديوهاته؟`)) return;
-    await remove(ref(db,`reviews/${rcId}`));
-    document.getElementById('reviewVideosSection').style.display = 'none';
-    showToast('🗑️ تم الحذف!','warn');
-    loadReviewCodes();
-};
-
-// Access Codes
-window.openManageAccessCodes = function() {
-    if (!currentReviewCode) return;
-    get(ref(db,`reviews/${currentReviewCode}/accessCodes`)).then(snap => {
-        const data = snap.val() || {};
-        const codes = Object.values(data).join('
-');
-        document.getElementById('accessCodesInput').value = codes;
-        document.getElementById('acError').textContent = '';
-        document.getElementById('accessCodesModal').style.display = 'flex';
-    });
-};
-
-window.closeAccessCodesModal = function() {
-    document.getElementById('accessCodesModal').style.display = 'none';
-};
-
-window.saveAccessCodes = async function() {
-    const raw   = document.getElementById('accessCodesInput').value;
-    const codes = raw.split('
-').map(c=>c.trim()).filter(Boolean);
-    const err   = document.getElementById('acError');
-    if (!codes.length) { err.textContent = '⚠️ حط كود واحد على الأقل!'; return; }
-    const obj = {};
-    codes.forEach((c,i) => obj[`c${i}`] = c);
-    try {
-        await set(ref(db,`reviews/${currentReviewCode}/accessCodes`), obj);
-        closeAccessCodesModal();
-        showToast(`✅ تم حفظ ${codes.length} كود!`);
-    } catch(e) { err.textContent = '❌ '+e.message; }
-};
-
-// Review Videos CRUD
-window.openAddReviewVideo = function() {
-    editingReviewVid = null;
-    document.getElementById('modalTitle').textContent = '➕ فيديو مراجعة جديد';
-    document.getElementById('vTitle').value = '';
-    document.getElementById('vUrl1').value  = '';
-    document.getElementById('vUrl2').value  = '';
-    document.getElementById('vOrder').value = nextReviewOrder();
-    document.getElementById('part2Row').style.display = 'none';
-    document.getElementById('toggleBtn').textContent  = '+ إضافة جزء ثاني';
-    document.getElementById('formError').textContent  = '';
-    // reuse same modal but save goes to review path
-    window._saveTarget = 'review';
-    document.getElementById('videoModal').style.display = 'flex';
-};
-
-function nextReviewOrder() {
-    const orders = Object.values(reviewVideos).map(v=>v.order||0);
-    return orders.length ? Math.max(...orders)+1 : 1;
-}
-
-window.editReviewVideo = function(vid) {
-    const v = reviewVideos[vid]; if (!v) return;
-    editingReviewVid = vid;
-    document.getElementById('modalTitle').textContent = '✏️ تعديل فيديو المراجعة';
-    document.getElementById('vTitle').value = v.title||'';
-    document.getElementById('vUrl1').value  = v.url1 ||'';
-    document.getElementById('vUrl2').value  = v.url2 ||'';
-    document.getElementById('vOrder').value = v.order||1;
-    const has2 = !!v.url2;
-    document.getElementById('part2Row').style.display = has2?'block':'none';
-    document.getElementById('toggleBtn').textContent  = has2?'- إزالة جزء ثاني':'+ إضافة جزء ثاني';
-    document.getElementById('formError').textContent  = '';
-    window._saveTarget = 'review';
-    document.getElementById('videoModal').style.display = 'flex';
-};
-
-window.moveReviewVideo = async function(vid, dir) {
-    const entries = Object.entries(reviewVideos).sort((a,b)=>(a[1].order||0)-(b[1].order||0));
-    const idx = entries.findIndex(e=>e[0]===vid);
-    const si  = idx+dir;
-    if (si<0||si>=entries.length) return;
-    const [aId,aV]=[entries[idx]], [bId,bV]=[entries[si]];
-    await set(ref(db,`reviews/${currentReviewCode}/videos/${aId[0]}/order`), bV[1].order||0);
-    await set(ref(db,`reviews/${currentReviewCode}/videos/${bId[0]}/order`), aV[1].order||0);
-    get(ref(db,`reviews/${currentReviewCode}/videos`)).then(s=>{ reviewVideos=s.val()||{}; renderReviewVideos(); });
-};
-
-window.deleteReviewVideo = async function(vid, title) {
-    if (!confirm(`هتحذف:
-"${title}"؟`)) return;
-    await remove(ref(db,`reviews/${currentReviewCode}/videos/${vid}`));
-    delete reviewVideos[vid];
-    renderReviewVideos();
-    showToast('🗑️ تم الحذف!','warn');
-};
-
-// Override saveVideo to handle both homework and review targets
-const _origSaveVideo = window.saveVideo;
-window.saveVideo = async function() {
-    if (window._saveTarget !== 'review') { await _origSaveVideo(); return; }
-    const title = document.getElementById('vTitle').value.trim();
-    const url1  = document.getElementById('vUrl1').value.trim();
-    const url2  = document.getElementById('vUrl2').value.trim();
-    const order = parseInt(document.getElementById('vOrder').value) || nextReviewOrder();
-    const errEl = document.getElementById('formError');
-    if (!title) { errEl.textContent='⚠️ العنوان مطلوب!'; return; }
-    if (!url1)  { errEl.textContent='⚠️ رابط الجزء الأول مطلوب!'; return; }
-    const data = { title, url1:toEmbed(url1), order, updatedAt:Date.now() };
-    if (url2) data.url2 = toEmbed(url2);
-    const vid = editingReviewVid || `v${Date.now()}`;
-    try {
-        await set(ref(db,`reviews/${currentReviewCode}/videos/${vid}`), data);
-        reviewVideos[vid] = data;
-        window.closeModal();
-        window._saveTarget = null;
-        renderReviewVideos();
-        showToast(editingReviewVid ? '✅ تم التحديث!':'✅ تم إضافة الفيديو!');
-    } catch(e) { errEl.textContent='❌ '+e.message; }
-};
-
-// Reset _saveTarget when closing modal for homework
-const _origCloseModal = window.closeModal;
-window.closeModal = function() {
-    window._saveTarget = null;
-    _origCloseModal();
-};
-</script>
 </body>
 </html>
+
