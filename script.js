@@ -244,37 +244,38 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // ── Load Review Content ──────────────────────────────────
     async function loadReviewContent(rv) {
-        const sorted = Object.values(rv.videos).sort((a,b) => (a.order||0)-(b.order||0));
+        // حماية من null/undefined
+        const videos = (rv && rv.videos && typeof rv.videos === 'object') ? rv.videos : {};
+        const sorted = Object.values(videos).sort((a,b) => (a.order||0)-(b.order||0));
+
+        // حفظ urls لكل فيديو عشان نستخدمها في lazy load
+        const videoUrls = sorted.map(v => {
+            const urls = [];
+            for (let j=1; j<=9; j++) { if(v['url'+j]) urls.push(toEmbedUrl(v['url'+j])); else break; }
+            return urls;
+        });
 
         let html = `
         <div class="welcome-banner">
             <div class="welcome-text">
                 <h3>🎯 فيديوهات المراجعة</h3>
-                <p>${rv.desc || rv.code}</p>
+                <p>${rv.desc || rv.code || ''}</p>
             </div>
         </div>`;
 
         const rvCode = rv.code || rv.rcId || 'REVIEW';
-        html += '<div class="video-menu"><select class="video-selector" onchange="window._showVideo(this.value, this.options[this.selectedIndex].dataset)">';
+        html += '<div class="video-menu"><select class="video-selector" id="rvSelect" onchange="window._rvShow(this.value)">';
         html += '<option value="">اختر الفيديو...</option>';
         sorted.forEach((v,i) => {
-            html += `<option value="rv_${i}" data-video-code="${rvCode}" data-chapter-num="0" data-chapter-name="مراجعة" data-video-title="${v.title}" data-student-name="">${v.title}</option>`;
+            html += `<option value="${i}" data-video-code="${rvCode}" data-chapter-num="0" data-chapter-name="مراجعة" data-video-title="${v.title||''}" data-student-name="">${v.title||''}</option>`;
         });
         html += '</select></div>';
 
+        // كل div فيديو فارغ — الـ iframes هتتحط بس لما الطالب يختار (lazy)
         sorted.forEach((v,i) => {
-            const urls = [];
-            for (let j=1; j<=9; j++) { if(v['url'+j]) urls.push(toEmbedUrl(v['url'+j])); else break; }
             html += `<div class="video" id="rv_${i}" style="display:none;">`;
-            html += `<h3 class="video-title">${v.title}</h3>`;
-            if (urls.length > 1) {
-                urls.forEach((url,j) => {
-                    html += `<h3 class="video-title">الجزء ${j===0?'الأول':j===1?'الثاني':j+1}</h3>`;
-                    html += `<iframe src="${url}" width="100%" height="480" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen webkitallowfullscreen mozallowfullscreen playsinline webkit-playsinline></iframe>`;
-                });
-            } else {
-                html += `<iframe src="${urls[0]||''}" width="100%" height="480" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen webkitallowfullscreen mozallowfullscreen playsinline webkit-playsinline></iframe>`;
-            }
+            html += `<h3 class="video-title">${v.title||''}</h3>`;
+            html += `<div class="rv-frames" id="rv_frames_${i}"></div>`;
             html += '</div>';
         });
 
@@ -284,7 +285,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         videoContainer.innerHTML = html;
 
-        // ── تعبئة اسم الطالب (كود المراجعة) في options بعد البناء ──
+        // تعبئة اسم الطالب
         const loggedUser = localStorage.getItem('username');
         if (loggedUser) {
             videoContainer.querySelectorAll('option[data-video-code]').forEach(opt => {
@@ -292,13 +293,57 @@ document.addEventListener('DOMContentLoaded', async function () {
             });
         }
 
-        // ── عرض الفيديو الأول تلقائياً ──
+        // الـ labels للأجزاء
+        const partLabels = ['الأول','الثاني','الثالث','الرابع','الخامس','السادس','السابع','الثامن','التاسع'];
+
+        // lazy loader — بيحط الـ iframes لما الطالب يختار الفيديو بس
+        window._rvShow = function(idx) {
+            if (idx === '' || idx === null || idx === undefined) return;
+            const i = parseInt(idx);
+            // إخفاء كل الفيديوهات
+            sorted.forEach((_,k) => {
+                const el = document.getElementById('rv_'+k);
+                if (el) el.style.display = 'none';
+            });
+            const el = document.getElementById('rv_'+i);
+            if (!el) return;
+            // inject iframes لو لسه متحطتش
+            const framesDiv = document.getElementById('rv_frames_'+i);
+            if (framesDiv && framesDiv.childElementCount === 0) {
+                const urls = videoUrls[i] || [];
+                let framesHtml = '';
+                urls.forEach((url,j) => {
+                    if (urls.length > 1) {
+                        framesHtml += `<h3 class="video-title">الجزء ${partLabels[j]||j+1}</h3>`;
+                    }
+                    framesHtml += `<iframe src="${url}" width="100%" height="480" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen webkitallowfullscreen mozallowfullscreen playsinline webkit-playsinline></iframe>`;
+                });
+                framesDiv.innerHTML = framesHtml;
+            }
+            el.style.display = 'block';
+            if (window.innerWidth <= 768) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            // سجّل المشاهدة
+            try {
+                const v = sorted[i];
+                const sel = document.getElementById('rvSelect');
+                const opt = sel ? sel.options[sel.selectedIndex] : null;
+                if (loggedUser && opt && opt.dataset.videoCode) {
+                    const now = Date.now();
+                    push(ref(db, 'watchLogs'), {
+                        studentCode: loggedUser, studentName: opt.dataset.studentName||'',
+                        videoCode: opt.dataset.videoCode, chapterNum: 0,
+                        chapterName: 'مراجعة', videoTitle: v.title||'', at: now
+                    });
+                }
+            } catch(e) { /* non-blocking */ }
+        };
+
+        // عرض الفيديو الأول تلقائياً
         if (sorted.length > 0) {
-            const firstId = 'rv_0';
-            const firstEl = document.getElementById(firstId);
-            if (firstEl) firstEl.style.display = 'block';
-            const sel = videoContainer.querySelector('.video-selector');
-            if (sel) sel.value = firstId;
+            const sel = document.getElementById('rvSelect');
+            if (sel) sel.value = '0';
+            window._rvShow('0');
         }
     }
 
@@ -311,16 +356,12 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
         if (!urls.length) return '';
 
-        const labels = urls.length > 1
-            ? ['الجزء الأول','الجزء الثاني','الجزء الثالث','الجزء الرابع','الجزء الخامس']
-            : [v.title];
+        const labels = ['الجزء الأول','الجزء الثاني','الجزء الثالث','الجزء الرابع','الجزء الخامس','الجزء السادس','الجزء السابع','الجزء الثامن','الجزء التاسع'];
 
-        let html = `<div class="video" id="${idPrefix}" style="display:none;">`;
-        html += `<h3 class="video-title">${v.title}</h3>`;
-        urls.forEach((url, i) => {
-            if (urls.length > 1) html += `<h3 class="video-title">${labels[i] || 'جزء '+(i+1)}</h3>`;
-            html += `<iframe src="${url}" width="100%" height="480" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen webkitallowfullscreen mozallowfullscreen playsinline webkit-playsinline></iframe>`;
-        });
+        // حفظ الـ urls في data attribute — الـ iframes هتتحط بس لما الفيديو يتاختار
+        let html = `<div class="video" id="${idPrefix}" style="display:none;" data-urls='${JSON.stringify(urls)}' data-title="${(v.title||'').replace(/'/g,"&apos;")}">`;
+        html += `<h3 class="video-title">${v.title||''}</h3>`;
+        html += `<div class="hw-frames" id="frames_${idPrefix}"></div>`;
         html += '</div>';
         return html;
     }
@@ -385,6 +426,20 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (chEl) chEl.querySelectorAll('.video').forEach(v => v.style.display = 'none');
         const t = document.getElementById(id);
         if (t) {
+            // Lazy inject iframes لو لسه متحطتش
+            const framesDiv = document.getElementById('frames_' + id);
+            if (framesDiv && framesDiv.childElementCount === 0) {
+                try {
+                    const urls = JSON.parse(t.dataset.urls || '[]');
+                    const partLabels = ['الجزء الأول','الجزء الثاني','الجزء الثالث','الجزء الرابع','الجزء الخامس','الجزء السادس','الجزء السابع','الجزء الثامن','الجزء التاسع'];
+                    let framesHtml = '';
+                    urls.forEach((url, i) => {
+                        if (urls.length > 1) framesHtml += `<h3 class="video-title">${partLabels[i] || 'جزء '+(i+1)}</h3>`;
+                        framesHtml += `<iframe src="${url}" width="100%" height="480" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen webkitallowfullscreen mozallowfullscreen playsinline webkit-playsinline></iframe>`;
+                    });
+                    framesDiv.innerHTML = framesHtml;
+                } catch(e) { /* non-blocking */ }
+            }
             t.style.display = 'block';
             if (window.innerWidth <= 768) t.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
