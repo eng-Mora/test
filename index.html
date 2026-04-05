@@ -1,125 +1,430 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>The Process Platform</title>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <link rel="stylesheet" href="style.css">
-</head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>📋 فورم — The Process</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<style>
+:root{
+  --primary:#800000;--pl:#a00000;--gold:#D4AF37;
+  --bg:#f0f2f5;--card:#fff;--border:#e0e0e0;
+  --text:#2c2c2c;--muted:#777;--danger:#dc3545;--success:#28a745;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);direction:rtl;min-height:100vh;}
 
+/* ── Loading ── */
+#loadingScreen{position:fixed;inset:0;background:linear-gradient(135deg,#0B0C2A,#1a1a4e 50%,#800000);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;color:#fff;gap:1rem;}
+#loadingScreen i{font-size:2.5rem;animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+#loadingScreen p{font-size:1rem;opacity:.8;}
+
+/* ── Error / Not found ── */
+#errorScreen{display:none;position:fixed;inset:0;background:var(--bg);align-items:center;justify-content:center;}
+.error-card{background:#fff;border-radius:20px;padding:3rem 2.5rem;max-width:400px;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.1);}
+.error-card i{font-size:3rem;color:var(--danger);display:block;margin-bottom:1rem;}
+.error-card h2{color:var(--danger);margin-bottom:.5rem;}
+.error-card p{color:var(--muted);font-size:.92rem;}
+
+/* ── Code Entry Screen ── */
+#codeScreen{display:none;position:fixed;inset:0;background:linear-gradient(135deg,#0B0C2A,#1a1a4e 50%,#800000);align-items:center;justify-content:center;z-index:999;}
+.code-card{background:#fff;border-radius:20px;padding:3rem 2.5rem;width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4);}
+.code-card .logo{font-size:2.5rem;margin-bottom:.5rem;}
+.code-card h1{color:var(--primary);font-size:1.6rem;margin-bottom:.3rem;}
+.code-card .form-title{color:var(--muted);font-size:.95rem;margin-bottom:1.5rem;font-weight:500;}
+.code-input{width:100%;padding:.9rem 1rem;border:2px solid var(--border);border-radius:12px;font-family:Tajawal,sans-serif;font-size:1.1rem;text-align:center;letter-spacing:3px;transition:border-color .2s;margin-bottom:.8rem;}
+.code-input:focus{outline:none;border-color:var(--primary);}
+.code-btn{width:100%;padding:.9rem;background:var(--primary);color:#fff;border:none;border-radius:12px;font-family:Tajawal,sans-serif;font-size:1.05rem;font-weight:700;cursor:pointer;transition:background .2s;}
+.code-btn:hover{background:var(--pl);}
+.code-btn:disabled{background:#aaa;cursor:not-allowed;}
+#codeError{color:var(--danger);margin-top:.6rem;font-size:.88rem;min-height:1.2rem;}
+
+/* ── Form Page ── */
+#formPage{display:none;}
+
+header{background:linear-gradient(135deg,#800000,#2c3e50);color:#fff;padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,.2);}
+.header-title{font-size:1.15rem;font-weight:800;}
+.header-title span{color:var(--gold);}
+.student-badge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);padding:.35rem .9rem;border-radius:20px;font-size:.82rem;display:flex;align-items:center;gap:.4rem;}
+
+.form-container{max-width:680px;margin:0 auto;padding:2rem 1rem 4rem;}
+
+/* Welcome banner */
+.welcome-banner{background:#fff;border-radius:16px;padding:1.5rem;box-shadow:0 4px 20px rgba(0,0,0,.07);margin-bottom:1.5rem;border-right:5px solid var(--primary);}
+.welcome-banner h2{font-size:1.2rem;color:var(--primary);margin-bottom:.3rem;}
+.welcome-banner p{color:var(--muted);font-size:.9rem;}
+
+/* Already submitted banner */
+.submitted-banner{background:#d4edda;border-radius:14px;padding:1rem 1.3rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:.8rem;border:1px solid #b8dfc4;}
+.submitted-banner i{color:var(--success);font-size:1.3rem;}
+.submitted-banner p{font-size:.9rem;color:#155724;}
+
+/* Question card */
+.q-card{background:#fff;border-radius:16px;padding:1.4rem 1.5rem;box-shadow:0 4px 16px rgba(0,0,0,.06);margin-bottom:1rem;border:2px solid transparent;transition:border-color .2s;}
+.q-card.answered{border-color:#b8dfc4;}
+.q-num{font-size:.75rem;font-weight:700;color:var(--muted);margin-bottom:.5rem;display:flex;justify-content:space-between;align-items:center;}
+.q-text{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:1rem;line-height:1.5;}
+
+/* MCQ options */
+.options-list{display:flex;flex-direction:column;gap:.5rem;}
+.option-label{display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:all .2s;user-select:none;}
+.option-label:hover{border-color:#aaa;background:#fafafa;}
+.option-label input[type=radio]{accent-color:var(--primary);width:18px;height:18px;flex-shrink:0;}
+.option-label.selected{border-color:var(--primary);background:#fff5f5;}
+.option-label span{font-size:.95rem;line-height:1.4;}
+
+/* Text answer */
+.text-answer{width:100%;padding:.8rem 1rem;border:2px solid var(--border);border-radius:10px;font-family:Tajawal,sans-serif;font-size:.95rem;resize:vertical;min-height:90px;transition:border-color .2s;color:var(--text);}
+.text-answer:focus{outline:none;border-color:var(--primary);}
+
+/* Submit bar */
+.submit-bar{position:fixed;bottom:0;right:0;left:0;background:#fff;border-top:2px solid var(--border);padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;z-index:50;box-shadow:0 -4px 20px rgba(0,0,0,.08);}
+.progress-info{font-size:.85rem;color:var(--muted);}
+.progress-info strong{color:var(--primary);}
+.progress-bar-wrap{height:4px;background:#f0f0f0;border-radius:2px;width:120px;}
+.progress-bar{height:100%;background:var(--primary);border-radius:2px;transition:width .3s;}
+.submit-btn{padding:.75rem 2rem;background:var(--primary);color:#fff;border:none;border-radius:12px;font-family:Tajawal,sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:background .2s;white-space:nowrap;}
+.submit-btn:hover{background:var(--pl);}
+.submit-btn:disabled{background:#aaa;cursor:not-allowed;}
+
+/* Success screen */
+#successScreen{display:none;position:fixed;inset:0;background:linear-gradient(135deg,#0B0C2A,#1a1a4e 50%,#155724);align-items:center;justify-content:center;z-index:9999;}
+.success-card{background:#fff;border-radius:20px;padding:3rem 2.5rem;max-width:400px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4);}
+.success-card .check{font-size:4rem;display:block;margin-bottom:1rem;animation:pop .4s ease;}
+@keyframes pop{0%{transform:scale(0)}80%{transform:scale(1.1)}100%{transform:scale(1)}}
+.success-card h2{color:var(--success);margin-bottom:.5rem;font-size:1.5rem;}
+.success-card p{color:var(--muted);font-size:.92rem;margin-bottom:1.5rem;}
+.success-card .btn-back{padding:.75rem 2rem;background:var(--primary);color:#fff;border:none;border-radius:12px;font-family:Tajawal,sans-serif;font-size:1rem;font-weight:700;cursor:pointer;}
+
+/* Toast */
+.toast{position:fixed;bottom:5rem;left:50%;transform:translateX(-50%) translateY(100px);background:#2c3e50;color:#fff;padding:.75rem 1.8rem;border-radius:30px;font-size:.95rem;font-weight:600;z-index:9999;opacity:0;transition:all .3s;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+@media(max-width:500px){
+  .code-card{width:92%;padding:2rem 1.5rem;}
+  .form-container{padding:1rem .7rem 5rem;}
+  .submit-bar{flex-wrap:wrap;gap:.5rem;}
+  .progress-bar-wrap{display:none;}
+}
+</style>
+</head>
 <body>
 
-    <!-- Sidebar Toggle -->
-    <button class="sidebar-toggle" id="sidebarToggle" aria-label="القائمة">
-        <i class="fas fa-bars"></i>
+<!-- Loading -->
+<div id="loadingScreen">
+  <i class="fas fa-spinner"></i>
+  <p>جاري التحميل...</p>
+</div>
+
+<!-- Error -->
+<div id="errorScreen" style="display:none;position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;">
+  <div class="error-card">
+    <i class="fas fa-exclamation-triangle"></i>
+    <h2>الفورم مش موجود</h2>
+    <p id="errorMsg">اللينك ده غلط أو الفورم اتحذف.</p>
+  </div>
+</div>
+
+<!-- Code Entry -->
+<div id="codeScreen" style="display:none">
+  <div class="code-card">
+    <div class="logo">📋</div>
+    <h1>The Process</h1>
+    <p class="form-title" id="formTitleDisplay">جاري التحميل...</p>
+    <input type="text" id="studentCode" class="code-input" placeholder="أدخل كود الدخول" maxlength="20"
+           onkeydown="if(event.key==='Enter')submitCode()">
+    <button class="code-btn" id="codeBtn" onclick="submitCode()">
+      <i class="fas fa-arrow-left"></i> دخول
     </button>
+    <div id="codeError"></div>
+  </div>
+</div>
 
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <h3>القائمة</h3>
-        </div>
-        <div class="sidebar-menu">
-            <a href="#" id="homeLink" class="sidebar-link">
-                <i class="fas fa-home"></i>
-                <span>الصفحة الرئيسية</span>
-            </a>
-            <a href="https://eng-mora.github.io/Preparation/ar" target="_blank" class="sidebar-link">
-                <i class="fas fa-book"></i>
-                <span>حصة تأسيسية عربي</span>
-            </a>
-            <a href="https://eng-mora.github.io/Preparation/" target="_blank" class="sidebar-link">
-                <i class="fas fa-language"></i>
-                <span>حصة تأسيسية لغات</span>
-            </a>
-        </div>
+<!-- Form Page -->
+<div id="formPage" style="display:none">
+  <header>
+    <div class="header-title">📋 <span id="headerFormTitle">الفورم</span></div>
+    <div class="student-badge">
+      <i class="fas fa-user-circle"></i>
+      <span id="headerStudentName">طالب</span>
+    </div>
+  </header>
+
+  <div class="form-container">
+    <div class="welcome-banner">
+      <h2 id="formTitleBig">الفورم</h2>
+      <p id="formDescText"></p>
     </div>
 
-    <!-- Main -->
-    <main id="main" style="display:none;">
-        <section id="home">
-            <div>
-                <img src="https://i.ibb.co/Wv878vvp/Gemini-Generated-Image-7273ng7273ng7273.png" alt="The Process Platform" loading="lazy">
-                <h2>The Process <span>Platform</span></h2>
-                <p>كل ثانية بتذاكر فيها دلوقتي، بتقربك خطوة من حلمك.</p>
-                <p>خليك قوي، وافتكر دايمًا إن التعب بيروح — لكن النتيجة بتفضل. ❤️</p>
-            </div>
-        </section>
-
-        <section id="videos" class="video-container">
-            <div style="text-align: center; padding: 2rem;">
-                <h3>منصة الفيديوهات التعليمية</h3>
-                <p>سجّل دخولك للوصول إلى المحتوى المتاح</p>
-            </div>
-        </section>
-
-        <section id="contact">
-            <p class="or">لو واجهتك مشكلة ابعتلي</p>
-            <div class="social-icons">
-                <button>
-                    <a href="https://www.facebook.com/mamro8529?mibextid=ZbWKwL" target="_blank">
-                        <i class="fab fa-facebook-f"></i>
-                    </a>
-                </button>
-                <button>
-                    <a href="https://wa.me/message/5LRM2DVHPZQFM1" target="_blank">
-                        <i class="fab fa-whatsapp"></i>
-                    </a>
-                </button>
-                <button>
-                    <a href="http://t.me/Mora_mo1" target="_blank">
-                        <i class="fab fa-telegram-plane"></i>
-                    </a>
-                </button>
-            </div>
-            <div class="developer-credit">
-                <p>Developed by ENG: Amro Mohamed</p>
-            </div>
-        </section>
-    </main>
-
-    <!-- Login -->
-    <div class="login-container" id="loginContainer">
-        <div class="form-container">
-            <div class="left-section">
-                <h1>The<br>Process</h1>
-                <p>ENG: Tarek Mohamed</p>
-            </div>
-            <div class="right-section">
-                <h2>تسجيل الدخول</h2>
-                <form id="loginForm">
-                    <div class="input-group">
-                        <input type="text" id="username" name="username" required placeholder="أدخل كود الدخول">
-                        <i class="fas fa-key icon"></i>
-                    </div>
-                    <button type="submit" class="login-btn">دخول</button>
-                    <div id="errorMessage" class="error"></div>
-                </form>
-                <p class="or">لو واجهتك مشكلة ابعتلي</p>
-                <div class="social-icons">
-                    <button>
-                        <a href="https://www.facebook.com/mamro8529?mibextid=ZbWKwL" target="_blank">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                    </button>
-                    <button>
-                        <a href="https://wa.me/message/5LRM2DVHPZQFM1" target="_blank">
-                            <i class="fab fa-whatsapp"></i>
-                        </a>
-                    </button>
-                    <button>
-                        <a href="http://t.me/Mora_mo1" target="_blank">
-                            <i class="fab fa-telegram-plane"></i>
-                        </a>
-                    </button>
-                </div>
-                <p class="or">Developed by ENG: Amro Mohamed</p>
-            </div>
-        </div>
+    <!-- Already submitted notice -->
+    <div class="submitted-banner" id="editBanner" style="display:none">
+      <i class="fas fa-check-circle"></i>
+      <p>أجبت على الفورم ده من قبل — تقدر تعدل إجاباتك وتبعتها تاني.</p>
     </div>
 
-    <script type="module" src="script.js"></script>
+    <div id="questionsContainer"></div>
+  </div>
+
+  <!-- Submit bar -->
+  <div class="submit-bar">
+    <div>
+      <div class="progress-info">
+        <strong id="answeredCount">0</strong> / <span id="totalCount">0</span> سؤال
+      </div>
+      <div class="progress-bar-wrap" style="margin-top:4px">
+        <div class="progress-bar" id="progressBar" style="width:0%"></div>
+      </div>
+    </div>
+    <button class="submit-btn" id="submitBtn" onclick="submitForm()">
+      <i class="fas fa-paper-plane"></i> إرسال الإجابات
+    </button>
+  </div>
+</div>
+
+<!-- Success Screen -->
+<div id="successScreen" style="display:none">
+  <div class="success-card">
+    <span class="check">✅</span>
+    <h2>تم الإرسال!</h2>
+    <p>إجاباتك اتحفظت بنجاح يا <strong id="successName"></strong></p>
+    <p style="font-size:.8rem;color:#aaa;margin-top:.5rem">تقدر ترجع في أي وقت وتعدل إجاباتك من نفس اللينك.</p>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyBXsX0v_7p8CHDFiTUm4XkQsoZIqGueAOk",
+  authDomain:"the-process-5d196.firebaseapp.com",
+  databaseURL:"https://the-process-5d196-default-rtdb.firebaseio.com",
+  projectId:"the-process-5d196",
+  storageBucket:"the-process-5d196.firebasestorage.app",
+  messagingSenderId:"96415822332",
+  appId:"1:96415822332:web:2be476bee2e474383d8279"
+});
+var db = firebase.database();
+
+// ── State ─────────────────────────────────────────────────
+var currentFormId   = null;
+var currentForm     = null;
+var currentStudent  = null;
+var currentCode     = null;
+var questions       = []; // sorted [{key, ...}]
+var answers         = {}; // qKey → value
+var existingResponse= null;
+
+// ── Init ──────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', function(){
+  var params = new URLSearchParams(window.location.search);
+  var fid    = params.get('form');
+  if(!fid){ showError('مفيش فورم محدد في اللينك.'); return; }
+  currentFormId = fid;
+
+  db.ref('forms/'+fid).once('value').then(function(snap){
+    if(!snap.exists()){ showError('الفورم ده مش موجود.'); return; }
+    currentForm = snap.val();
+    if(currentForm.active===false){ showError('الفورم ده مش متاح دلوقتي.'); return; }
+
+    // Build sorted questions array
+    questions = Object.entries(currentForm.questions||{})
+      .sort(function(a,b){return (a[1].order||0)-(b[1].order||0);})
+      .map(function(e){return Object.assign({key:e[0]},e[1]);});
+
+    // Update code screen UI
+    document.getElementById('formTitleDisplay').textContent = currentForm.title||'الفورم';
+    hide('loadingScreen');
+    show('codeScreen');
+    setTimeout(function(){ document.getElementById('studentCode').focus(); }, 100);
+  }).catch(function(e){ showError('خطأ في التحميل: '+e.message); });
+});
+
+// ── Code submission ───────────────────────────────────────
+function submitCode(){
+  var code = document.getElementById('studentCode').value.trim();
+  var errEl= document.getElementById('codeError');
+  var btn  = document.getElementById('codeBtn');
+  if(!code){ errEl.textContent='⚠️ أدخل كودك'; return; }
+
+  btn.disabled=true; btn.textContent='...جاري التحقق'; errEl.textContent='';
+
+  db.ref('students/'+code).once('value').then(function(snap){
+    if(!snap.exists() || snap.val()===null){
+      errEl.textContent='❌ الكود غلط، حاول تاني';
+      btn.disabled=false; btn.innerHTML='<i class="fas fa-arrow-left"></i> دخول';
+      return;
+    }
+    var student = snap.val();
+    if(student.banned){
+      errEl.textContent='🚫 الحساب ده موقوف، تواصل مع المشرف';
+      btn.disabled=false; btn.innerHTML='<i class="fas fa-arrow-left"></i> دخول';
+      return;
+    }
+    currentCode    = code;
+    currentStudent = student;
+    hide('codeScreen');
+    loadFormPage();
+  }).catch(function(e){
+    errEl.textContent='❌ خطأ: '+e.message;
+    btn.disabled=false; btn.innerHTML='<i class="fas fa-arrow-left"></i> دخول';
+  });
+}
+
+// ── Load Form Page ────────────────────────────────────────
+function loadFormPage(){
+  var name = currentStudent.name || currentCode;
+  document.getElementById('headerStudentName').textContent = name;
+  document.getElementById('headerFormTitle').textContent   = currentForm.title||'الفورم';
+  document.getElementById('formTitleBig').textContent      = currentForm.title||'الفورم';
+  document.getElementById('formDescText').textContent      = currentForm.description||'';
+  document.getElementById('totalCount').textContent        = questions.length;
+
+  // Check for existing response
+  db.ref('formResponses/'+currentFormId+'/'+currentCode).once('value').then(function(snap){
+    if(snap.exists() && snap.val()){
+      existingResponse = snap.val();
+      answers = existingResponse.answers || {};
+      document.getElementById('editBanner').style.display='flex';
+      document.getElementById('submitBtn').innerHTML='<i class="fas fa-sync"></i> تحديث الإجابات';
+    }
+    buildQuestions();
+    show('formPage');
+  });
+}
+
+// ── Build Questions ───────────────────────────────────────
+function buildQuestions(){
+  var container = document.getElementById('questionsContainer');
+  container.innerHTML = '';
+
+  questions.forEach(function(q, i){
+    var card = document.createElement('div');
+    card.className = 'q-card' + (answers[q.key]!==undefined && answers[q.key]!=='' ? ' answered' : '');
+    card.id = 'qcard_'+q.key;
+
+    var inner = '<div class="q-num">';
+    inner += '<span>سؤال '+(i+1)+' من '+questions.length+'</span>';
+    inner += '<span style="background:'+(q.type==='mcq'?'#e8f4fd':'#f0e8fd')+';color:'+(q.type==='mcq'?'#007bff':'#6f42c1')+';padding:2px 8px;border-radius:6px;font-size:.72rem;font-weight:700">'+(q.type==='mcq'?'اختيار متعدد':'نص حر')+'</span>';
+    inner += '</div>';
+    inner += '<div class="q-text">'+escHtml(q.text||'')+'</div>';
+
+    if(q.type==='mcq'){
+      inner += '<div class="options-list" id="opts_'+q.key+'">';
+      (q.options||[]).forEach(function(opt){
+        var checked = answers[q.key]===opt;
+        inner += '<label class="option-label'+(checked?' selected':'')+'" id="lbl_'+q.key+'_'+escId(opt)+'">';
+        inner += '<input type="radio" name="q_'+q.key+'" value="'+escHtml(opt)+'" '+(checked?'checked':'')+' onchange="pickOption(\''+q.key+'\',this)">';
+        inner += '<span>'+escHtml(opt)+'</span>';
+        inner += '</label>';
+      });
+      inner += '</div>';
+    } else {
+      inner += '<textarea class="text-answer" id="ta_'+q.key+'" placeholder="اكتب إجابتك هنا..." onInput="pickText(\''+q.key+'\',this)">'+escHtml(answers[q.key]||'')+'</textarea>';
+    }
+
+    card.innerHTML = inner;
+    container.appendChild(card);
+  });
+
+  updateProgress();
+}
+
+// ── Answer handlers ───────────────────────────────────────
+function pickOption(qkey, input){
+  answers[qkey] = input.value;
+  // update label styles
+  var opts = document.getElementById('opts_'+qkey);
+  if(opts) opts.querySelectorAll('.option-label').forEach(function(lbl){
+    lbl.classList.toggle('selected', lbl.querySelector('input').value===input.value);
+  });
+  document.getElementById('qcard_'+qkey).classList.add('answered');
+  updateProgress();
+}
+
+function pickText(qkey, ta){
+  answers[qkey] = ta.value;
+  document.getElementById('qcard_'+qkey).classList.toggle('answered', ta.value.trim()!=='');
+  updateProgress();
+}
+
+function updateProgress(){
+  var answered = questions.filter(function(q){ return answers[q.key]!==undefined && answers[q.key]!==''; }).length;
+  document.getElementById('answeredCount').textContent = answered;
+  var pct = questions.length ? Math.round(answered/questions.length*100) : 0;
+  document.getElementById('progressBar').style.width = pct+'%';
+}
+
+// ── Submit ────────────────────────────────────────────────
+function submitForm(){
+  var answered = questions.filter(function(q){ return answers[q.key]!==undefined && answers[q.key]!==''; }).length;
+  if(answered < questions.length){
+    var unanswered = questions.length - answered;
+    if(!confirm('فيه '+unanswered+' سؤال لسه مجاوبتش عليه. هتبعت على أي حال؟')) return;
+  }
+
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('submitBtn').textContent = '...جاري الإرسال';
+
+  var now = Date.now();
+  var payload = {
+    studentName : currentStudent.name || currentCode,
+    studentCode : currentCode,
+    language    : currentStudent.language || '',
+    submittedAt : existingResponse ? existingResponse.submittedAt||now : now,
+    updatedAt   : now,
+    answers     : answers
+  };
+
+  db.ref('formResponses/'+currentFormId+'/'+currentCode).set(payload).then(function(){
+    document.getElementById('successName').textContent = currentStudent.name || currentCode;
+    hide('formPage');
+    show('successScreen');
+    // After 3s let them go back to edit
+    setTimeout(function(){
+      document.querySelector('#successScreen .success-card').insertAdjacentHTML('beforeend',
+        '<button onclick="goBackToForm()" style="margin-top:.5rem;padding:.6rem 1.5rem;background:transparent;border:2px solid var(--primary);color:var(--primary);border-radius:10px;font-family:Tajawal,sans-serif;font-size:.95rem;font-weight:700;cursor:pointer">تعديل الإجابات</button>'
+      );
+    }, 2000);
+  }).catch(function(e){
+    showToast('❌ خطأ في الإرسال: '+e.message);
+    document.getElementById('submitBtn').disabled=false;
+    document.getElementById('submitBtn').innerHTML='<i class="fas fa-paper-plane"></i> إرسال الإجابات';
+  });
+}
+
+function goBackToForm(){
+  existingResponse = { submittedAt: Date.now() };
+  document.getElementById('editBanner').style.display='flex';
+  document.getElementById('submitBtn').disabled=false;
+  document.getElementById('submitBtn').innerHTML='<i class="fas fa-sync"></i> تحديث الإجابات';
+  hide('successScreen');
+  show('formPage');
+}
+
+// ── Utils ─────────────────────────────────────────────────
+function show(id){ document.getElementById(id).style.display='flex'; }
+function hide(id){ document.getElementById(id).style.display='none'; }
+function showError(msg){
+  hide('loadingScreen');
+  document.getElementById('errorMsg').textContent=msg;
+  document.getElementById('errorScreen').style.display='flex';
+}
+function escHtml(s){
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escId(s){
+  return String(s||'').replace(/[^a-zA-Z0-9_-]/g,'_');
+}
+function showToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast show';
+  setTimeout(function(){t.classList.remove('show');},3000);
+}
+</script>
 </body>
 </html>
