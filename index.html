@@ -242,7 +242,7 @@
 
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 <script>
 // ── Firebase Config ──────────────────────────────────────
 const firebaseConfig = {
@@ -257,7 +257,7 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
-const db   = firebase.firestore();
+const db   = firebase.database();
 
 // ⚠️ غيّر ده لإيميل الأدمن بتاعك في Firebase Auth
 const ADMIN_EMAIL = "admin@pithouse.com";
@@ -267,15 +267,19 @@ function showSpinner(msg='Loading...'){document.getElementById('spinner-label').
 function hideSpinner(){document.getElementById('global-spinner').style.display='none'}
 function showToast(msg,type='info'){const icons={success:'✅',error:'❌',info:'ℹ️'};const el=document.createElement('div');el.className=`toast ${type}`;el.innerHTML=`<span>${icons[type]||'•'}</span><span>${esc(msg)}</span>`;document.getElementById('toast-container').appendChild(el);setTimeout(()=>el.remove(),4000)}
 function formatPrice(n){if(n===undefined||n===null||isNaN(n))return'0 EGP';return Number(n).toLocaleString()+' EGP'}
-function formatDate(ts){if(!ts)return'—';const d=ts.toDate?ts.toDate():new Date(ts.seconds*1000);return d.toLocaleDateString('ar-EG')}
+function formatDate(ts){if(!ts)return'—';return new Date(ts).toLocaleDateString('ar-EG')}
 function statusBadge(s){const map={pending:['⏳','Pending'],confirmed:['✅','Confirmed'],shipped:['🚚','Shipped'],delivered:['📦','Delivered']};const[icon,label]=map[s]||['•',s||'—'];return`<span class="status-badge status-${s}">${icon} ${label}</span>`}
 function esc(s){const d=document.createElement('div');d.appendChild(document.createTextNode(s||''));return d.innerHTML}
+function objToArray(obj){if(!obj)return[];return Object.entries(obj).map(([id,val])=>({id,...val}))}
 
 // ── Navigation ───────────────────────────────────────────
-let ordersUnsub = null;
+let ordersListener = null;
 function navigate(page){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  if(ordersUnsub && page!=='orders'){ordersUnsub();ordersUnsub=null}
+  if(ordersListener && page!=='orders'){
+    db.ref('orders').off('value', ordersListener);
+    ordersListener=null;
+  }
   document.getElementById(`page-${page}`).classList.add('active');
   if(page==='dashboard') loadDashboard();
   if(page==='orders')    loadOrders();
@@ -310,15 +314,19 @@ async function doLogout(){await auth.signOut()}
 async function loadDashboard(){
   showSpinner('Loading dashboard...');
   try{
-    const[ordersSnap,productsSnap]=await Promise.all([db.collection('orders').get(),db.collection('products').get()]);
-    const orders=ordersSnap.docs.map(d=>d.data());
-    const pending=orders.filter(o=>o.status==='pending').length;
-    const revenue=orders.reduce((sum,o)=>sum+(o.totalPrice||0),0);
+    const [ordersSnap, productsSnap] = await Promise.all([
+      db.ref('orders').get(),
+      db.ref('products').get()
+    ]);
+    const orders = objToArray(ordersSnap.val());
+    const products = objToArray(productsSnap.val());
+    const pending = orders.filter(o=>o.status==='pending').length;
+    const revenue = orders.reduce((sum,o)=>sum+(o.totalPrice||0),0);
     document.getElementById('stat-total').textContent=orders.length;
     document.getElementById('stat-pending').textContent=pending;
     document.getElementById('stat-revenue').textContent=formatPrice(revenue);
-    document.getElementById('stat-products').textContent=productsSnap.size;
-    const recent=ordersSnap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0)).slice(0,5);
+    document.getElementById('stat-products').textContent=products.length;
+    const recent = orders.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,5);
     const container=document.getElementById('recent-orders');
     if(!recent.length){container.innerHTML=`<div class="empty-state"><div class="empty-state-icon">📦</div><h3>No Orders Yet</h3></div>`;return}
     container.innerHTML=`<div class="orders-table-wrapper"><table class="orders-table"><thead><tr><th>Order ID</th><th>Customer</th><th>Total</th><th>Status</th><th>Date</th></tr></thead><tbody>${recent.map(o=>`<tr><td class="order-id-cell">${esc(o.id)}</td><td class="order-customer-cell">${esc(o.customerName||'—')}</td><td class="order-price-cell">${formatPrice(o.totalPrice)}</td><td>${statusBadge(o.status)}</td><td style="font-size:.78rem;white-space:nowrap">${formatDate(o.createdAt)}</td></tr>`).join('')}</tbody></table></div>`;
@@ -327,10 +335,11 @@ async function loadDashboard(){
 
 // ── Orders ───────────────────────────────────────────────
 function loadOrders(){
-  if(ordersUnsub)return;
-  ordersUnsub=db.collection('orders').orderBy('createdAt','desc').onSnapshot(snapshot=>{
-    renderOrders(snapshot.docs.map(d=>({id:d.id,...d.data()})));
-  },err=>{console.error(err);showToast('Failed to load orders','error')});
+  if(ordersListener)return;
+  ordersListener = db.ref('orders').on('value', snapshot=>{
+    const orders = objToArray(snapshot.val()).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+    renderOrders(orders);
+  }, err=>{console.error(err);showToast('Failed to load orders','error')});
 }
 
 function renderOrders(orders){
@@ -340,13 +349,15 @@ function renderOrders(orders){
 }
 
 async function updateStatus(sel){
-  try{await db.collection('orders').doc(sel.dataset.id).update({status:sel.value});showToast(`Status → "${sel.value}"`,'success')}
-  catch(err){console.error(err);showToast('Failed to update status','error')}
+  try{
+    await db.ref('orders/'+sel.dataset.id).update({status:sel.value});
+    showToast(`Status → "${sel.value}"`,'success');
+  }catch(err){console.error(err);showToast('Failed to update status','error')}
 }
 
 async function deleteOrder(id){
   if(!confirm(`Delete order ${id}?`))return;
-  try{await db.collection('orders').doc(id).delete();showToast('Order deleted','info')}
+  try{await db.ref('orders/'+id).remove();showToast('Order deleted','info')}
   catch(err){console.error(err);showToast('Failed to delete order','error')}
 }
 
@@ -356,11 +367,10 @@ let editingId=null;
 async function loadProducts(){
   showSpinner('Loading products...');
   try{
-    let snap;
-    try{snap=await db.collection('products').orderBy('createdAt','desc').get()}
-    catch(e){snap=await db.collection('products').get()}
-    renderProducts(snap.docs.map(d=>({id:d.id,...d.data()})));
-  }catch(err){showToast('Failed to load products','error')}
+    const snap = await db.ref('products').get();
+    const products = objToArray(snap.val()).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+    renderProducts(products);
+  }catch(err){console.error(err);showToast('Failed to load products','error')}
   finally{hideSpinner()}
 }
 
@@ -395,13 +405,13 @@ async function saveProduct(){
   const data = { name, price, imageUrl: image, description: desc };
 
   try {
-    if(editingId) {
-      await db.collection('products').doc(editingId).update(data);
-      showToast('Product updated ✓', 'success');
+    if(editingId){
+      await db.ref('products/'+editingId).update(data);
+      showToast('Product updated ✓','success');
     } else {
-      data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-      await db.collection('products').add(data);
-      showToast('Product added ✓', 'success');
+      data.createdAt = Date.now();
+      await db.ref('products').push(data);
+      showToast('Product added ✓','success');
     }
     closeModal();
     await loadProducts();
@@ -416,7 +426,7 @@ async function saveProduct(){
 
 async function deleteProduct(id){
   if(!confirm('Delete this product?'))return;
-  try{await db.collection('products').doc(id).delete();showToast('Product deleted','info');await loadProducts()}
+  try{await db.ref('products/'+id).remove();showToast('Product deleted','info');await loadProducts()}
   catch(err){console.error(err);showToast('Failed to delete product','error')}
 }
 </script>
