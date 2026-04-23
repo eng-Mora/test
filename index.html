@@ -85,10 +85,7 @@
     .hero-title{font-family:var(--font-display);font-size:clamp(4rem,11vw,8rem);letter-spacing:.05em;line-height:.88;margin-bottom:1.5rem}
     .hero-title span{color:var(--accent)}
     .hero-sub{font-size:1.05rem;color:var(--text-secondary);line-height:1.75;max-width:500px;margin:0 auto 2.5rem}
-    .hero-tags{display:flex;align-items:center;justify-content:center;gap:.75rem;flex-wrap:wrap}
-    .hero-tag{display:inline-flex;align-items:center;gap:.5rem;background:var(--bg-card);border:1px solid var(--border);border-radius:99px;padding:.45rem 1.1rem;font-size:.82rem;color:var(--text-secondary);font-weight:600;transition:all var(--transition);cursor:default}
-    .hero-tag:hover{border-color:var(--accent);color:var(--accent)}
-    .hero-tag.hot{background:rgba(255,61,0,.08);border-color:rgba(255,61,0,.25);color:var(--accent)}
+
 
     /* ── SHOP ── */
     .shop-container{max-width:1280px;margin:0 auto;padding:3rem 1.5rem}
@@ -224,10 +221,69 @@
 
     @keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
 
+    /* ── AUTH MODAL ── */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:9000;padding:1rem;backdrop-filter:blur(10px)}
+    .modal-backdrop.hidden{display:none}
+    .auth-modal{background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--accent);border-radius:22px;padding:2.25rem;width:100%;max-width:400px;animation:slideUp .4s cubic-bezier(.34,1.56,.64,1);position:relative}
+    @keyframes slideUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+    .auth-modal-close{position:absolute;top:1rem;left:1rem;background:none;border:none;color:var(--text-muted);font-size:1.4rem;cursor:pointer;line-height:1;padding:.2rem}
+    .auth-modal-close:hover{color:var(--accent)}
+    .auth-tabs{display:flex;gap:.5rem;margin-bottom:1.75rem;background:var(--bg-secondary);border-radius:var(--radius-sm);padding:.25rem}
+    .auth-tab{flex:1;padding:.6rem;border:none;background:none;color:var(--text-muted);font-family:var(--font-ar);font-size:.88rem;font-weight:700;cursor:pointer;border-radius:6px;transition:all var(--transition)}
+    .auth-tab.active{background:var(--accent);color:#fff}
+    .auth-form{display:none}.auth-form.active{display:block}
+    .auth-logo{font-family:var(--font-display);font-size:2rem;letter-spacing:.1em;text-align:center;margin-bottom:.2rem}
+    .auth-logo span{color:var(--accent)}
+    .auth-badge{text-align:center;color:var(--text-muted);font-size:.78rem;margin-bottom:1.5rem}
+    .auth-error{color:var(--danger);font-size:.8rem;margin-top:.5rem;text-align:center;min-height:1.2em}
+
+    /* ── NAV USER ── */
+    .nav-user-btn{display:flex;align-items:center;gap:.5rem;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.5rem 1rem;color:var(--text-primary);font-family:var(--font-ar);font-size:.85rem;font-weight:700;cursor:pointer;transition:all var(--transition)}
+    .nav-user-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .user-avatar{width:28px;height:28px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:900;color:#fff;flex-shrink:0}
+
+    /* ── PROFILE DROPDOWN ── */
+    .profile-dropdown-wrap{position:relative}
+    .profile-dropdown{position:absolute;top:calc(100% + .5rem);left:0;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:.5rem;min-width:200px;z-index:500;box-shadow:0 12px 40px rgba(0,0,0,.5);animation:fadeUp .2s ease}
+    .profile-dropdown.hidden{display:none}
+    .dropdown-user-info{padding:.75rem 1rem;border-bottom:1px solid var(--border);margin-bottom:.4rem}
+    .dropdown-user-name{font-weight:800;font-size:.9rem;margin-bottom:.2rem}
+    .dropdown-user-email{font-size:.75rem;color:var(--text-muted)}
+    .dropdown-item{display:flex;align-items:center;gap:.65rem;padding:.65rem 1rem;border-radius:var(--radius-sm);color:var(--text-secondary);font-size:.88rem;font-weight:600;cursor:pointer;transition:all var(--transition);border:none;background:none;width:100%;text-align:right}
+    .dropdown-item:hover{background:var(--bg-secondary);color:var(--text-primary)}
+    .dropdown-item.danger{color:var(--danger)}
+    .dropdown-item.danger:hover{background:rgba(255,23,68,.08)}
+
+    /* ── PROFILE PAGE ── */
+    .profile-container{max-width:600px;margin:0 auto;padding:3rem 1.5rem}
+    .profile-header-card{background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--accent);border-radius:var(--radius-lg);padding:2rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1.5rem}
+    .profile-avatar-lg{width:72px;height:72px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:900;color:#fff;flex-shrink:0}
+    .profile-section{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.75rem;margin-bottom:1.5rem}
+    .profile-section-title{font-family:var(--font-display);font-size:1.1rem;letter-spacing:.08em;color:var(--text-secondary);margin-bottom:1.25rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .saved-address-item{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.25rem;margin-bottom:.6rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;cursor:pointer;transition:border-color var(--transition)}
+    .saved-address-item:hover{border-color:var(--accent)}
+    .saved-address-item.selected{border-color:var(--accent);background:rgba(255,61,0,.05)}
+    .address-label{font-weight:700;font-size:.88rem;margin-bottom:.25rem}
+    .address-text{font-size:.8rem;color:var(--text-muted)}
+    .address-select-dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all var(--transition)}
+    .saved-address-item.selected .address-select-dot{border-color:var(--accent);background:var(--accent)}
+
+    /* ── PROMO ── */
+    .promo-section{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.25rem;margin-bottom:1rem}
+    .promo-input-row{display:flex;gap:.6rem}
+    .promo-input-row .form-control{flex:1}
+    .promo-apply-btn{padding:.8rem 1.25rem;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-family:var(--font-ar);font-size:.88rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:all var(--transition)}
+    .promo-apply-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .promo-result{margin-top:.65rem;font-size:.85rem;font-weight:700;min-height:1.4em}
+    .promo-result.success{color:var(--success)}
+    .promo-result.error{color:var(--danger)}
+    .discount-row{display:flex;justify-content:space-between;align-items:center;padding:.55rem 0;border-bottom:1px solid var(--border);font-size:.9rem;color:var(--success)}
+
     @media(max-width:640px){
       .hero-title{font-size:3.2rem}
       .form-row{grid-template-columns:1fr}
       .cart-drawer{max-width:100%}
+      .profile-header-card{flex-direction:column;text-align:center}
     }
   </style>
 </head>
@@ -265,6 +321,23 @@
       <div class="nav-logo">PIT <span>HOUSE</span> <small>SHOP</small></div>
       <div class="nav-actions">
         <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">🌙</button>
+        <div id="nav-auth-guest">
+          <button class="nav-user-btn" onclick="openAuthModal()">👤 تسجيل الدخول</button>
+        </div>
+        <div id="nav-auth-user" class="profile-dropdown-wrap" style="display:none">
+          <button class="nav-user-btn" onclick="toggleProfileDropdown()">
+            <div class="user-avatar" id="nav-avatar">؟</div>
+            <span id="nav-username">...</span>
+          </button>
+          <div class="profile-dropdown hidden" id="profile-dropdown">
+            <div class="dropdown-user-info">
+              <div class="dropdown-user-name" id="dd-name">—</div>
+              <div class="dropdown-user-email" id="dd-email">—</div>
+            </div>
+            <button class="dropdown-item" onclick="showProfile();toggleProfileDropdown()">📋 حسابي وعناويني</button>
+            <button class="dropdown-item danger" onclick="doLogout()">🚪 تسجيل الخروج</button>
+          </div>
+        </div>
         <button class="nav-cart-btn" onclick="openCart()">
           🛒 السلة <span class="cart-count" id="cart-count">0</span>
         </button>
@@ -279,13 +352,6 @@
       <span class="hero-eyebrow">⚡ كماليات وإكسسوارات السيارات</span>
       <h1 class="hero-title">PIT<br/><span>HOUSE</span></h1>
       <p class="hero-sub">كل اللي سيارتك محتاجه من ليد وسمعات وإكسسوارات — بأفضل الجودة وأحسن الأسعار</p>
-      <div class="hero-tags">
-        <span class="hero-tag hot">🚗 كماليات عصرية</span>
-        <span class="hero-tag">💡 إضاءة LED</span>
-        <span class="hero-tag">🔊 سمعات</span>
-        <span class="hero-tag">✨ إكسسوارات</span>
-        <span class="hero-tag">💵 الدفع عند الاستلام</span>
-      </div>
     </div>
   </section>
 
@@ -321,6 +387,11 @@
 
     <div class="checkout-section">
       <div class="checkout-section-title">👤 بيانات العميل</div>
+      <div id="saved-addresses-wrap" style="display:none;margin-bottom:1.25rem">
+        <div style="font-size:.82rem;font-weight:700;color:var(--text-muted);margin-bottom:.65rem">📍 عناوينك المحفوظة</div>
+        <div id="saved-addresses-list"></div>
+        <div style="margin-top:.5rem;margin-bottom:.75rem;text-align:center;font-size:.78rem;color:var(--text-muted)">— أو ادخل عنوان جديد —</div>
+      </div>
       <div class="form-row">
         <div class="form-group" id="fg-name">
           <label class="form-label">الاسم بالكامل *</label>
@@ -356,8 +427,27 @@
     </div>
 
     <div class="checkout-section">
+      <div class="checkout-section-title">🎟️ كود الخصم</div>
+      <div class="promo-section">
+        <div class="promo-input-row">
+          <input type="text" class="form-control" id="promo-input" placeholder="ادخل كود الخصم هنا..." style="text-transform:uppercase"/>
+          <button class="promo-apply-btn" onclick="applyPromo()">تطبيق</button>
+        </div>
+        <div class="promo-result" id="promo-result"></div>
+      </div>
+    </div>
+
+    <div class="checkout-section">
       <div class="checkout-section-title">📋 ملخص الطلب</div>
       <div id="checkout-items"></div>
+      <div id="discount-row" style="display:none" class="discount-row">
+        <span>🎟️ كود الخصم (<span id="discount-pct"></span>%)</span>
+        <span id="discount-val" style="font-family:var(--font-display)"></span>
+      </div>
+      <div id="shipping-row" style="display:none" class="discount-row">
+        <span>🚚 التوصيل</span>
+        <span style="font-family:var(--font-display)">مجاني 🎉</span>
+      </div>
       <div class="order-total-row">
         <span class="order-total-label">الإجمالي</span>
         <span class="order-total-val" id="checkout-total">0 EGP</span>
@@ -396,11 +486,106 @@
   </div>
 </div>
 
+<!-- ══ AUTH MODAL ══ -->
+<div class="modal-backdrop hidden" id="auth-modal" onclick="if(event.target===this)closeAuthModal()">
+  <div class="auth-modal">
+    <button class="auth-modal-close" onclick="closeAuthModal()">✕</button>
+    <div class="auth-logo">PIT <span>HOUSE</span></div>
+    <div class="auth-badge">حسابك في Pit House</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">تسجيل الدخول</button>
+      <button class="auth-tab" onclick="switchAuthTab('register')">حساب جديد</button>
+    </div>
+    <!-- LOGIN -->
+    <div class="auth-form active" id="auth-login">
+      <div class="form-group">
+        <label class="form-label">البريد الإلكتروني</label>
+        <input type="email" class="form-control" id="login-email" placeholder="example@email.com"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">كلمة المرور</label>
+        <input type="password" class="form-control" id="login-pass" placeholder="كلمة المرور"/>
+      </div>
+      <div class="auth-error" id="login-error"></div>
+      <button class="place-order-btn" style="margin-top:1rem" onclick="doLogin()">دخول →</button>
+    </div>
+    <!-- REGISTER -->
+    <div class="auth-form" id="auth-register">
+      <div class="form-group">
+        <label class="form-label">الاسم بالكامل</label>
+        <input type="text" class="form-control" id="reg-name" placeholder="محمد أحمد"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">البريد الإلكتروني</label>
+        <input type="email" class="form-control" id="reg-email" placeholder="example@email.com"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">كلمة المرور</label>
+        <input type="password" class="form-control" id="reg-pass" placeholder="6 أحرف على الأقل"/>
+      </div>
+      <div class="auth-error" id="reg-error"></div>
+      <button class="place-order-btn" style="margin-top:1rem" onclick="doRegister()">إنشاء الحساب →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PROFILE PAGE ══ -->
+<div id="page-profile" class="page">
+  <nav class="navbar">
+    <div class="nav-inner">
+      <div class="nav-logo" onclick="showShop()" style="cursor:pointer">PIT <span>HOUSE</span> <small>SHOP</small></div>
+      <div class="nav-actions">
+        <button class="theme-btn" onclick="toggleTheme()">🌙</button>
+        <button class="nav-cart-btn" onclick="showShop()">← رجوع للمتجر</button>
+      </div>
+    </div>
+  </nav>
+  <div class="profile-container">
+    <div class="profile-header-card">
+      <div class="profile-avatar-lg" id="profile-avatar-lg">؟</div>
+      <div>
+        <div style="font-family:var(--font-display);font-size:1.8rem;letter-spacing:.06em" id="profile-display-name">—</div>
+        <div style="color:var(--text-muted);font-size:.88rem" id="profile-display-email">—</div>
+      </div>
+    </div>
+
+    <div class="profile-section">
+      <div class="profile-section-title">📍 عناويني المحفوظة</div>
+      <div id="profile-addresses-list"></div>
+      <button class="place-order-btn" style="margin-top:1rem;padding:.85rem" onclick="showAddAddressForm()">+ إضافة عنوان جديد</button>
+      <div id="add-address-form" style="display:none;margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--border)">
+        <div class="form-group">
+          <label class="form-label">اسم العنوان (مثال: البيت، الشغل)</label>
+          <input type="text" class="form-control" id="addr-label" placeholder="البيت"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">العنوان بالتفصيل *</label>
+          <input type="text" class="form-control" id="addr-text" placeholder="المحافظة، المدينة، الشارع، رقم المنزل"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">رقم الموبايل</label>
+          <input type="tel" class="form-control" id="addr-phone" placeholder="01xxxxxxxxx"/>
+        </div>
+        <div style="display:flex;gap:.75rem;margin-top:.75rem">
+          <button class="place-order-btn" style="padding:.8rem;margin-top:0" onclick="saveAddress()">حفظ العنوان</button>
+          <button class="place-order-btn" style="padding:.8rem;margin-top:0;background:var(--bg-secondary);color:var(--text-primary)" onclick="hideAddAddressForm()">إلغاء</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-section">
+      <div class="profile-section-title">⚙️ إعدادات الحساب</div>
+      <button class="dropdown-item danger" style="font-size:.95rem;padding:.85rem 1rem;border:1px solid rgba(255,23,68,.2);border-radius:var(--radius-sm);width:100%;justify-content:center" onclick="doLogout()">🚪 تسجيل الخروج</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast-container"></div>
 <div id="page-spinner"><div class="spinner-ring"></div><div class="spinner-txt">جاري المعالجة...</div></div>
 
 <!-- ══ FIREBASE REALTIME DB ══ -->
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
 <script>
@@ -414,7 +599,8 @@ const firebaseConfig = {
   appId:"1:1049730961681:web:f2a4028410cdaa34d6fcb0"
 };
 firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+const db   = firebase.database();
+const auth = firebase.auth();
 
 // ── Theme ─────────────────────────────────────────────────
 let isDark = true;
@@ -426,6 +612,8 @@ function toggleTheme(){
 
 // ── State ─────────────────────────────────────────────────
 let cart = [];
+let currentUser = null;
+let appliedPromo = null;
 
 // ── Utils ─────────────────────────────────────────────────
 function formatPrice(n){if(!n&&n!==0)return'٠ EGP';return Number(n).toLocaleString('ar-EG')+' EGP'}
@@ -443,28 +631,237 @@ function hideSpinner(){document.getElementById('page-spinner').classList.remove(
 
 // ── Navigation ────────────────────────────────────────────
 function showShop(){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-shop').classList.add('active');closeCart()}
-function showCheckout(){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-checkout').classList.add('active');closeCart();renderCheckoutSummary();window.scrollTo(0,0)}
+function showCheckout(){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-checkout').classList.add('active');
+  closeCart();
+  appliedPromo=null;
+  document.getElementById('promo-input').value='';
+  document.getElementById('promo-result').textContent='';
+  document.getElementById('promo-result').className='promo-result';
+  document.getElementById('discount-row').style.display='none';
+  document.getElementById('shipping-row').style.display='none';
+  renderCheckoutSummary();
+  loadSavedAddressesForCheckout();
+  window.scrollTo(0,0);
+}
 function showSuccess(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-success').classList.add('active');document.getElementById('success-order-id').textContent='رقم الطلب: '+id;window.scrollTo(0,0)}
+function showProfile(){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-profile').classList.add('active');
+  loadProfileData();
+  window.scrollTo(0,0);
+}
+function goCheckout(){if(!cart.length){showToast('السلة فاضية!','error');return}showCheckout()}
+
+// ── Auth ──────────────────────────────────────────────────
+auth.onAuthStateChanged(user=>{
+  currentUser = user;
+  if(user){
+    const initials=(user.displayName||user.email||'؟').charAt(0).toUpperCase();
+    document.getElementById('nav-avatar').textContent=initials;
+    document.getElementById('nav-username').textContent=user.displayName||user.email.split('@')[0];
+    document.getElementById('dd-name').textContent=user.displayName||'—';
+    document.getElementById('dd-email').textContent=user.email;
+    document.getElementById('nav-auth-guest').style.display='none';
+    document.getElementById('nav-auth-user').style.display='flex';
+  } else {
+    document.getElementById('nav-auth-guest').style.display='flex';
+    document.getElementById('nav-auth-user').style.display='none';
+  }
+});
+
+function openAuthModal(){document.getElementById('auth-modal').classList.remove('hidden')}
+function closeAuthModal(){document.getElementById('auth-modal').classList.add('hidden')}
+function switchAuthTab(tab){
+  document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',i===(tab==='login'?0:1)));
+  document.getElementById('auth-login').classList.toggle('active',tab==='login');
+  document.getElementById('auth-register').classList.toggle('active',tab==='register');
+}
+
+async function doLogin(){
+  const email=document.getElementById('login-email').value.trim();
+  const pass=document.getElementById('login-pass').value;
+  const errEl=document.getElementById('login-error');
+  errEl.textContent='';
+  if(!email||!pass){errEl.textContent='ادخل الإيميل وكلمة المرور';return}
+  try{
+    await auth.signInWithEmailAndPassword(email,pass);
+    closeAuthModal();
+    showToast('أهلاً بيك! 👋','success');
+  }catch(err){
+    const msgs={'auth/user-not-found':'الحساب مش موجود','auth/wrong-password':'كلمة المرور غلط','auth/invalid-email':'إيميل غير صحيح','auth/invalid-credential':'الإيميل أو كلمة المرور غلط'};
+    errEl.textContent=msgs[err.code]||err.message;
+  }
+}
+
+async function doRegister(){
+  const name=document.getElementById('reg-name').value.trim();
+  const email=document.getElementById('reg-email').value.trim();
+  const pass=document.getElementById('reg-pass').value;
+  const errEl=document.getElementById('reg-error');
+  errEl.textContent='';
+  if(!name){errEl.textContent='ادخل اسمك';return}
+  if(!email){errEl.textContent='ادخل الإيميل';return}
+  if(pass.length<6){errEl.textContent='كلمة المرور أقل من 6 أحرف';return}
+  try{
+    const cred=await auth.createUserWithEmailAndPassword(email,pass);
+    await cred.user.updateProfile({displayName:name});
+    await db.ref('users/'+cred.user.uid).set({name,email,createdAt:Date.now()});
+    closeAuthModal();
+    showToast('تم إنشاء الحساب! 🎉','success');
+  }catch(err){
+    const msgs={'auth/email-already-in-use':'الإيميل ده مسجّل بالفعل','auth/invalid-email':'إيميل غير صحيح','auth/weak-password':'كلمة المرور ضعيفة'};
+    errEl.textContent=msgs[err.code]||err.message;
+  }
+}
+
+async function doLogout(){
+  await auth.signOut();
+  showShop();
+  showToast('تم تسجيل الخروج','info');
+}
+
+function toggleProfileDropdown(){
+  document.getElementById('profile-dropdown').classList.toggle('hidden');
+}
+document.addEventListener('click',e=>{
+  const wrap=document.getElementById('nav-auth-user');
+  if(wrap && !wrap.contains(e.target)) document.getElementById('profile-dropdown').classList.add('hidden');
+});
+
+// ── Profile & Addresses ───────────────────────────────────
+function loadProfileData(){
+  if(!currentUser)return;
+  const initials=(currentUser.displayName||currentUser.email||'؟').charAt(0).toUpperCase();
+  document.getElementById('profile-avatar-lg').textContent=initials;
+  document.getElementById('profile-display-name').textContent=currentUser.displayName||'—';
+  document.getElementById('profile-display-email').textContent=currentUser.email;
+  loadAddressesList();
+}
+
+async function loadAddressesList(){
+  if(!currentUser)return;
+  const snap=await db.ref('users/'+currentUser.uid+'/addresses').get();
+  const addrs=objToArray(snap.val());
+  const list=document.getElementById('profile-addresses-list');
+  if(!addrs.length){list.innerHTML='<div style="color:var(--text-muted);font-size:.88rem;padding:.75rem 0">مفيش عناوين محفوظة لحد دلوقتي</div>';return}
+  list.innerHTML=addrs.map(a=>`
+    <div class="saved-address-item">
+      <div>
+        <div class="address-label">📍 ${esc(a.label||'عنوان')}</div>
+        <div class="address-text">${esc(a.text)}</div>
+        ${a.phone?`<div class="address-text">📞 ${esc(a.phone)}</div>`:''}
+      </div>
+      <button onclick="deleteAddress('${a.id}')" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:1.1rem;padding:.3rem">🗑</button>
+    </div>`).join('');
+}
+
+function showAddAddressForm(){document.getElementById('add-address-form').style.display='block'}
+function hideAddAddressForm(){document.getElementById('add-address-form').style.display='none';['addr-label','addr-text','addr-phone'].forEach(id=>document.getElementById(id).value='')}
+
+async function saveAddress(){
+  if(!currentUser){showToast('سجّل دخولك الأول','error');return}
+  const label=document.getElementById('addr-label').value.trim()||'عنوان';
+  const text=document.getElementById('addr-text').value.trim();
+  const phone=document.getElementById('addr-phone').value.trim();
+  if(!text){showToast('ادخل العنوان بالتفصيل','error');return}
+  try{
+    await db.ref('users/'+currentUser.uid+'/addresses').push({label,text,phone,createdAt:Date.now()});
+    showToast('تم حفظ العنوان ✓','success');
+    hideAddAddressForm();
+    loadAddressesList();
+  }catch(err){showToast('حصل خطأ، حاول تاني','error')}
+}
+
+async function deleteAddress(id){
+  if(!confirm('هتحذف العنوان ده؟'))return;
+  await db.ref('users/'+currentUser.uid+'/addresses/'+id).remove();
+  showToast('تم حذف العنوان','info');
+  loadAddressesList();
+}
+
+async function loadSavedAddressesForCheckout(){
+  const wrap=document.getElementById('saved-addresses-wrap');
+  const list=document.getElementById('saved-addresses-list');
+  if(!currentUser){wrap.style.display='none';return}
+  const snap=await db.ref('users/'+currentUser.uid+'/addresses').get();
+  const addrs=objToArray(snap.val());
+  if(!addrs.length){wrap.style.display='none';return}
+  wrap.style.display='block';
+  list.innerHTML=addrs.map(a=>`
+    <div class="saved-address-item" id="addr-opt-${a.id}" onclick="selectSavedAddress('${a.id}',${JSON.stringify(a.text)},${JSON.stringify(a.phone||'')})" >
+      <div>
+        <div class="address-label">📍 ${esc(a.label||'عنوان')}</div>
+        <div class="address-text">${esc(a.text)}</div>
+        ${a.phone?`<div class="address-text">📞 ${esc(a.phone)}</div>`:''}
+      </div>
+      <div class="address-select-dot"></div>
+    </div>`).join('');
+}
+
+function selectSavedAddress(id,text,phone){
+  document.querySelectorAll('.saved-address-item').forEach(el=>el.classList.remove('selected'));
+  document.getElementById('addr-opt-'+id)?.classList.add('selected');
+  document.getElementById('c-address').value=text;
+  if(phone) document.getElementById('c-phone').value=phone;
+}
+
+// ── Promo Code ────────────────────────────────────────────
+async function applyPromo(){
+  const code=document.getElementById('promo-input').value.trim().toUpperCase();
+  const resultEl=document.getElementById('promo-result');
+  if(!code){resultEl.textContent='ادخل الكود الأول';resultEl.className='promo-result error';return}
+  resultEl.textContent='جاري التحقق...';resultEl.className='promo-result';
+  try{
+    const snap=await db.ref('promoCodes').orderByChild('code').equalTo(code).get();
+    if(!snap.exists()){resultEl.textContent='❌ الكود غلط أو مش موجود';resultEl.className='promo-result error';return}
+    const promo=Object.values(snap.val())[0];
+    const today=new Date().toISOString().slice(0,10);
+    if(promo.active===false){resultEl.textContent='❌ الكود ده معطّل';resultEl.className='promo-result error';return}
+    if(promo.expiry&&promo.expiry<today){resultEl.textContent='❌ الكود ده منتهي';resultEl.className='promo-result error';return}
+    appliedPromo=promo;
+    resultEl.textContent='✅ '+promo.message;
+    resultEl.className='promo-result success';
+    renderCheckoutSummary();
+  }catch(err){
+    console.error(err);
+    resultEl.textContent='حصل خطأ، حاول تاني';
+    resultEl.className='promo-result error';
+  }
+}
+
+function getFinalTotal(){
+  let total=getCartTotal();
+  if(!appliedPromo)return{total,discount:0,freeShip:false};
+  let discount=0;
+  if(appliedPromo.type==='discount'||appliedPromo.type==='both'){
+    discount=Math.round(total*(appliedPromo.discount/100));
+    total=total-discount;
+  }
+  const freeShip=appliedPromo.type==='freeship'||appliedPromo.type==='both';
+  return{total,discount,freeShip};
+}
 
 // ── Load Products ─────────────────────────────────────────
 async function loadProducts(){
   try{
-    const snap = await db.ref('products').get();
-    const products = objToArray(snap.val()).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
-    document.getElementById('products-count').textContent = products.length+' منتج';
+    const snap=await db.ref('products').get();
+    const products=objToArray(snap.val()).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+    document.getElementById('products-count').textContent=products.length+' منتج';
     renderProducts(products);
   }catch(err){
     console.error(err);
-    document.getElementById('products-grid').innerHTML=`<div style="grid-column:1/-1" class="empty-state"><div class="empty-state-icon">⚠️</div><h3>فيه مشكلة</h3><p>مقدرناش نحمل المنتجات، حاول تاني</p></div>`;
+    document.getElementById('products-grid').innerHTML='<div style="grid-column:1/-1" class="empty-state"><div class="empty-state-icon">⚠️</div><h3>فيه مشكلة</h3><p>مقدرناش نحمل المنتجات، حاول تاني</p></div>';
     document.getElementById('products-count').textContent='—';
-  } finally {
+  }finally{
     setTimeout(()=>document.getElementById('loading-screen').classList.add('hidden'),500);
   }
 }
 
 function renderProducts(products){
   const grid=document.getElementById('products-grid');
-  if(!products.length){grid.innerHTML=`<div style="grid-column:1/-1" class="empty-state"><div class="empty-state-icon">🚗</div><h3>مفيش منتجات لسه</h3><p>ارجع قريباً</p></div>`;return}
+  if(!products.length){grid.innerHTML='<div style="grid-column:1/-1" class="empty-state"><div class="empty-state-icon">🚗</div><h3>مفيش منتجات لسه</h3><p>ارجع قريباً</p></div>';return}
   grid.innerHTML=products.map((p,i)=>`
     <div class="product-card" style="animation:fadeUp .45s ease ${i*0.08}s both">
       <div class="product-img-wrap">
@@ -503,7 +900,7 @@ function updateCartUI(){
 }
 function renderCartItems(){
   const con=document.getElementById('cart-items-list');
-  if(!cart.length){con.innerHTML=`<div class="cart-empty"><div class="cart-empty-icon">🛒</div><p>السلة فاضية</p><p style="font-size:.8rem;margin-top:.25rem;color:var(--text-muted)">أضف منتجات من المتجر</p></div>`;return}
+  if(!cart.length){con.innerHTML='<div class="cart-empty"><div class="cart-empty-icon">🛒</div><p>السلة فاضية</p><p style="font-size:.8rem;margin-top:.25rem;color:var(--text-muted)">أضف منتجات من المتجر</p></div>';return}
   con.innerHTML=cart.map(item=>`
     <div class="cart-item">
       ${item.imageUrl?`<img class="cart-item-img" src="${esc(item.imageUrl)}" alt="${esc(item.name)}" onerror="this.style.display='none'">`:`<div class="cart-item-img" style="display:flex;align-items:center;justify-content:center;font-size:2rem">🚗</div>`}
@@ -521,12 +918,20 @@ function renderCartItems(){
 }
 function openCart(){renderCartItems();document.getElementById('cart-overlay').classList.add('open');document.getElementById('cart-drawer').classList.add('open')}
 function closeCart(){document.getElementById('cart-overlay').classList.remove('open');document.getElementById('cart-drawer').classList.remove('open')}
-function goCheckout(){if(!cart.length){showToast('السلة فاضية!','error');return}showCheckout()}
 
 // ── Checkout ──────────────────────────────────────────────
 function renderCheckoutSummary(){
   document.getElementById('checkout-items').innerHTML=cart.map(item=>`<div class="order-summary-item"><span class="name">${esc(item.name)} × ${item.qty}</span><span class="price">${formatPrice(item.price*item.qty)}</span></div>`).join('');
-  document.getElementById('checkout-total').textContent=formatPrice(getCartTotal());
+  const {total,discount,freeShip}=getFinalTotal();
+  if(discount>0){
+    document.getElementById('discount-row').style.display='flex';
+    document.getElementById('discount-pct').textContent=appliedPromo.discount;
+    document.getElementById('discount-val').textContent='- '+formatPrice(discount);
+  }else{
+    document.getElementById('discount-row').style.display='none';
+  }
+  document.getElementById('shipping-row').style.display=freeShip?'flex':'none';
+  document.getElementById('checkout-total').textContent=formatPrice(total);
 }
 
 async function placeOrder(){
@@ -543,9 +948,22 @@ async function placeOrder(){
   const btn=document.getElementById('place-order-btn');
   btn.disabled=true;btn.textContent='جاري إرسال الطلب...';showSpinner();
   try{
-    const orderData={customerName:name,phone,address,notes,items:cart.map(i=>({id:i.id,name:i.name,price:i.price,qty:i.qty})),totalPrice:getCartTotal(),status:'pending',paymentMethod:'cash_on_delivery',createdAt:Date.now()};
+    const {total,discount,freeShip}=getFinalTotal();
+    const orderData={
+      customerName:name,phone,address,notes,
+      items:cart.map(i=>({id:i.id,name:i.name,price:i.price,qty:i.qty})),
+      originalPrice:getCartTotal(),
+      totalPrice:total,
+      discount,
+      freeShipping:freeShip,
+      promoCode:appliedPromo?appliedPromo.code:null,
+      status:'pending',
+      paymentMethod:'cash_on_delivery',
+      createdAt:Date.now(),
+      userId:currentUser?currentUser.uid:null
+    };
     const ref=await db.ref('orders').push(orderData);
-    cart=[];updateCartUI();hideSpinner();showSuccess(ref.key);
+    cart=[];appliedPromo=null;updateCartUI();hideSpinner();showSuccess(ref.key);
   }catch(err){
     console.error(err);hideSpinner();showToast('حصل خطأ، حاول تاني','error');
     btn.disabled=false;btn.textContent='✅ تأكيد الطلب';
