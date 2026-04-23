@@ -872,13 +872,26 @@ function renderProducts(products){
         ${p.description?`<div class="product-desc">${esc(p.description)}</div>`:''}
         <div class="product-footer">
           <div class="product-price">${Number(p.price).toLocaleString('ar-EG')}<small>EGP</small></div>
-          <button class="add-to-cart-btn" id="atc-${p.id}" onclick="addToCart(${JSON.stringify({id:p.id,name:p.name,price:p.price,imageUrl:p.imageUrl||''})})">+ أضف للسلة</button>
+          <button class="add-to-cart-btn" id="atc-${p.id}"
+            data-id="${esc(String(p.id))}"
+            data-name="${esc(p.name)}"
+            data-price="${Number(p.price)}"
+            data-img="${esc(p.imageUrl||'')}"
+            onclick="addToCartFromBtn(this)">+ أضف للسلة</button>
         </div>
       </div>
     </div>`).join('');
 }
 
 // ── Cart ──────────────────────────────────────────────────
+function addToCartFromBtn(btn){
+  addToCart({
+    id: btn.dataset.id,
+    name: btn.dataset.name,
+    price: Number(btn.dataset.price),
+    imageUrl: btn.dataset.img
+  });
+}
 function addToCart(product){
   const ex=cart.find(i=>i.id===product.id);
   if(ex)ex.qty++;else cart.push({...product,qty:1});
