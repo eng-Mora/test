@@ -490,11 +490,14 @@ document.addEventListener('DOMContentLoaded', async function () {
     window.switchExtraChapter = function (num) {
         const section = document.querySelector('.extra-chapters-section');
         if (!section) return;
-        section.querySelectorAll('[id^="extra-chapter-"]').forEach(el => el.classList.remove('active'));
+        // إخفاء كل chapter-content جوا الـ extra section
+        section.querySelectorAll('.chapter-content').forEach(el => el.classList.remove('active'));
+        // تحديث الـ buttons
         section.querySelectorAll('.chapter-btn').forEach(b => {
             b.classList.toggle('active', b.getAttribute('onclick') === `switchExtraChapter(${num})`);
         });
-        const target = document.getElementById('extra-chapter-' + num);
+        // إظهار الفصل المطلوب
+        const target = section.querySelector('#chapter-' + num);
         if (target) target.classList.add('active');
     };
 
@@ -607,9 +610,21 @@ document.addEventListener('DOMContentLoaded', async function () {
                 html += '</div>';
                 extraIdxs.forEach((chNum, i) => {
                     const vids = chapData['ch' + chNum] || {};
-                    html += `<div id="extra-chapter-${chNum}" class="chapter-content ${i === 0 ? 'active' : ''}">`;
-                    html += buildChapter(chNum, chapterNames[chNum], vids, code, username);
-                    html += '</div>';
+                    // buildChapter بتعمل div بـ id="chapter-X" class="chapter-content"
+                    // نضيف active للأول بعد البناء مباشرة عن طريق placeholder
+                    const chHtml = buildChapter(chNum, chapterNames[chNum], vids, code, username);
+                    // استبدل class في أول div عشان يبقى active لو هو الأول
+                    if (i === 0) {
+                        html += chHtml.replace(
+                            `id="chapter-${chNum}" class="chapter-content `,
+                            `id="chapter-${chNum}" class="chapter-content active `
+                        ).replace(
+                            `id="chapter-${chNum}" class="chapter-content"`,
+                            `id="chapter-${chNum}" class="chapter-content active"`
+                        );
+                    } else {
+                        html += chHtml;
+                    }
                 });
                 html += '</div>';
             }
