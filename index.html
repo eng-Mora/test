@@ -27,6 +27,129 @@
         const db  = getDatabase(app);
         const auth = getAuth(app);
 
+        // ===== PARENT VIEW — يشتغل لو URL فيه ?view=CODE =====
+        // type="module" بيضمن إن الـ DOM جاهز — مش محتاجين DOMContentLoaded
+        {
+            const params = new URLSearchParams(window.location.search);
+            const studentCode = params.get('view');
+            if (studentCode) {
+                window.__isParentView = true;
+                document.getElementById('authScreen').style.display  = 'none';
+                document.getElementById('adminPanel').style.display  = 'none';
+                document.getElementById('parentView').style.display  = 'block';
+                document.getElementById('pvStatusBadge').textContent = '📊 تقرير الطالب';
+
+                onValue(ref(db, `students/${studentCode}`), (snap) => {
+                    const s = snap.val();
+                    if (!s) {
+                        document.getElementById('pvName').textContent = '❌ الطالب غير موجود';
+                        document.getElementById('pvTableBody').innerHTML =
+                            '<tr><td colspan="5" style="text-align:center;padding:2rem;color:#c00">الكود غير صحيح أو الطالب محذوف</td></tr>';
+                        return;
+                    }
+
+                    document.getElementById('pvAvatar').src        = s.image || `https://api.dicebear.com/7.x/bottts/svg?seed=${studentCode}`;
+                    document.getElementById('pvName').textContent  = s.name;
+                    document.getElementById('pvLang').textContent  = s.language;
+                    document.getElementById('pvLang').className    = `lang-badge ${s.language === 'عربي' ? 'arabic' : 'language'}`;
+
+                    const statusEl = document.getElementById('pvStatusBadge2');
+                    statusEl.textContent = s.banned ? '🚫 محظور' : '✅ نشط';
+                    statusEl.className   = `status-badge ${s.banned ? 'banned' : 'active'}`;
+
+                    const contact = [];
+                    if (s.phone)       contact.push(`<span><i class="fas fa-mobile-alt" style="color:#800000;margin-left:4px"></i>${s.phone}</span>`);
+                    if (s.parentPhone) contact.push(`<span><i class="fas fa-user-shield" style="color:#6c3483;margin-left:4px"></i>ولي الأمر: ${s.parentPhone}</span>`);
+                    document.getElementById('pvContact').innerHTML = contact.join('') || '';
+
+                    onValue(ref(db, 'attendance'), (attSnap) => {
+                        const allAtt  = attSnap.val() || {};
+                        const attData = {};
+                        Object.entries(allAtt).forEach(([date, day]) => {
+                            if (day[studentCode]) attData[date] = day[studentCode];
+                        });
+                        onValue(ref(db, `grades/${studentCode}`), (gSnap) => {
+                            renderParentTable(attData, gSnap.val() || {});
+                        }, { onlyOnce: true });
+                    }, { onlyOnce: true });
+
+                }, { onlyOnce: true });
+            }
+        }
+
+        function renderParentTable(attData, gradesData) {
+            const allDates = new Set([...Object.keys(attData), ...Object.keys(gradesData)]);
+            const total    = Object.keys(attData).length;
+            const present  = Object.values(attData).filter(a => a.present).length;
+            const absent   = total - present;
+            const pct      = total > 0 ? Math.round(present / total * 100) : 0;
+
+            document.getElementById('pvTotal').textContent   = total;
+            document.getElementById('pvPresent').textContent = present;
+            document.getElementById('pvAbsent').textContent  = absent;
+            document.getElementById('pvPct').textContent     = pct + '%';
+            document.getElementById('pvPct').style.color     = pct >= 75 ? '#28a745' : pct >= 50 ? '#ffc107' : '#dc3545';
+
+            const quizScores = Object.values(gradesData)
+                .filter(g => g.quiz !== undefined && g.quiz !== '')
+                .map(g => Number(g.quiz));
+            const quizAvg = quizScores.length
+                ? (quizScores.reduce((a, b) => a + b, 0) / quizScores.length).toFixed(1) + '/10'
+                : '—';
+            document.getElementById('pvQuizAvg').textContent = quizAvg;
+
+            // Progress bar
+            document.getElementById('pvPctLabel').textContent = total > 0 ? pct + '%' : '—';
+            document.getElementById('pvProgressFill').style.width = pct + '%';
+            document.getElementById('pvProgressFill').style.background =
+                pct >= 75 ? 'linear-gradient(90deg,#28a745,#85d196)' :
+                pct >= 50 ? 'linear-gradient(90deg,#ffc107,#ffe082)' :
+                            'linear-gradient(90deg,#dc3545,#f58e95)';
+            const msgs = {
+                hi:  '🌟 ممتاز! استمر في التفوق',
+                mid: '👍 كويس، بس في مجال للتحسين',
+                lo:  '⚠️ الحضور منخفض، يُرجى المتابعة'
+            };
+            document.getElementById('pvProgressMsg').textContent =
+                total === 0 ? 'لا يوجد سجل حضور حتى الآن' :
+                pct >= 75 ? msgs.hi : pct >= 50 ? msgs.mid : msgs.lo;
+
+            // Table
+            const tbody = document.getElementById('pvTableBody');
+            if (allDates.size === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:#aaa">لا يوجد سجلات بعد</td></tr>';
+                return;
+            }
+            tbody.innerHTML = '';
+            [...allDates].sort((a, b) => b.localeCompare(a)).forEach(date => {
+                const att   = attData[date];
+                const grade = gradesData[date] || {};
+                const tr    = document.createElement('tr');
+
+                const attendanceBadge = att
+                    ? `<span class="att-badge ${att.present ? 'present' : 'absent'}">${att.present ? '✅ حاضر' : '🚫 غائب'}</span>`
+                    : `<span class="att-badge unknown">—</span>`;
+
+                const hwEmoji = { 'ممتاز': '⭐', 'كويس': '👍', 'مقبول': '👌', 'لم يحضر': '❌' };
+                const hwText  = grade.hw ? `${hwEmoji[grade.hw] || ''} ${grade.hw}` : '—';
+                const quizVal = grade.quiz !== undefined && grade.quiz !== '' ? `${grade.quiz}/10` : '—';
+
+                const dateFormatted = (() => {
+                    try { return new Date(date).toLocaleDateString('ar-EG', { weekday:'short', year:'numeric', month:'short', day:'numeric' }); }
+                    catch(e) { return date; }
+                })();
+
+                tr.innerHTML = `
+                    <td><strong>${dateFormatted}</strong></td>
+                    <td>${attendanceBadge}</td>
+                    <td style="font-weight:700;color:${grade.quiz >= 7 ? '#28a745' : grade.quiz < 5 ? '#dc3545' : '#ffc107'}">${quizVal}</td>
+                    <td>${hwText}</td>
+                    <td style="color:#666;font-style:italic">${grade.note || '—'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
         // ===== State =====
         let allStudents = {};
         let editingCode = null;
@@ -34,7 +157,11 @@
         let selectedStudents = new Set();
 
         // ===== Firebase Auth — مراقبة حالة الدخول =====
+        // ===== Firebase Auth — مراقبة حالة الدخول =====
         onAuthStateChanged(auth, (user) => {
+            // لو parent view → مش محتاج auth خالص
+            if (new URLSearchParams(window.location.search).get('view')) return;
+
             if (user) {
                 document.getElementById('authScreen').style.display = 'none';
                 document.getElementById('adminPanel').style.display = 'block';
@@ -115,7 +242,7 @@
 
             const entries = Object.entries(data);
             if (entries.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:2rem;color:#888">لا يوجد طلاب بعد. ابدأ بإضافة طالب جديد 👆</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:2rem;color:#888">لا يوجد طلاب بعد. ابدأ بإضافة طالب جديد 👆</td></tr>`;
                 updateBulkBar();
                 return;
             }
@@ -142,6 +269,7 @@
                     <td><code class="code-badge">${code}</code></td>
                     <td>${vcBadge}</td>
                     <td>${student.phone || '-'}</td>
+                    <td>${student.parentPhone ? `<span style="color:#6c3483;font-weight:600"><i class="fas fa-user-shield" style="margin-left:4px;font-size:0.8rem"></i>${student.parentPhone}</span>` : '<span style="color:#bbb">—</span>'}</td>
                     <td><span class="email-text">${student.email || '-'}</span></td>
                     <td>
                         <span class="lang-badge ${student.language === 'عربي' ? 'arabic' : 'language'}">
@@ -273,6 +401,7 @@
             document.getElementById('accessCode').disabled = false;
             document.getElementById('studentName').value = '';
             document.getElementById('studentPhone').value = '';
+            document.getElementById('parentPhone').value = '';
             document.getElementById('studentEmail').value = '';
             document.getElementById('studentLanguage').value = 'لغات';
             document.getElementById('studentImage').value = '';
@@ -291,6 +420,7 @@
             document.getElementById('accessCode').disabled = true;
             document.getElementById('studentName').value = s.name || '';
             document.getElementById('studentPhone').value = s.phone || '';
+            document.getElementById('parentPhone').value = s.parentPhone || '';
             document.getElementById('studentEmail').value = s.email || '';
             document.getElementById('studentLanguage').value = s.language || 'لغات';
             document.getElementById('studentImage').value = s.image || '';
@@ -309,6 +439,7 @@
             const code     = document.getElementById('accessCode').value.trim();
             const name     = document.getElementById('studentName').value.trim();
             const phone    = document.getElementById('studentPhone').value.trim();
+            const parentPhone = document.getElementById('parentPhone').value.trim();
             const email    = document.getElementById('studentEmail').value.trim();
             const language = document.getElementById('studentLanguage').value;
             const image    = document.getElementById('studentImage').value.trim();
@@ -322,6 +453,7 @@
             const studentData = {
                 name,
                 phone: phone || '',
+                parentPhone: parentPhone || '',
                 email: email || '',
                 language,
                 image: image || `https://api.dicebear.com/7.x/bottts/svg?seed=${code}`,
@@ -363,7 +495,7 @@
             const q = document.getElementById('searchInput').value.toLowerCase();
             const filtered = {};
             for (const [code, s] of Object.entries(allStudents)) {
-                if (s.name?.toLowerCase().includes(q) || code.includes(q) || s.phone?.includes(q)) filtered[code] = s;
+                if (s.name?.toLowerCase().includes(q) || code.includes(q) || s.phone?.includes(q) || s.parentPhone?.includes(q)) filtered[code] = s;
             }
             renderTable(filtered);
         };
@@ -1323,6 +1455,15 @@
             document.getElementById('profStatus').className   = 'prof-status-badge ' + (s.banned ? 'banned' : 'active');
             document.getElementById('profStatus').textContent = s.banned ? '🚫 محظور' : '✅ نشط';
 
+            // Contact info
+            const contactRow = document.getElementById('profContactRow');
+            if (contactRow) {
+                contactRow.innerHTML = `
+                    ${s.phone ? `<span style="color:#555"><i class="fas fa-mobile-alt" style="margin-left:4px;color:#800000"></i> ${s.phone}</span>` : ''}
+                    ${s.parentPhone ? `<span style="color:#6c3483;font-weight:600"><i class="fas fa-user-shield" style="margin-left:4px;color:#6c3483"></i> ولي الأمر: ${s.parentPhone}</span>` : ''}
+                `.trim() || '<span style="color:#bbb">لا توجد بيانات تواصل</span>';
+            }
+
             // Load attendance + grades from Firebase
             loadProfileData(code);
 
@@ -1332,6 +1473,30 @@
         window.closeProfileModal = function() {
             document.getElementById('profileModal').style.display = 'none';
             profileCode = null;
+        };
+
+        window.shareParentLink = function() {
+            if (!profileCode) return;
+            const baseUrl = window.location.origin + window.location.pathname;
+            const link    = `${baseUrl}?view=${encodeURIComponent(profileCode)}`;
+            navigator.clipboard.writeText(link).then(() => {
+                showToast('✅ تم نسخ لينك ولي الأمر!');
+            }).catch(() => {
+                // fallback
+                const ta = document.createElement('textarea');
+                ta.value = link;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                showToast('✅ تم نسخ اللينك!');
+            });
+            // Show the link in a small alert for easy sharing
+            const s = allStudents[profileCode];
+            const studentName = s ? s.name : profileCode;
+            if (confirm(`🔗 لينك ولي أمر "${studentName}":\n\n${link}\n\nتم النسخ للكلبورد ✅\nافتح لينك جديد الآن؟`)) {
+                window.open(link, '_blank');
+            }
         };
 
         function loadProfileData(code) {
@@ -1368,7 +1533,7 @@
             ]);
 
             if (allDates.size === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:#aaa">لا يوجد سجلات بعد</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:#aaa">لا يوجد سجلات بعد</td></tr>';
                 updateProfileStats();
                 return;
             }
@@ -1393,6 +1558,9 @@
                 const quizVal  = grade.quiz  !== undefined ? grade.quiz  : '';
                 const hwVal    = grade.hw    !== undefined ? grade.hw    : '';
                 const noteVal  = grade.note  || '';
+
+                // WhatsApp button
+                const waBtn = buildWhatsAppBtn(profileCode, date, att, grade);
 
                 tr.innerHTML = `
                     <td><strong>${formatDate(date)}</strong><br><small style="color:#aaa">${date}</small></td>
@@ -1424,6 +1592,7 @@
                                data-date="${date}"
                                onblur="saveGrade('${profileCode}','${date}','note',this.value)">
                     </td>
+                    <td>${waBtn}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -1432,7 +1601,7 @@
 
             // Button: add new session row
             const addRow = document.createElement('tr');
-            addRow.innerHTML = `<td colspan="5" style="text-align:center;padding:0.8rem">
+            addRow.innerHTML = `<td colspan="6" style="text-align:center;padding:0.8rem">
                 <button class="btn-add-session" onclick="addNewSessionRow()">
                     <i class="fas fa-plus"></i> إضافة حصة جديدة
                 </button>
@@ -1563,6 +1732,104 @@
 
         window.cancelNewSession = function() {
             loadProfileData(profileCode);
+        };
+
+        // ---- Build WhatsApp message & button ----
+        function buildWhatsAppMsg(studentCode, date, att, grade) {
+            const s = allStudents[studentCode];
+            if (!s) return null;
+
+            const studentName = s.name || studentCode;
+            const parentPhone = s.parentPhone || '';
+            const baseUrl     = window.location.origin + window.location.pathname;
+            const profileLink = `${baseUrl}?view=${encodeURIComponent(studentCode)}`;
+
+            const dateFormatted = (() => {
+                try { return new Date(date).toLocaleDateString('ar-EG', { weekday:'long', year:'numeric', month:'long', day:'numeric' }); }
+                catch(e) { return date; }
+            })();
+
+            const isPresent = att ? att.present : null;
+            const quizScore = (grade && grade.quiz !== undefined && grade.quiz !== '') ? grade.quiz : null;
+            const hwVal     = (grade && grade.hw)  ? grade.hw  : null;
+            const hwEmoji   = { 'ممتاز': '⭐', 'كويس': '👍', 'مقبول': '👌', 'لم يحضر': '❌' };
+
+            let msg = '';
+
+            if (isPresent === false) {
+                // طالب غايب
+                msg =
+`السلام عليكم 🌟
+مع حضرتك عمرو، أسيستنت مستر طارق مدرس الفيزياء / فيزيكس
+
+اليوم ${dateFormatted}
+نُبلغ حضرتك أنه *تم تسجيل غياب الطالب "${studentName}" (${studentCode})*
+
+📌 للمتابعة المستمرة لدرجات وحضور الطالب، اللينك الخاص بيه:
+${profileLink}`;
+            } else {
+                // طالب حاضر
+                const quizLine = quizScore !== null
+                    ? `📝 الكويز: *${quizScore}/10*`
+                    : `📝 الكويز: *لم يُسجّل بعد*`;
+                const hwLine = hwVal
+                    ? `📚 تقييم الواجب: *${hwEmoji[hwVal] || ''} ${hwVal}*`
+                    : `📚 تقييم الواجب: *لم يُسجّل بعد*`;
+
+                msg =
+`السلام عليكم 🌟
+مع حضرتك عمرو، أسيستنت مستر طارق مدرس الفيزياء / فيزيكس
+
+اليوم ${dateFormatted}
+نُبلغ حضرتك بنتيجة الطالب *"${studentName}" (${studentCode})*:
+
+${quizLine}
+${hwLine}
+
+📌 في حالة التأخير أو لمتابعة درجات وحضور الطالب بشكل مستمر، اللينك الخاص بيه:
+${profileLink}`;
+            }
+
+            return { msg, parentPhone };
+        }
+
+        function buildWhatsAppBtn(studentCode, date, att, grade) {
+            const s = allStudents[studentCode];
+            const parentPhone = s?.parentPhone || '';
+
+            // نبني الزر دايماً — لو مفيش رقم، بيظهر تحذير
+            const hasPhone = !!parentPhone;
+            const tip = hasPhone ? `إرسال لـ ${parentPhone}` : 'لا يوجد رقم ولي الأمر';
+
+            return `<button class="btn-wa${hasPhone ? '' : ' btn-wa-disabled'}"
+                            onclick="sendWhatsApp('${studentCode}','${date}')"
+                            title="${tip}">
+                        <i class="fab fa-whatsapp"></i>
+                        ${hasPhone ? 'إرسال' : 'لا يوجد رقم'}
+                    </button>`;
+        }
+
+        window.sendWhatsApp = function(studentCode, date) {
+            const s = allStudents[studentCode];
+            if (!s) { showToast('❌ الطالب غير موجود', 'warning'); return; }
+            if (!s.parentPhone) {
+                showToast('⚠️ لا يوجد رقم ولي الأمر — أضفه أولاً في بيانات الطالب', 'warning');
+                return;
+            }
+
+            const att   = profileAttData[date]   || null;
+            const grade = profileGradesData[date] || {};
+            const result = buildWhatsAppMsg(studentCode, date, att, grade);
+            if (!result) return;
+
+            // تنظيف الرقم: إزالة أي مسافات أو +
+            let phone = result.parentPhone.replace(/\D/g, '');
+            // لو بيبدأ بـ 0 → استبدله بـ 20 (مصر)
+            if (phone.startsWith('0')) phone = '20' + phone.slice(1);
+
+            const encoded = encodeURIComponent(result.msg);
+            const url = `https://wa.me/${phone}?text=${encoded}`;
+            window.open(url, '_blank');
         };
 
         // ---- Helpers ----
@@ -2794,9 +3061,267 @@
             tbody td    { padding: 0.6rem 0.4rem; }
             .admin-email-badge { display: none; }
         }
+
+        .btn-wa {
+            background: #25D366;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.35rem 0.75rem;
+            font-family: 'Tajawal', sans-serif;
+            font-weight: 700;
+            font-size: 0.82rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            transition: background 0.2s, transform 0.15s;
+            white-space: nowrap;
+        }
+        .btn-wa:hover { background: #1ebe5d; transform: translateY(-1px); }
+        .btn-wa-disabled {
+            background: #ccc !important;
+            color: #888 !important;
+            cursor: not-allowed !important;
+        }
+        .btn-wa-disabled:hover { transform: none !important; }
+
+        /* ============= PARENT VIEW STYLES ============= */
+        #parentView {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f8f0f0 0%, #f0f2f5 100%);
+            font-family: 'Tajawal', sans-serif;
+        }
+        .pv-header {
+            background: linear-gradient(135deg, #800000, #2c3e50);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        }
+        .pv-logo { font-size: 1.3rem; font-weight: 800; letter-spacing: 0.5px; }
+        .pv-logo span { color: #D4AF37; }
+        .pv-badge {
+            font-size: 0.82rem;
+            background: rgba(255,255,255,0.15);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            backdrop-filter: blur(4px);
+        }
+        .pv-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        .pv-student-card {
+            background: white;
+            border-radius: 18px;
+            padding: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+            border-right: 5px solid #800000;
+        }
+        .pv-avatar {
+            width: 90px; height: 90px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #800000;
+            flex-shrink: 0;
+        }
+        .pv-name {
+            font-size: 1.5rem; font-weight: 800;
+            color: #2c3e50; margin: 0 0 0.4rem;
+        }
+        .pv-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.4rem; }
+        .pv-contact { font-size: 0.85rem; color: #666; display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.3rem; }
+        .pv-stats-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .pv-stat-card {
+            background: white;
+            border-radius: 14px;
+            padding: 1.2rem 0.8rem;
+            text-align: center;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+            border-top: 3px solid #ddd;
+        }
+        .pv-stat-card.green { border-top-color: #28a745; }
+        .pv-stat-card.red   { border-top-color: #dc3545; }
+        .pv-stat-card.gold  { border-top-color: #D4AF37; }
+        .pv-stat-card.blue  { border-top-color: #007bff; }
+        .pv-stat-num {
+            font-size: 1.8rem; font-weight: 800;
+            color: #800000; display: block; margin-bottom: 0.2rem;
+        }
+        .pv-stat-label { font-size: 0.78rem; color: #888; font-weight: 600; }
+        .pv-progress-card {
+            background: white;
+            border-radius: 14px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+            margin-bottom: 1.5rem;
+        }
+        .pv-progress-bar {
+            height: 16px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .pv-progress-fill {
+            height: 100%;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #800000, #D4AF37);
+            transition: width 1s ease;
+            width: 0%;
+        }
+        .pv-table-card {
+            background: white;
+            border-radius: 14px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+            margin-bottom: 1.5rem;
+        }
+        .pv-section-title {
+            font-size: 1.1rem; font-weight: 800;
+            color: #2c3e50; margin: 0 0 1rem;
+        }
+        .pv-table { width: 100%; border-collapse: collapse; }
+        .pv-table th {
+            background: linear-gradient(135deg, #800000, #2c3e50);
+            color: white; padding: 0.8rem;
+            text-align: right; font-size: 0.85rem;
+        }
+        .pv-table td {
+            padding: 0.75rem 0.8rem;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.88rem; color: #444;
+            text-align: right;
+        }
+        .pv-table tr:hover td { background: #fdf5f5; }
+        .pv-table tr:last-child td { border-bottom: none; }
+        .pv-footer {
+            text-align: center; color: #aaa;
+            font-size: 0.82rem; padding: 1rem 0 2rem;
+        }
+        .btn-share-parent {
+            background: linear-gradient(135deg, #6c3483, #9b59b6);
+            color: white; border: none; border-radius: 8px;
+            padding: 0.5rem 1rem; cursor: pointer;
+            font-family: 'Tajawal', sans-serif;
+            font-weight: 700; font-size: 0.9rem;
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 0.5rem;
+        }
+        .btn-share-parent:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(108,52,131,0.35);
+        }
+        @media (max-width: 600px) {
+            .pv-stats-row { grid-template-columns: repeat(3, 1fr); }
+            .pv-student-card { flex-direction: column; text-align: center; }
+            .pv-contact { justify-content: center; }
+            .pv-tags { justify-content: center; }
+        }
+        /* ============= END PARENT VIEW ============= */
     </style>
 </head>
 <body>
+
+<!-- =================== PARENT VIEW =================== -->
+<div id="parentView" style="display:none">
+    <div class="pv-header">
+        <div class="pv-logo">🛡️ <span>The Process</span></div>
+        <div class="pv-badge" id="pvStatusBadge"></div>
+    </div>
+    <div class="pv-container">
+
+        <!-- Student Card -->
+        <div class="pv-student-card">
+            <img id="pvAvatar" src="" alt="" class="pv-avatar" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=x'">
+            <div class="pv-student-info">
+                <h1 id="pvName" class="pv-name"></h1>
+                <div class="pv-tags">
+                    <span id="pvLang" class="lang-badge language"></span>
+                    <span id="pvStatusBadge2" class="status-badge active"></span>
+                </div>
+                <div class="pv-contact" id="pvContact"></div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="pv-stats-row">
+            <div class="pv-stat-card">
+                <div class="pv-stat-num" id="pvTotal">0</div>
+                <div class="pv-stat-label">إجمالي الحصص</div>
+            </div>
+            <div class="pv-stat-card green">
+                <div class="pv-stat-num" id="pvPresent">0</div>
+                <div class="pv-stat-label">✅ حضر</div>
+            </div>
+            <div class="pv-stat-card red">
+                <div class="pv-stat-num" id="pvAbsent">0</div>
+                <div class="pv-stat-label">🚫 غاب</div>
+            </div>
+            <div class="pv-stat-card gold">
+                <div class="pv-stat-num" id="pvPct">—</div>
+                <div class="pv-stat-label">نسبة الحضور</div>
+            </div>
+            <div class="pv-stat-card blue">
+                <div class="pv-stat-num" id="pvQuizAvg">—</div>
+                <div class="pv-stat-label">متوسط الكويز</div>
+            </div>
+        </div>
+
+        <!-- Attendance Progress Bar -->
+        <div class="pv-progress-card">
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.6rem">
+                <span style="font-weight:700;color:var(--secondary)">📊 نسبة الحضور</span>
+                <span id="pvPctLabel" style="font-weight:800;font-size:1.1rem;color:var(--primary)">—</span>
+            </div>
+            <div class="pv-progress-bar">
+                <div class="pv-progress-fill" id="pvProgressFill"></div>
+            </div>
+            <div id="pvProgressMsg" style="font-size:0.82rem;color:#888;margin-top:0.5rem;text-align:center"></div>
+        </div>
+
+        <!-- Sessions Table -->
+        <div class="pv-table-card">
+            <h3 class="pv-section-title">📋 سجل الحصص</h3>
+            <div style="overflow-x:auto">
+                <table class="pv-table">
+                    <thead>
+                        <tr>
+                            <th>📅 التاريخ</th>
+                            <th>الحضور</th>
+                            <th>🧠 كويز /10</th>
+                            <th>📝 الواجب</th>
+                            <th>💬 ملاحظات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pvTableBody">
+                        <tr><td colspan="5" style="text-align:center;padding:2rem;color:#aaa">
+                            <i class="fas fa-spinner fa-spin"></i> جاري التحميل...
+                        </td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="pv-footer">
+            تقرير أكاديمي — The Process &nbsp;|&nbsp; للاستفسار تواصل مع المدرس
+        </div>
+    </div>
+</div>
+<!-- =================== END PARENT VIEW =================== -->
 
 <!-- Auth Screen -->
 <div id="authScreen">
@@ -2903,7 +3428,7 @@
                     <tr>
                         <th><input type="checkbox" id="selectAllCheckbox" class="student-checkbox" onchange="toggleSelectAll(this.checked)" title="تحديد الكل"></th>
                         <th>صورة</th><th>الاسم</th><th>كود الدخول</th><th>كود الفيديو</th>
-                        <th>التليفون</th><th>الإيميل</th><th>القسم</th><th>الحالة</th><th>إجراءات</th>
+                        <th>التليفون</th><th>ولي الأمر</th><th>الإيميل</th><th>القسم</th><th>الحالة</th><th>إجراءات</th>
                     </tr>
                 </thead>
                 <tbody id="studentsBody">
@@ -3136,8 +3661,12 @@
                 <input type="text" id="studentName" placeholder="اسم الطالب">
             </div>
             <div class="form-group">
-                <label>📱 رقم التليفون</label>
+                <label>📱 رقم تليفون الطالب</label>
                 <input type="text" id="studentPhone" placeholder="01XXXXXXXXX" dir="ltr">
+            </div>
+            <div class="form-group">
+                <label>👨‍👩‍👦 رقم ولي الأمر</label>
+                <input type="text" id="parentPhone" placeholder="01XXXXXXXXX" dir="ltr">
             </div>
             <div class="form-group">
                 <label>📧 الإيميل</label>
@@ -3329,6 +3858,10 @@
                     <span id="profLang" class="lang-badge language"></span>
                     <span id="profStatus" class="prof-status-badge active"></span>
                 </div>
+                <div id="profContactRow" style="margin-top:0.4rem;display:flex;gap:1rem;flex-wrap:wrap;font-size:0.85rem"></div>
+                <button class="btn-share-parent" onclick="shareParentLink()" style="margin-top:0.6rem">
+                    <i class="fas fa-share-alt"></i> شارك مع ولي الأمر
+                </button>
             </div>
             <button class="prof-close-btn" onclick="closeProfileModal()">
                 <i class="fas fa-times"></i>
@@ -3369,10 +3902,11 @@
                         <th>🧠 كويز /10</th>
                         <th>📝 الواجب</th>
                         <th>💬 ملاحظات</th>
+                        <th>📲 واتساب ولي الأمر</th>
                     </tr>
                 </thead>
                 <tbody id="profAttBody">
-                    <tr><td colspan="5" style="text-align:center;padding:2rem;color:#aaa">
+                    <tr><td colspan="6" style="text-align:center;padding:2rem;color:#aaa">
                         <i class="fas fa-spinner fa-spin"></i> جاري التحميل...
                     </td></tr>
                 </tbody>
