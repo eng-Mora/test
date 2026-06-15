@@ -907,11 +907,11 @@
     /* ════════════════════════════════
        AUTH MODAL
     ════════════════════════════════ */
-    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.93);display:flex;align-items:center;justify-content:center;z-index:9000;padding:1rem;backdrop-filter:blur(22px)}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(18,24,33,.78);display:flex;align-items:center;justify-content:center;z-index:9000;padding:1rem;backdrop-filter:blur(14px)}
     .modal-backdrop.hidden{display:none}
     .auth-modal{
-      background:linear-gradient(160deg,#0F0800 0%,#080808 55%,#0A0010 100%);
-      border:1px solid rgba(230,57,70,.16);
+      background:linear-gradient(160deg,#222D3D 0%,#1A2230 55%,#241C36 100%);
+      border:1px solid rgba(230,57,70,.18);
       border-radius:26px;padding:0;width:100%;max-width:420px;
       animation:authPop .44s cubic-bezier(.34,1.56,.64,1);
       position:relative;overflow:hidden;
@@ -928,21 +928,21 @@
     .auth-modal-close:hover{background:rgba(230,57,70,.18);color:var(--led1);box-shadow:0 0 12px rgba(230,57,70,.4)}
     .auth-logo{font-family:var(--font-display);font-size:2rem;font-weight:900;letter-spacing:.14em;text-align:center;margin-bottom:.35rem;color:#F5F0EB;text-transform:uppercase}
     .auth-logo span{color:var(--led1);text-shadow:0 0 20px var(--led1),0 0 40px rgba(230,57,70,.5)}
-    .auth-badge{text-align:center;font-size:.72rem;margin-bottom:1.6rem;color:rgba(230,57,70,.45);letter-spacing:.12em;font-family:var(--font-mono)}
-    .auth-tabs{display:flex;gap:0;margin-bottom:1.75rem;background:rgba(0,0,0,.55);border:1px solid rgba(230,57,70,.1);border-radius:12px;padding:.28rem}
-    .auth-tab{flex:1;padding:.6rem;border:none;background:none;color:rgba(230,57,70,.4);font-family:var(--font-ar);font-size:.88rem;font-weight:700;cursor:pointer;border-radius:9px;transition:all .25s}
+    .auth-badge{text-align:center;font-size:.72rem;margin-bottom:1.6rem;color:rgba(236,242,241,.4);letter-spacing:.12em;font-family:var(--font-mono)}
+    .auth-tabs{display:flex;gap:0;margin-bottom:1.75rem;background:rgba(255,255,255,.05);border:1px solid rgba(230,57,70,.12);border-radius:12px;padding:.28rem}
+    .auth-tab{flex:1;padding:.6rem;border:none;background:none;color:rgba(236,242,241,.5);font-family:var(--font-ar);font-size:.88rem;font-weight:700;cursor:pointer;border-radius:9px;transition:all .25s}
     .auth-tab.active{background:linear-gradient(135deg,var(--led1),var(--led2));color:#FFFFFF;font-weight:900;box-shadow:0 0 20px rgba(230,57,70,.4),0 4px 16px rgba(0,0,0,.4)}
-    .auth-tab:not(.active):hover{color:rgba(230,57,70,.8);background:rgba(230,57,70,.06)}
+    .auth-tab:not(.active):hover{color:rgba(245,232,213,.85);background:rgba(255,255,255,.07)}
     .auth-form{display:none}.auth-form.active{display:block}
     .auth-modal .form-label{color:rgba(230,57,70,.55);font-size:.72rem;letter-spacing:.1em;font-family:var(--font-mono)}
-    .auth-modal .form-control{background:rgba(0,0,0,.5);border:1px solid rgba(230,57,70,.13);color:#F5E8D5;border-radius:10px}
-    .auth-modal .form-control::placeholder{color:rgba(230,57,70,.18)}
+    .auth-modal .form-control{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:#F5E8D5;border-radius:10px}
+    .auth-modal .form-control::placeholder{color:rgba(236,242,241,.28)}
     .auth-modal .form-control:focus{border-color:rgba(230,57,70,.55);box-shadow:0 0 0 3px rgba(230,57,70,.07),0 0 16px rgba(230,57,70,.1);outline:none}
     .auth-modal .place-order-btn{background:linear-gradient(135deg,var(--led1),var(--led2));color:#FFFFFF;font-weight:900;border-radius:12px;box-shadow:0 0 28px rgba(230,57,70,.35),0 6px 20px rgba(0,0,0,.5);margin-top:1rem}
     .auth-modal .place-order-btn:hover{box-shadow:0 0 50px rgba(230,57,70,.6);transform:translateY(-2px)}
-    .social-divider{display:flex;align-items:center;gap:.75rem;margin:1.1rem 0 .9rem;color:rgba(230,57,70,.25);font-size:.72rem;font-family:var(--font-mono);letter-spacing:.1em}
-    .social-divider::before,.social-divider::after{content:'';flex:1;height:1px;background:rgba(230,57,70,.12)}
-    .social-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:.65rem;padding:.75rem 1rem;border-radius:12px;border:1px solid rgba(230,57,70,.18);background:rgba(230,57,70,.04);color:var(--text-primary);font-family:var(--font-ar);font-size:.9rem;font-weight:700;cursor:pointer;transition:all .22s;margin-bottom:.55rem}
+    .social-divider{display:flex;align-items:center;gap:.75rem;margin:1.1rem 0 .9rem;color:rgba(236,242,241,.35);font-size:.72rem;font-family:var(--font-mono);letter-spacing:.1em}
+    .social-divider::before,.social-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.12)}
+    .social-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:.65rem;padding:.75rem 1rem;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:var(--text-primary);font-family:var(--font-ar);font-size:.9rem;font-weight:700;cursor:pointer;transition:all .22s;margin-bottom:.55rem}
     .social-btn:hover{border-color:rgba(230,57,70,.45);background:rgba(230,57,70,.09);transform:translateY(-1px);box-shadow:0 0 22px rgba(230,57,70,.15)}
     .social-btn img{width:20px;height:20px;flex-shrink:0}
     .phone-modal-backdrop{position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:1rem}
@@ -1271,7 +1271,8 @@
       .pdp-buy-panel{position:static}
       .checkout-container,.profile-container,.orders-container,.favorites-container{padding:2rem 1rem}
       .nav-hamburger{display:flex}
-      .nav-actions > *:not(.nav-hamburger):not(.nav-cart-btn){display:none}
+      .nav-actions > *:not(.nav-hamburger):not(.nav-cart-btn):not(.theme-btn){display:none}
+      .theme-btn{width:36px;height:36px;font-size:.92rem}
       #nav-orders-btn{display:none!important}
       .payment-methods-grid{grid-template-columns:1fr}
       .products-grid{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
@@ -1504,6 +1505,11 @@
           <input type="tel" class="form-control" id="c-phone" placeholder="01xxxxxxxxx"/>
           <span class="form-error" data-i18n="checkoutErrorPhone">ادخل رقم موبايل صحيح</span>
         </div>
+      </div>
+      <div class="form-group" id="fg-alt-phone">
+        <label class="form-label" data-i18n="checkoutLabelAltPhone">رقم تليفون بديل (اختياري)</label>
+        <input type="tel" class="form-control" id="c-alt-phone" data-i18n-placeholder="checkoutPlaceholderAltPhone" placeholder="01xxxxxxxxx"/>
+        <span class="form-error" data-i18n="checkoutErrorAltPhone">ادخل رقم موبايل صحيح</span>
       </div>
       <!-- ══ GOVERNORATE + CITY SELECTS ══ -->
       <div class="form-row">
@@ -1807,6 +1813,11 @@
     </div>
     <!-- REGISTER -->
     <div class="auth-form" id="auth-register">
+      <button class="social-btn" onclick="doSocialLogin('google')">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"/>
+        إنشاء حساب بـ Google
+      </button>
+      <div class="social-divider">أو أنشئ حساب بالبريد</div>
       <div class="form-group">
         <label class="form-label">الاسم *</label>
         <input type="text" class="form-control" id="reg-firstname" placeholder="محمد أحمد"/>
@@ -1827,11 +1838,6 @@
       </div>
       <div class="auth-error" id="reg-error"></div>
       <button class="place-order-btn" style="margin-top:1rem" onclick="doRegister()" data-i18n="authRegisterBtn">إنشاء الحساب →</button>
-      <div class="social-divider">أو أنشئ حساب بـ</div>
-      <button class="social-btn" onclick="doSocialLogin('google')">
-        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"/>
-        إنشاء حساب بـ Google
-      </button>
     </div>
     </div><!-- /auth-modal-inner -->
   </div>
@@ -3073,6 +3079,7 @@ function renderCheckoutSummary(){
 async function placeOrder(){
   const name=document.getElementById('c-name').value.trim();
   const phone=document.getElementById('c-phone').value.trim();
+  const altPhone=document.getElementById('c-alt-phone').value.trim();
   const address=document.getElementById('c-address').value.trim();
   const notes=document.getElementById('c-notes').value.trim();
   const governorateKey=document.getElementById('c-governorate').value;
@@ -3082,6 +3089,7 @@ async function placeOrder(){
   const chk=(fgId,cond)=>{if(!cond){document.getElementById(fgId).classList.add('has-error');valid=false}else document.getElementById(fgId).classList.remove('has-error')};
   chk('fg-name',name.length>=2);
   chk('fg-phone',/^01[0-9]{9}$/.test(phone));
+  chk('fg-alt-phone', altPhone==='' || /^01[0-9]{9}$/.test(altPhone));
   chk('fg-governorate',!!governorateKey);
   chk('fg-city',!!city);
   chk('fg-address',address.length>=5);
@@ -3146,7 +3154,7 @@ async function placeOrder(){
     }
     const shippingCost = _currentShippingCost||0;
     const orderData={
-      customerName:name,phone,
+      customerName:name,phone,altPhone,
       governorate:governorateKey,
       governorateName,
       city,
@@ -3474,6 +3482,7 @@ function renderOrderCard(o, idx){
       <div style="border-top:1px solid var(--border);padding-top:.75rem;margin-top:.25rem">
         <div class="order-meta-row"><span>${t('orderMetaAddress')}</span><span class="order-meta-val">${o.governorateName?esc(o.governorateName)+' — ':''} ${o.city?esc(o.city)+' — ':''} ${esc(o.address||'—')}</span></div>
         <div class="order-meta-row"><span>${t('orderMetaPhone')}</span><span class="order-meta-val">${esc(o.phone||'—')}</span></div>
+        ${o.altPhone?`<div class="order-meta-row"><span>${t('orderMetaAltPhone')}</span><span class="order-meta-val">${esc(o.altPhone)}</span></div>`:''}
         <div class="order-meta-row"><span>${t('orderMetaPayment')}</span><span class="order-meta-val">${{vodafone_cash:t('orderPayVF'),instapay:t('orderPayIP'),cash_on_delivery:t('orderPayCOD')}[o.paymentMethod]||t('orderPayCOD')}</span></div>
         ${o.promoCode?`<div class="order-meta-row"><span>${t('orderMetaPromo')}</span><span class="order-meta-val">${esc(o.promoCode)}</span></div>`:''}
         
@@ -3564,6 +3573,23 @@ function getOrderById(id){
   });
 }
 
+let _storeSettingsCache = null;
+async function getStoreSettings(){
+  if(_storeSettingsCache) return _storeSettingsCache;
+  try{
+    const snap = await db.ref('settings/store').get();
+    const s = snap.val() || {};
+    _storeSettingsCache = {
+      name: s.name || 'PIT HOUSE',
+      address: s.address || 'القاهرة، مصر',
+      slogan: s.slogan || ''
+    };
+  }catch(e){
+    _storeSettingsCache = {name:'PIT HOUSE', address:'القاهرة، مصر', slogan:''};
+  }
+  return _storeSettingsCache;
+}
+
 function pitHouseLogoSVG(){
   return `<svg xmlns="http://www.w3.org/2000/svg" width="80" height="28" viewBox="0 0 82 38" fill="none">
     <rect x="4" y="18" width="74" height="14" rx="5" fill="#162018"/>
@@ -3589,76 +3615,126 @@ async function downloadInvoice(orderId){
   showToast('جاري تجهيز الفاتورة...','info');
   const o = await getOrderById(orderId);
   if(!o){ showToast('تعذر تحميل بيانات الطلب','error'); return; }
+  const store = await getStoreSettings();
 
   const date = o.createdAt ? new Date(o.createdAt).toLocaleDateString('ar-EG',{year:'numeric',month:'long',day:'numeric'}) : new Date().toLocaleDateString('ar-EG',{year:'numeric',month:'long',day:'numeric'});
   const orderNum = o.id.slice(-8).toUpperCase();
-  const payMap = {'vodafone_cash':'📱 فودافون كاش','instapay':'⚡ InstaPay','cash_on_delivery':'💵 عند الاستلام'};
-  const payLabel = payMap[o.paymentMethod] || '💵 عند الاستلام';
+  const payMap = {'vodafone_cash':'فودافون كاش','instapay':'إنستاباي','cash_on_delivery':'الدفع عند الاستلام'};
+  const payLabel = payMap[o.paymentMethod] || 'الدفع عند الاستلام';
 
   const itemsRows = (o.items||[]).map(it=>`
     <tr>
-      <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;font-size:13px">
-        ${it.image?`<img src="${it.image}" style="width:44px;height:44px;object-fit:cover;border-radius:6px;vertical-align:middle;margin-left:8px" onerror="this.style.display='none'"/>`:''}<span>${it.name||'—'}</span>
+      <td class="td-product">
+        ${it.image?`<img src="${it.image}" class="prod-thumb" onerror="this.style.display='none'"/>`:''}<span>${it.name||'—'}</span>
       </td>
-      <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;text-align:center;font-size:13px">${it.qty}</td>
-      <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;text-align:center;font-size:13px;color:#FF3D00;font-weight:700">${it.price? it.price.toLocaleString('ar-EG'):'—'} ج.م</td>
-      <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;text-align:center;font-size:13px;color:#FF3D00;font-weight:700">${it.price&&it.qty?(it.price*it.qty).toLocaleString('ar-EG'):'—'} ج.م</td>
+      <td class="td-center">${it.qty}</td>
+      <td class="td-center td-price">${it.price? it.price.toLocaleString('ar-EG'):'—'} ج.م</td>
+      <td class="td-center td-price">${it.price&&it.qty?(it.price*it.qty).toLocaleString('ar-EG'):'—'} ج.م</td>
     </tr>`).join('');
 
   const html = `<!DOCTYPE html><html lang="ar" dir="rtl">
 <head><meta charset="UTF-8"/><title>فاتورة #${orderNum} — Pit House</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
 <style>
+  :root{
+    --red:#E63946; --red-deep:#C5283D;
+    --black:#1A1D23;
+    --gold:#D4A24E;
+    --ink:#1C2530; --muted:#8A95A5;
+    --line:#E7EBF1; --bg-soft:#F7F8FA;
+    --green:#1F9D63;
+  }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Cairo',sans-serif;background:#fff;color:#111;padding:32px;direction:rtl}
-  .page{max-width:720px;margin:0 auto;background:#fff;padding:40px}
-  .header{display:flex;align-items:center;justify-content:space-between;padding-bottom:24px;border-bottom:3px solid #FF3D00;margin-bottom:28px}
-  .brand{font-size:2rem;font-weight:900;letter-spacing:.05em;line-height:1}
-  .brand span{color:#FF3D00}
-  .invoice-title{font-size:1rem;color:#888;margin-top:4px}
-  .invoice-num{font-family:monospace;font-size:1.1rem;font-weight:700;color:#FF3D00;background:#fff5f2;border:1px solid #ffd0c0;padding:6px 14px;border-radius:99px}
+  *{print-color-adjust:exact;-webkit-print-color-adjust:exact;color-adjust:exact}
+  body{font-family:'Cairo',sans-serif;background:#EEF1F6;color:var(--ink);padding:32px;direction:rtl}
+  .page{max-width:760px;margin:0 auto;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 10px 40px rgba(15,42,71,.08);border:1px solid var(--line);position:relative}
+  .watermark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-28deg);font-size:6.5rem;font-weight:900;color:rgba(230,57,70,.045);letter-spacing:.1em;white-space:nowrap;pointer-events:none;user-select:none;z-index:0}
+  .header,.body-pad,.footer{position:relative;z-index:1}
+
+  .header{background:#fff;color:var(--ink);padding:32px 40px;position:relative;overflow:hidden;border-bottom:4px solid var(--red)}
+  .header::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 55%,rgba(230,57,70,.05) 100%)}
+  .header-content{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;width:100%}
+  .brand{font-size:1.9rem;font-weight:900;letter-spacing:.04em;line-height:1;color:var(--black)}
+  .brand span{color:var(--red)}
+  .doc-title{font-size:.82rem;color:var(--muted);margin-top:6px;letter-spacing:.05em}
+  .sender-info{font-size:.74rem;color:var(--muted);margin-top:10px}
+  .invoice-num{font-family:'Courier New',monospace;font-size:1.05rem;font-weight:800;color:#fff;background:var(--red);padding:8px 18px;border-radius:99px;letter-spacing:.03em}
+  .date-pill{font-size:.74rem;color:var(--muted);margin-top:8px;text-align:center}
+
+  .body-pad{padding:32px 40px}
+
   .meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px}
-  .meta-box{background:#f9f9f9;border:1px solid #eee;border-radius:10px;padding:16px}
-  .meta-label{font-size:.72rem;font-weight:700;color:#aaa;letter-spacing:.06em;margin-bottom:8px;text-transform:uppercase}
-  .meta-val{font-size:.88rem;font-weight:600;color:#333;line-height:1.6}
-  table{width:100%;border-collapse:collapse;margin-bottom:20px}
-  thead tr{background:#111;color:#fff}
-  thead th{padding:10px 14px;font-size:.78rem;font-weight:700;letter-spacing:.05em;text-align:right}
+  .meta-box{background:var(--bg-soft);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+  .meta-label{font-size:.7rem;font-weight:800;color:var(--red);letter-spacing:.1em;margin-bottom:10px;text-transform:uppercase;border-bottom:1px solid var(--line);padding-bottom:8px}
+  .meta-val{font-size:.88rem;font-weight:600;color:var(--ink);line-height:2}
+  .meta-val .lbl{color:var(--muted);font-weight:600;margin-left:4px}
+  .status-chip{display:inline-block;background:rgba(31,157,99,.1);color:var(--green);font-weight:800;font-size:.78rem;padding:3px 12px;border-radius:99px;margin-top:2px}
+
+  table{width:100%;border-collapse:collapse;margin-bottom:24px;border-radius:10px;overflow:hidden}
+  thead tr{background:var(--black);color:#fff}
+  thead th{padding:13px 14px;font-size:.76rem;font-weight:700;letter-spacing:.05em;text-align:right}
   thead th:not(:first-child){text-align:center}
-  .total-section{background:#f9f9f9;border:1px solid #eee;border-radius:10px;padding:16px;margin-bottom:28px}
-  .total-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:.88rem;color:#555}
-  .total-row.grand{font-size:1.1rem;font-weight:900;color:#FF3D00;border-top:2px solid #FF3D00;padding-top:12px;margin-top:4px}
-  .footer{text-align:center;color:#aaa;font-size:.75rem;margin-top:32px;padding-top:20px;border-top:1px solid #eee}
-  @media print{body{padding:0}.page{padding:24px}@page{margin:1cm}}
+  tbody tr:nth-child(even){background:var(--bg-soft)}
+  td{padding:12px 14px;border-bottom:1px solid var(--line);font-size:.85rem}
+  .td-product{display:flex;align-items:center;gap:10px}
+  .prod-thumb{width:42px;height:42px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+  .td-center{text-align:center}
+  .td-price{color:var(--red);font-weight:800}
+
+  .total-section{background:var(--bg-soft);border:1px solid var(--line);border-radius:12px;padding:20px 24px;margin-bottom:28px}
+  .total-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;font-size:.88rem;color:var(--muted)}
+  .total-row .val{color:var(--ink);font-weight:700}
+  .total-row.grand{font-size:1.25rem;font-weight:900;color:var(--red);border-top:2px solid var(--red);padding-top:14px;margin-top:6px}
+  .total-row.grand .val{color:var(--red)}
+
+  .footer{text-align:center;color:var(--muted);font-size:.78rem;padding:22px 40px 28px;border-top:1px solid var(--line)}
+  .footer .thanks{font-weight:800;color:var(--black);font-size:.95rem;margin-bottom:6px}
+  .footer .thanks span{color:var(--red)}
+
+  @media print{
+    *{print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important;color-adjust:exact!important}
+    html,body{padding:0;background:#fff;height:100%}
+    .page{border-radius:0;box-shadow:none;max-width:100%;border:none;height:100%}
+    @page{margin:0.7cm;size:A4}
+  }
 </style>
 </head><body>
 <div class="page">
+  <div class="watermark">PIT HOUSE</div>
   <div class="header">
-    <div>
-      <div class="brand">PIT <span>HOUSE</span></div>
-      <div class="invoice-title">كماليات وإكسسوارات السيارات</div>
-    </div>
-    <div style="text-align:left">
-      <div class="invoice-num">#${orderNum}</div>
-      <div style="font-size:.75rem;color:#aaa;margin-top:6px;text-align:center">${date}</div>
+    <div class="header-content">
+      <div>
+        <div class="brand">PIT <span>HOUSE</span></div>
+        <div class="doc-title">${esc(store.slogan || 'كماليات وإكسسوارات السيارات')}</div>
+        <div class="sender-info">${esc(store.address)}</div>
+      </div>
+      <div style="text-align:left">
+        <div class="invoice-num">فاتورة #${orderNum}</div>
+
+        <div class="date-pill">${date}</div>
+      </div>
     </div>
   </div>
 
+  <div class="body-pad">
   <div class="meta-grid">
     <div class="meta-box">
       <div class="meta-label">بيانات العميل</div>
       <div class="meta-val">
-        👤 ${o.customerName||o.name||'—'}<br/>
-        📞 ${o.phone||'—'}<br/>
-        📍 ${[o.governorateName,o.city,o.address].filter(Boolean).join(' — ')||'—'}
+        <span class="lbl">الاسم:</span> ${o.customerName||o.name||'—'}<br/>
+        <span class="lbl">الهاتف:</span> ${o.phone||'—'}<br/>
+        ${o.altPhone?`<span class="lbl">هاتف بديل:</span> ${o.altPhone}<br/>`:''}
+        <span class="lbl">العنوان:</span> ${[o.governorateName,o.city,o.address].filter(Boolean).join(' — ')||'—'}
       </div>
     </div>
     <div class="meta-box">
       <div class="meta-label">بيانات الطلب</div>
       <div class="meta-val">
-        💳 ${payLabel}<br/>
-        📅 ${date}<br/>
-        🚚 تم التوصيل ✅
+        <span class="lbl">طريقة الدفع:</span> ${payLabel}<br/>
+        ${o.paymentMethod==='cash_on_delivery' && o.codFee>0 ? `<span class="lbl">رسوم الدفع عند الاستلام:</span> ${Number(o.codFee).toLocaleString('ar-EG')} ج.م<br/>` : ''}
+        <span class="lbl">الشحن:</span> ${o.shippingCost>0 ? Number(o.shippingCost).toLocaleString('ar-EG')+' ج.م' : 'مجاني'}<br/>
+        <span class="lbl">التاريخ:</span> ${date}<br/>
+        <span class="status-chip">تم التوصيل</span>
       </div>
     </div>
   </div>
@@ -3676,16 +3752,20 @@ async function downloadInvoice(orderId){
   </table>
 
   <div class="total-section">
-    ${o.discount?`<div class="total-row"><span>الخصم (${o.promoCode||''})</span><span style="color:#00c853">- ${Number(o.discount).toLocaleString('ar-EG')} ج.م</span></div>`:''}
+    <div class="total-row"><span>إجمالي المنتجات</span><span class="val">${Number(o.originalPrice||0).toLocaleString('ar-EG')} ج.م</span></div>
+    ${o.discount?`<div class="total-row"><span>الخصم${o.promoCode?' ('+o.promoCode+')':''}</span><span class="val" style="color:var(--green)">- ${Number(o.discount).toLocaleString('ar-EG')} ج.م</span></div>`:''}
+    <div class="total-row"><span>الشحن</span><span class="val">${o.shippingCost>0?Number(o.shippingCost).toLocaleString('ar-EG')+' ج.م':'مجاني'}</span></div>
+    ${o.codFee>0?`<div class="total-row"><span>رسوم الدفع عند الاستلام</span><span class="val">${Number(o.codFee).toLocaleString('ar-EG')} ج.م</span></div>`:''}
     <div class="total-row grand">
       <span>الإجمالي النهائي</span>
-      <span>${Number(o.totalPrice||0).toLocaleString('ar-EG')} ج.م</span>
+      <span class="val">${Number(o.totalPrice||0).toLocaleString('ar-EG')} ج.م</span>
     </div>
+  </div>
   </div>
 
   <div class="footer">
-    شكراً لثقتك في Pit House 🚗⚡<br/>
-    هذه الفاتورة مرجع رسمي لطلبك — رقم الطلب: #${orderNum}
+    <div class="thanks">شكراً لثقتك في ${esc(store.name||'Pit House')}</div>
+    هذه الفاتورة مرجع رسمي لطلبك — رقم الطلب #${orderNum}
   </div>
 </div>
 </body></html>`;
@@ -3697,101 +3777,173 @@ async function downloadWarranty(orderId){
   showToast('جاري تجهيز شهادة الضمان...','info');
   const o = await getOrderById(orderId);
   if(!o){ showToast('تعذر تحميل بيانات الطلب','error'); return; }
+  const store = await getStoreSettings();
 
   const deliveredDate = o.deliveredAt ? new Date(o.deliveredAt) : (o.updatedAt ? new Date(o.updatedAt) : new Date());
   const expiryDate = new Date(deliveredDate);
   expiryDate.setFullYear(expiryDate.getFullYear() + 1);
   const fmtDate = d => d.toLocaleDateString('ar-EG',{year:'numeric',month:'long',day:'numeric'});
   const orderNum = o.id.slice(-8).toUpperCase();
+  const payMap = {'vodafone_cash':'فودافون كاش','instapay':'إنستاباي','cash_on_delivery':'الدفع عند الاستلام'};
+  const payLabel = payMap[o.paymentMethod] || 'الدفع عند الاستلام';
+  const orderDate = o.createdAt ? new Date(o.createdAt).toLocaleDateString('ar-EG',{year:'numeric',month:'long',day:'numeric'}) : '—';
 
   const productsHTML = (o.items||[]).map(it=>`
-    <div style="display:flex;align-items:center;gap:14px;background:#f9f9f9;border:1px solid #eee;border-radius:10px;padding:14px 16px;margin-bottom:10px">
-      ${it.image?`<img src="${it.image}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;flex-shrink:0" onerror="this.style.display='none'"/>`:'<div style="width:60px;height:60px;border-radius:8px;background:#e0e0e0;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0">🚗</div>'}
-      <div style="flex:1">
-        <div style="font-weight:800;font-size:.95rem;color:#111;margin-bottom:4px">${it.name||'—'}</div>
-        ${it.description?`<div style="font-size:.78rem;color:#888;line-height:1.5;margin-bottom:4px">${it.description}</div>`:''}
-        <div style="font-size:.82rem;color:#FF3D00;font-weight:700">الكمية: ${it.qty} × ${it.price?Number(it.price).toLocaleString('ar-EG'):'—'} ج.م</div>
+    <div class="prod-card">
+      ${it.image?`<img src="${it.image}" class="prod-img" onerror="this.style.display='none'"/>`:'<div class="prod-img prod-img-empty"></div>'}
+      <div class="prod-info">
+        <div class="prod-name">${it.name||'—'}</div>
+        ${it.description?`<div class="prod-desc">${it.description}</div>`:''}
+        <div class="prod-qty">الكمية: ${it.qty} × ${it.price?Number(it.price).toLocaleString('ar-EG'):'—'} ج.م</div>
       </div>
     </div>`).join('');
 
   const html = `<!DOCTYPE html><html lang="ar" dir="rtl">
 <head><meta charset="UTF-8"/><title>شهادة ضمان #${orderNum} — Pit House</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
 <style>
+  :root{
+    --red:#E63946; --red-deep:#C5283D;
+    --black:#1A1D23;
+    --gold:#D4A24E;
+    --emerald:#0E7A52;
+    --ink:#1C2530; --muted:#8A95A5;
+    --line:#E7EBF1; --bg-soft:#F7F8FA;
+  }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Cairo',sans-serif;background:#fff;color:#111;padding:32px;direction:rtl}
-  .page{max-width:720px;margin:0 auto;background:#fff;padding:40px;position:relative}
-  .watermark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:7rem;font-weight:900;color:rgba(0,230,118,.05);letter-spacing:.1em;white-space:nowrap;pointer-events:none;user-select:none;z-index:0}
-  .content{position:relative;z-index:1}
-  .header{text-align:center;padding-bottom:28px;border-bottom:3px solid #00E676;margin-bottom:28px}
-  .shield{font-size:4rem;margin-bottom:8px}
-  .brand{font-size:1.5rem;font-weight:900;letter-spacing:.05em}
-  .brand span{color:#FF3D00}
-  .cert-title{font-size:1.5rem;font-weight:900;color:#00E676;margin-top:12px;letter-spacing:.04em}
-  .cert-sub{font-size:.85rem;color:#888;margin-top:6px}
-  .order-badge{display:inline-block;font-family:monospace;font-size:.9rem;font-weight:700;color:#FFB300;background:rgba(255,179,0,.1);border:1px solid rgba(255,179,0,.25);padding:5px 16px;border-radius:99px;margin-top:10px}
-  .dates-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px}
-  .date-box{border-radius:10px;padding:16px;text-align:center}
-  .date-box.start{background:rgba(33,150,243,.06);border:1px solid rgba(33,150,243,.2)}
-  .date-box.end{background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.2)}
-  .date-label{font-size:.72rem;font-weight:700;color:#aaa;letter-spacing:.05em;margin-bottom:6px}
-  .date-val{font-size:.95rem;font-weight:800;color:#111}
-  .section-title{font-size:.85rem;font-weight:700;color:#aaa;letter-spacing:.06em;margin-bottom:12px;display:flex;align-items:center;gap:6px}
-  .coverage-list{background:#f9f9f9;border:1px solid #eee;border-radius:10px;padding:16px 20px;margin-bottom:24px}
-  .coverage-item{display:flex;align-items:flex-start;gap:10px;padding:6px 0;font-size:.87rem;color:#444;border-bottom:1px solid #f0f0f0}
+  *{print-color-adjust:exact;-webkit-print-color-adjust:exact;color-adjust:exact}
+  body{font-family:'Cairo',sans-serif;background:#EEF1F6;color:var(--ink);padding:32px;direction:rtl;font-size:14px}
+  .page{max-width:760px;margin:0 auto;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 10px 40px rgba(26,29,35,.10);position:relative;border:1px solid var(--line)}
+  .watermark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-28deg);font-size:6rem;font-weight:900;color:rgba(230,57,70,.045);letter-spacing:.1em;white-space:nowrap;pointer-events:none;user-select:none;z-index:0}
+
+  .header{background:linear-gradient(135deg,var(--black) 0%,#0E1014 100%);color:#fff;text-align:center;padding:22px 36px;position:relative;overflow:hidden;border-bottom:4px solid var(--red)}
+  .header::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 55%,rgba(230,57,70,.18) 100%)}
+  .header-content{position:relative;z-index:1}
+  .brand{font-size:1.4rem;font-weight:900;letter-spacing:.05em;color:#fff}
+  .brand span{color:var(--red)}
+  .cert-title{font-size:1.35rem;font-weight:900;color:#fff;margin-top:8px;letter-spacing:.04em}
+  .cert-sub{font-size:.76rem;color:rgba(255,255,255,.65);margin-top:5px}
+  .sender-info{font-size:.7rem;color:rgba(255,255,255,.5);margin-top:5px}
+  .order-badge{display:inline-block;font-family:'Courier New',monospace;font-size:.82rem;font-weight:800;color:#fff;background:var(--red);padding:5px 16px;border-radius:99px;margin-top:9px;letter-spacing:.03em}
+
+  .content{position:relative;z-index:1;padding:22px 36px}
+
+  .dates-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+  .date-box{border-radius:10px;padding:12px;text-align:center;border:1px solid var(--line)}
+  .date-box.start{background:var(--bg-soft);border-color:var(--line)}
+  .date-box.end{background:rgba(230,57,70,.05);border-color:rgba(230,57,70,.18)}
+  .date-label{font-size:.65rem;font-weight:800;color:var(--muted);letter-spacing:.08em;margin-bottom:5px;text-transform:uppercase}
+  .date-val{font-size:.92rem;font-weight:800;color:var(--ink)}
+  .date-box.end .date-val{color:var(--red-deep)}
+
+  .info-box{background:var(--bg-soft);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin-bottom:14px}
+  .info-label{font-size:.65rem;font-weight:800;color:var(--red);letter-spacing:.1em;margin-bottom:8px;text-transform:uppercase;border-bottom:1px solid var(--line);padding-bottom:6px}
+  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .info-grid .full{grid-column:1/-1}
+  .info-item-label{font-size:.65rem;color:var(--muted);margin-bottom:2px}
+  .info-item-val{font-size:.85rem;font-weight:800;color:var(--ink)}
+
+  .section-title{font-size:.72rem;font-weight:800;color:var(--red);letter-spacing:.1em;margin-bottom:10px;text-transform:uppercase}
+
+  .prod-card{display:flex;align-items:center;gap:12px;background:var(--bg-soft);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:8px}
+  .prod-img{width:46px;height:46px;object-fit:cover;border-radius:8px;flex-shrink:0;border:1px solid var(--line)}
+  .prod-img-empty{background:#e3e6ea}
+  .prod-info{flex:1}
+  .prod-name{font-weight:800;font-size:.86rem;color:var(--ink);margin-bottom:2px}
+  .prod-desc{font-size:.72rem;color:var(--muted);line-height:1.4;margin-bottom:2px}
+  .prod-qty{font-size:.76rem;color:var(--red);font-weight:800}
+
+  .coverage-list{background:var(--bg-soft);border:1px solid var(--line);border-radius:10px;padding:2px 16px;margin-bottom:16px;margin-top:10px}
+  .coverage-item{display:flex;align-items:flex-start;gap:8px;padding:7px 0;font-size:.8rem;color:var(--ink);border-bottom:1px solid var(--line)}
   .coverage-item:last-child{border-bottom:none}
-  .coverage-item::before{content:'✓';color:#00E676;font-weight:900;flex-shrink:0;margin-top:1px}
-  .seal-section{text-align:center;padding:20px;background:linear-gradient(135deg,rgba(255,61,0,.04),rgba(0,230,118,.04));border:2px solid #e0e0e0;border-radius:12px;margin-top:24px}
-  .seal-text{font-size:1rem;font-weight:900;color:#111;margin-bottom:4px}
-  .seal-sub{font-size:.78rem;color:#aaa}
-  .footer{text-align:center;color:#bbb;font-size:.72rem;margin-top:24px;padding-top:16px;border-top:1px solid #f0f0f0}
-  @media print{body{padding:0}.page{padding:24px}@page{margin:1cm}}
+  .coverage-item::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--emerald);flex-shrink:0;margin-top:5px}
+
+  .seal-section{text-align:center;padding:14px;background:linear-gradient(135deg,rgba(230,57,70,.06),rgba(26,29,35,.04));border:2px solid rgba(212,162,78,.3);border-radius:12px;margin-top:4px}
+  .seal-text{font-size:.95rem;font-weight:900;color:var(--black);margin-bottom:3px;letter-spacing:.03em}
+  .seal-text span{color:var(--red)}
+  .seal-sub{font-size:.74rem;color:var(--muted)}
+
+  .footer{text-align:center;color:var(--muted);font-size:.7rem;padding:12px 36px 16px;border-top:1px solid var(--line)}
+  .footer .store-name{font-weight:800;color:var(--black);font-size:.82rem;margin-bottom:3px}
+  .footer .store-name span{color:var(--red)}
+
+  @media print{
+    *{print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important;color-adjust:exact!important}
+    html,body{padding:0;background:#fff;height:100%}
+    .page{border-radius:0;box-shadow:none;max-width:100%;border:none;height:100%}
+    @page{margin:0.7cm;size:A4}
+  }
 </style>
 </head><body>
 <div class="page">
   <div class="watermark">WARRANTED</div>
-  <div class="content">
-    <div class="header">
-      <div class="shield">🛡️</div>
+  <div class="header">
+    <div class="header-content">
       <div class="brand">PIT <span>HOUSE</span></div>
       <div class="cert-title">شهادة ضمان رسمية</div>
-      <div class="cert-sub">كماليات وإكسسوارات السيارات — ضمان شامل لمدة سنة كاملة</div>
-      <div class="order-badge">#${orderNum}</div>
+      <div class="cert-sub">${esc(store.slogan || 'كماليات وإكسسوارات السيارات')} — ضمان شامل لمدة سنة كاملة</div>
+      <div class="sender-info">${esc(store.address)}</div>
+      <div class="order-badge">طلب #${orderNum}</div>
     </div>
+  </div>
 
+
+  <div class="content">
     <div class="dates-row">
       <div class="date-box start">
-        <div class="date-label">📅 بداية الضمان</div>
+        <div class="date-label">بداية الضمان</div>
         <div class="date-val">${fmtDate(deliveredDate)}</div>
       </div>
       <div class="date-box end">
-        <div class="date-label">📅 انتهاء الضمان</div>
+        <div class="date-label">انتهاء الضمان</div>
         <div class="date-val">${fmtDate(expiryDate)}</div>
       </div>
     </div>
 
-    <div style="background:#f9f9f9;border:1px solid #eee;border-radius:10px;padding:16px 20px;margin-bottom:24px">
-      <div style="font-size:.72rem;font-weight:700;color:#aaa;letter-spacing:.06em;margin-bottom:10px;text-transform:uppercase">👤 بيانات العميل</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <div class="info-box">
+      <div class="info-label">بيانات العميل</div>
+      <div class="info-grid">
         <div>
-          <div style="font-size:.72rem;color:#bbb;margin-bottom:3px">الاسم</div>
-          <div style="font-size:.92rem;font-weight:800;color:#111">${o.customerName||o.name||'—'}</div>
+          <div class="info-item-label">الاسم</div>
+          <div class="info-item-val">${o.customerName||o.name||'—'}</div>
         </div>
         <div>
-          <div style="font-size:.72rem;color:#bbb;margin-bottom:3px">رقم الهاتف</div>
-          <div style="font-size:.92rem;font-weight:800;color:#111;direction:ltr;text-align:right">${o.phone||'—'}</div>
+          <div class="info-item-label">رقم الهاتف</div>
+          <div class="info-item-val" style="direction:ltr;text-align:right">${o.phone||'—'}</div>
         </div>
-        ${o.address?`<div style="grid-column:1/-1">
-          <div style="font-size:.72rem;color:#bbb;margin-bottom:3px">العنوان</div>
-          <div style="font-size:.88rem;font-weight:600;color:#333">${o.address}</div>
+        ${o.address?`<div class="full">
+          <div class="info-item-label">العنوان</div>
+          <div class="info-item-val" style="font-weight:600;font-size:.88rem">${o.address}</div>
         </div>`:''}
       </div>
     </div>
 
-    <div class="section-title">🛒 المنتجات المشمولة بالضمان</div>
+    <div class="info-box">
+      <div class="info-label">بيانات الطلب</div>
+      <div class="info-grid">
+        <div>
+          <div class="info-item-label">تاريخ الطلب</div>
+          <div class="info-item-val">${orderDate}</div>
+        </div>
+        <div>
+          <div class="info-item-label">طريقة الدفع</div>
+          <div class="info-item-val">${payLabel}</div>
+        </div>
+        <div>
+          <div class="info-item-label">الشحن</div>
+          <div class="info-item-val">${o.shippingCost>0?Number(o.shippingCost).toLocaleString('ar-EG')+' ج.م':'مجاني'}</div>
+        </div>
+        ${o.paymentMethod==='cash_on_delivery' && o.codFee>0 ? `<div>
+          <div class="info-item-label">رسوم الدفع عند الاستلام</div>
+          <div class="info-item-val">${Number(o.codFee).toLocaleString('ar-EG')} ج.م</div>
+        </div>` : ''}
+      </div>
+    </div>
+
+    <div class="section-title">المنتجات المشمولة بالضمان</div>
     ${productsHTML}
 
-    <div class="section-title" style="margin-top:20px">✅ تغطية الضمان</div>
+    <div class="section-title" style="margin-top:14px">تغطية الضمان</div>
     <div class="coverage-list">
       <div class="coverage-item">عيوب التصنيع والمواد خلال فترة الضمان</div>
       <div class="coverage-item">أعطال الأداء الناتجة عن عيب في المنتج</div>
@@ -3800,14 +3952,14 @@ async function downloadWarranty(orderId){
     </div>
 
     <div class="seal-section">
-      <div class="seal-text">🔐 موثق من Pit House</div>
-      <div class="seal-sub">رقم الطلب: #${orderNum} — العميل: ${o.customerName||o.name||'—'} — 📞 ${o.phone||'—'}</div>
+      <div class="seal-text">موثّق من Pit <span>House</span></div>
+      <div class="seal-sub">رقم الطلب #${orderNum} — العميل: ${o.customerName||o.name||'—'} — ${o.phone||'—'}</div>
     </div>
+  </div>
 
-    <div class="footer">
-      Pit House — كماليات وإكسسوارات السيارات 🚗⚡<br/>
-      هذه الشهادة مرجع رسمي للضمان — احتفظ بها للرجوع إليها
-    </div>
+  <div class="footer">
+    <div class="store-name">${esc(store.name||'Pit House')} — ${esc(store.slogan || 'كماليات وإكسسوارات السيارات')}</div>
+    هذه الشهادة مرجع رسمي للضمان — احتفظ بها للرجوع إليها
   </div>
 </div>
 </body></html>`;
@@ -4500,6 +4652,7 @@ const _i18n = {
     checkoutNewAddress: '— أو ادخل عنوان جديد —',
     checkoutLabelName: 'الاسم بالكامل *',
     checkoutLabelPhone: 'رقم الموبايل *',
+    checkoutLabelAltPhone: 'رقم تليفون بديل (اختياري)',
     checkoutLabelAddress: 'العنوان بالتفصيل *',
     checkoutLabelNotes: 'ملاحظات إضافية (اختياري)',
     checkoutPlaceholderName: 'مثال: محمد أحمد',
@@ -4507,6 +4660,8 @@ const _i18n = {
     checkoutPlaceholderNotes: 'أي تعليمات للتوصيل...',
     checkoutErrorName: 'من فضلك ادخل اسمك',
     checkoutErrorPhone: 'ادخل رقم موبايل صحيح',
+    checkoutErrorAltPhone: 'ادخل رقم موبايل صحيح',
+    checkoutPlaceholderAltPhone: '01xxxxxxxxx',
     checkoutErrorAddress: 'من فضلك ادخل عنوانك',
     checkoutSectionPayment: '💳 طريقة الدفع',
     payVFLabel: 'فودافون كاش',
@@ -4548,6 +4703,7 @@ const _i18n = {
     orderStepDelivered: 'تم التوصيل',
     orderMetaAddress: '📍 العنوان',
     orderMetaPhone: '📞 الموبايل',
+    orderMetaAltPhone: '📞 تليفون بديل',
     orderMetaPayment: '💳 الدفع',
     orderMetaPromo: '🎟️ كود الخصم',
     orderMetaTotal: 'الإجمالي',
@@ -4651,6 +4807,7 @@ const _i18n = {
     checkoutNewAddress: '— or enter a new address —',
     checkoutLabelName: 'Full Name *',
     checkoutLabelPhone: 'Mobile Number *',
+    checkoutLabelAltPhone: 'Alternative Phone (optional)',
     checkoutLabelAddress: 'Full Address *',
     checkoutLabelNotes: 'Additional Notes (optional)',
     checkoutPlaceholderName: 'e.g. John Smith',
@@ -4658,6 +4815,8 @@ const _i18n = {
     checkoutPlaceholderNotes: 'Any delivery instructions...',
     checkoutErrorName: 'Please enter your name',
     checkoutErrorPhone: 'Enter a valid mobile number',
+    checkoutErrorAltPhone: 'Enter a valid mobile number',
+    checkoutPlaceholderAltPhone: '01xxxxxxxxx',
     checkoutErrorAddress: 'Please enter your address',
     checkoutSectionPayment: '💳 Payment Method',
     payVFLabel: 'Vodafone Cash',
@@ -4699,6 +4858,7 @@ const _i18n = {
     orderStepDelivered: 'Delivered',
     orderMetaAddress: '📍 Address',
     orderMetaPhone: '📞 Mobile',
+    orderMetaAltPhone: '📞 Alt. Phone',
     orderMetaPayment: '💳 Payment',
     orderMetaPromo: '🎟️ Discount Code',
     orderMetaTotal: 'Total',
@@ -5104,9 +5264,11 @@ function buildWAMessage(paymentType){
   msg += '\n';
   const _waName = document.getElementById('c-name').value.trim();
   const _waPhone = document.getElementById('c-phone').value.trim();
+  const _waAltPhone = document.getElementById('c-alt-phone').value.trim();
   const _waAddress = document.getElementById('c-address').value.trim();
   msg += `👤 *الاسم:* ${_waName}\n`;
   msg += `📱 *الموبايل:* ${_waPhone}\n`;
+  if(_waAltPhone) msg += `📞 *تليفون بديل:* ${_waAltPhone}\n`;
   if(govName) msg += `🗺️ *المحافظة:* ${govName}\n`;
   if(cityName) msg += `📍 *المدينة:* ${cityName}\n`;
   msg += `🏠 *العنوان:* ${_waAddress}\n`;
