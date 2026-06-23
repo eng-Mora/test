@@ -166,12 +166,16 @@ document.addEventListener('DOMContentLoaded', async function () {
         // ── جهاز مختلف — نسجل المحاولة المرفوضة في blockedAttempts ──
         try {
             const ip = await getClientIp();
+            // مقارنة IP بآخر دخول ناجح — مؤشر استرشادي بس، ما بيأثرش على القرار
+            const lastIp = student && student.lastSuccessIp ? student.lastSuccessIp : null;
+            const sameNetwork = !!(lastIp && ip && lastIp === ip);
             await push(ref(db, `blockedAttempts/${username}`), {
                 at: Date.now(),
                 ip: ip,
                 deviceType: getDeviceType(),
                 browser: getBrowserName(),
                 studentName: student && student.name ? student.name : '',
+                sameNetwork: sameNetwork,
                 read: false
             });
         } catch (e) { /* non-blocking */ }
@@ -226,6 +230,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                         at: now, name: studentFromUrl.name, ip,
                         deviceType: getDeviceType(), browser: getBrowserName()
                     });
+                    set(ref(db, `students/${urlUser}/lastSuccessIp`), ip);
                 });
                 localStorage.setItem('isLoggedIn', 'true');
                 localStorage.setItem('username', urlUser);
@@ -342,6 +347,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                     at: now, name: student.name, ip,
                     deviceType: getDeviceType(), browser: getBrowserName()
                 });
+                set(ref(db, `students/${username}/lastSuccessIp`), ip);
             });
             // ─────────────────────────────────────────────────────
             await loadVideoContent(student.videoCode, username, student);
