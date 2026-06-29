@@ -182,22 +182,38 @@ document.addEventListener('DOMContentLoaded', async function () {
         return { ok: false }; // جهاز مختلف عن المسجل
     }
 
+    // ── تحديد مصدر القفل الصحيح لكود معين: students لو موجود فيها، وإلا reviewDevices ──
+    async function getReviewLockPath(code) {
+        try {
+            const snap = await get(ref(db, `students/${code}`));
+            if (snap.exists()) return { path: `students/${code}`, isStudent: true, data: snap.val() };
+        } catch (e) { /* non-blocking */ }
+        return { path: `reviewDevices/${code}`, isStudent: false, data: null };
+    }
+
     // ── Device Lock لكودات المراجعة (reviews) — نفس منطق الطلاب بالضبط ──
-    // بما إن أكواد المراجعة مش لها node مستقل في reviews، نخزن الجهاز
-    // في node منفصل: reviewDevices/{code}
+    // مصدر واحد للحقيقة: لو الكود ده أصلاً كود طالب موجود في students،
+    // نستخدم students/{code}/deviceId (نفس مكان قفل الطالب العادي)
+    // عشان ميبقاش فيه جهازين منفصلين لنفس الكود. غير كده، نستخدم
+    // node مستقل: reviewDevices/{code} (لأكواد المراجعة المستقلة بدون طالب)
     async function checkReviewDeviceLock(code, reviewInfo) {
         const myDeviceId = getOrCreateDeviceId();
-        let regData = null;
-        try {
-            const snap = await get(ref(db, `reviewDevices/${code}`));
-            regData = snap.exists() ? snap.val() : null;
-        } catch (e) { regData = null; }
+
+        const lock = await getReviewLockPath(code);
+        const lockPath = lock.path;
+        let regData = lock.data;
+        if (!lock.isStudent) {
+            try {
+                const snap = await get(ref(db, lockPath));
+                regData = snap.exists() ? snap.val() : null;
+            } catch (e) { regData = null; }
+        }
 
         const registeredId = regData && regData.deviceId;
 
         if (!registeredId) {
             // أول مرة يتسجل فيها جهاز لهذا الكود — نسجله ونسمح
-            try { await set(ref(db, `reviewDevices/${code}/deviceId`), myDeviceId); } catch (e) { /* non-blocking */ }
+            try { await set(ref(db, `${lockPath}/deviceId`), myDeviceId); } catch (e) { /* non-blocking */ }
             return { ok: true };
         }
         if (registeredId === myDeviceId) {
@@ -294,12 +310,13 @@ document.addEventListener('DOMContentLoaded', async function () {
                 localStorage.setItem('isLoggedIn', 'true');
                 localStorage.setItem('username', urlUser);
                 localStorage.setItem('loginType', 'review');
-                getClientIp().then(ip => {
+                getClientIp().then(async ip => {
                     push(ref(db, `loginLogs/${urlUser}`), {
                         at: Date.now(), name: rvUrl.desc || 'مراجعة', ip,
                         deviceType: getDeviceType(), browser: getBrowserName()
                     });
-                    set(ref(db, `reviewDevices/${urlUser}/lastSuccessIp`), ip);
+                    const lock = await getReviewLockPath(urlUser);
+                    set(ref(db, `${lock.path}/lastSuccessIp`), ip);
                 });
                 await loadReviewContent(rvUrl, urlUser);
                 showMain();
@@ -388,12 +405,13 @@ document.addEventListener('DOMContentLoaded', async function () {
             localStorage.setItem('isLoggedIn', 'true');
             localStorage.setItem('username', username);
             localStorage.setItem('loginType', 'review');
-            getClientIp().then(ip => {
+            getClientIp().then(async ip => {
                 push(ref(db, `loginLogs/${username}`), {
                     at: Date.now(), name: rv.desc || 'مراجعة', ip,
                     deviceType: getDeviceType(), browser: getBrowserName()
                 });
-                set(ref(db, `reviewDevices/${username}/lastSuccessIp`), ip);
+                const lock = await getReviewLockPath(username);
+                set(ref(db, `${lock.path}/lastSuccessIp`), ip);
             });
             await loadReviewContent(rv, username);
             showMain();
