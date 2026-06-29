@@ -893,189 +893,171 @@ table { width: 100%; display: block; overflow-x: auto; }
 ul, ol { padding-right: 20px; }
 /* ── Tasks Section ── */
 /* ══════════════════════════════════════════
-   📋 TASKS SECTION — REDESIGNED
+   📋 TASKS SECTION — ICON STYLE + NOTIFICATION
 ══════════════════════════════════════════ */
 .tasks-section {
     margin: 2rem auto;
     max-width: 700px;
-    background: linear-gradient(135deg, rgba(99,102,241,0.12) 0%, rgba(139,92,246,0.08) 100%);
-    border: 1px solid rgba(139,92,246,0.35);
+    background: rgba(15, 13, 28, 0.6);
+    border: 1px solid rgba(139,92,246,0.25);
     border-radius: 20px;
     padding: 0;
-    overflow: hidden;
-    box-shadow: 0 8px 32px rgba(99,102,241,0.15), 0 2px 8px rgba(0,0,0,0.3);
+    overflow: visible;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+    position: relative;
 }
 
 .tasks-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1.1rem 1.5rem;
-    background: linear-gradient(90deg, rgba(99,102,241,0.25) 0%, rgba(139,92,246,0.18) 100%);
-    border-bottom: 1px solid rgba(139,92,246,0.25);
+    padding: 1.1rem 1.4rem;
+    background: linear-gradient(90deg, rgba(99,102,241,0.2) 0%, rgba(139,92,246,0.12) 100%);
+    border-bottom: 1px solid rgba(139,92,246,0.2);
+    border-radius: 20px 20px 0 0;
     margin-bottom: 0;
 }
 
 .tasks-header h3 {
     margin: 0;
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 700;
-    color: #e0d9ff;
-    letter-spacing: 0.01em;
+    color: #c4b5fd;
     display: flex;
     align-items: center;
-    gap: .4rem;
+    gap: .5rem;
 }
 
 .tasks-progress-badge {
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    color: #fff;
-    border: none;
+    background: rgba(99,102,241,0.25);
+    color: #a5b4fc;
+    border: 1px solid rgba(99,102,241,0.4);
     border-radius: 99px;
-    padding: .3rem .9rem;
-    font-size: .83rem;
+    padding: .25rem .85rem;
+    font-size: .8rem;
     font-weight: 700;
-    transition: background .4s, transform .2s;
-    box-shadow: 0 2px 10px rgba(99,102,241,0.45);
-    letter-spacing: .02em;
+    transition: all .4s;
+    letter-spacing: .03em;
 }
 
 .tasks-progress-badge.all-done {
-    background: linear-gradient(135deg, #16a34a, #22c55e);
-    box-shadow: 0 2px 14px rgba(34,197,94,0.5);
-    animation: badge-pop .35s ease;
+    background: rgba(34,197,94,0.2);
+    color: #86efac;
+    border-color: rgba(34,197,94,0.45);
 }
 
 @keyframes badge-pop {
-    0%   { transform: scale(1); }
-    50%  { transform: scale(1.18); }
-    100% { transform: scale(1); }
+    0%,100% { transform: scale(1); }
+    50%      { transform: scale(1.2); }
 }
 
+/* ── قائمة المهام ── */
 .tasks-list {
     display: flex;
     flex-direction: column;
     gap: 0;
-    padding: .75rem 1rem 1rem;
+    padding: .8rem .9rem;
 }
 
 /* ── كل مهمة ── */
 .task-item {
     display: flex;
     align-items: center;
-    gap: .85rem;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 12px;
-    padding: .85rem 1.1rem;
+    gap: 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: .6rem .3rem;
     cursor: pointer;
-    transition: background .2s, border-color .2s, transform .15s;
+    transition: background .15s;
     position: relative;
-    margin-bottom: .55rem;
+    margin-bottom: 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
     user-select: none;
 }
 
-.task-item:last-child { margin-bottom: 0; }
+.task-item:last-child { border-bottom: none; }
 
-.task-item:hover {
-    background: rgba(139,92,246,0.12);
-    border-color: rgba(139,92,246,0.3);
-    transform: translateX(-2px);
-}
+.task-item:hover { background: rgba(139,92,246,0.06); border-radius: 10px; }
 
-/* ── مهمة منجزة ── */
-.task-item.done {
-    background: rgba(34,197,94,0.07);
-    border-color: rgba(34,197,94,0.35);
-}
-
-.task-item.done:hover {
-    background: rgba(34,197,94,0.12);
-    border-color: rgba(34,197,94,0.5);
-    transform: translateX(-2px);
-}
-
-.task-item.done .task-text {
-    text-decoration: line-through;
-    color: #6b7280;
-}
-
-/* ── Checkbox مخصص ── */
-.task-checkbox {
-    appearance: none;
-    -webkit-appearance: none;
-    width: 22px;
-    height: 22px;
-    border: 2px solid rgba(139,92,246,0.6);
-    border-radius: 6px;
+/* ── أيقونة الحالة (الدائرة) ── */
+.task-status-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid rgba(139,92,246,0.5);
     background: rgba(99,102,241,0.08);
-    cursor: pointer;
-    flex-shrink: 0;
-    position: relative;
-    transition: border-color .2s, background .2s, box-shadow .2s;
-}
-
-.task-checkbox:checked {
-    background: linear-gradient(135deg, #22c55e, #16a34a);
-    border-color: #22c55e;
-    box-shadow: 0 0 10px rgba(34,197,94,0.4);
-}
-
-.task-checkbox:checked::after {
-    content: '✓';
-    position: absolute;
-    inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #fff;
-    font-size: 13px;
-    font-weight: 900;
-    line-height: 22px;
-    text-align: center;
-    width: 100%;
+    flex-shrink: 0;
+    margin-left: 1rem;        /* RTL: space between icon and text */
+    transition: all .3s cubic-bezier(.34,1.56,.64,1);
+    position: relative;
 }
 
-.task-checkbox:hover:not(:checked) {
-    border-color: rgba(139,92,246,0.9);
-    box-shadow: 0 0 8px rgba(99,102,241,0.3);
+.task-status-icon::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(139,92,246,0.5);
+    transition: all .3s;
+}
+
+/* المهمة المنجزة — الدائرة تتحول لأخضر */
+.task-item.done .task-status-icon {
+    border-color: #22c55e;
+    background: rgba(34,197,94,0.15);
+    box-shadow: 0 0 12px rgba(34,197,94,0.3);
+    transform: scale(1.08);
+}
+
+.task-item.done .task-status-icon::after {
+    content: '✓';
+    width: auto;
+    height: auto;
+    background: transparent;
+    color: #22c55e;
+    font-size: 14px;
+    font-weight: 900;
+    border-radius: 0;
 }
 
 /* ── نص المهمة ── */
 .task-text {
     flex: 1;
-    font-size: .97rem;
+    font-size: .95rem;
     color: #d1d5db;
     line-height: 1.5;
     font-family: 'Tajawal', sans-serif;
-    transition: color .2s;
+    transition: color .25s;
 }
 
-/* ── أيقونة الإنجاز على اليسار ── */
-.task-check-icon {
-    color: #22c55e;
-    font-weight: 900;
+.task-item.done .task-text {
+    text-decoration: line-through;
+    color: #4b5563;
+}
+
+/* ── الـ checkbox (مخفي بالكامل) ── */
+.task-checkbox {
+    position: absolute;
     opacity: 0;
-    transform: scale(0.7);
-    transition: opacity .25s, transform .25s;
-    font-size: 1rem;
-    text-shadow: 0 0 8px rgba(34,197,94,0.6);
-    flex-shrink: 0;
+    width: 0; height: 0;
+    pointer-events: none;
 }
 
-.task-item.done .task-check-icon {
-    opacity: 1;
-    transform: scale(1);
-}
+/* ── أيقونة الـ check النهائية على اليمين (مخفية) ── */
+.task-check-icon { display: none; }
 
-/* ── شريط تقدم تحت الـ list ── */
+/* ── شريط التقدم ── */
 .tasks-progress-bar-wrap {
-    padding: 0 1rem .9rem;
+    padding: 0 .9rem .9rem;
 }
 
 .tasks-progress-bar-bg {
-    height: 6px;
-    background: rgba(255,255,255,0.07);
+    height: 4px;
+    background: rgba(255,255,255,0.06);
     border-radius: 99px;
     overflow: hidden;
 }
@@ -1088,13 +1070,81 @@ ul, ol { padding-right: 20px; }
     min-width: 0;
 }
 
+/* ══════════════════════════════════════════
+   🎉 COMPLETION NOTIFICATION
+══════════════════════════════════════════ */
+.tasks-done-toast {
+    position: fixed;
+    bottom: -120px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    background: linear-gradient(135deg, #0f172a 0%, #1a1035 100%);
+    border: 1px solid rgba(34,197,94,0.5);
+    border-radius: 18px;
+    padding: 1rem 1.5rem 1rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-width: 280px;
+    max-width: 340px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(34,197,94,0.15);
+    transition: bottom .55s cubic-bezier(.34,1.4,.64,1);
+    pointer-events: none;
+}
+
+.tasks-done-toast.show {
+    bottom: 28px;
+    pointer-events: auto;
+}
+
+.tasks-done-toast-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #16a34a, #22c55e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+    box-shadow: 0 0 20px rgba(34,197,94,0.4);
+    animation: toast-pulse 2s ease infinite;
+}
+
+@keyframes toast-pulse {
+    0%,100% { box-shadow: 0 0 20px rgba(34,197,94,0.4); }
+    50%      { box-shadow: 0 0 30px rgba(34,197,94,0.7); }
+}
+
+.tasks-done-toast-body {
+    flex: 1;
+}
+
+.tasks-done-toast-title {
+    font-family: 'Tajawal', sans-serif;
+    font-size: .82rem;
+    font-weight: 700;
+    color: #86efac;
+    margin-bottom: .2rem;
+    letter-spacing: .02em;
+}
+
+.tasks-done-toast-msg {
+    font-family: 'Tajawal', sans-serif;
+    font-size: .95rem;
+    font-weight: 600;
+    color: #f0fdf4;
+    line-height: 1.4;
+}
+
 /* ── موبايل ── */
 @media (max-width: 600px) {
     .tasks-section { margin: 1.2rem .75rem; border-radius: 16px; }
-    .tasks-header   { padding: .9rem 1.1rem; }
-    .tasks-header h3 { font-size: 1rem; }
-    .tasks-list     { padding: .6rem .75rem .85rem; }
-    .task-item      { padding: .75rem .85rem; gap: .7rem; }
-    .task-text      { font-size: .91rem; }
-    .task-checkbox  { width: 20px; height: 20px; border-radius: 5px; }
+    .tasks-list     { padding: .6rem .6rem; }
+    .task-item      { padding: .55rem .2rem; }
+    .task-text      { font-size: .9rem; }
+    .task-status-icon { width: 28px; height: 28px; margin-left: .75rem; }
+    .tasks-done-toast { min-width: 260px; max-width: 90vw; bottom: -110px; }
+    .tasks-done-toast.show { bottom: 20px; }
 }
