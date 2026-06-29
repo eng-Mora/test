@@ -692,9 +692,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             } catch (e) { /* non-blocking */ }
         };
 
-        // ── toggle task checkbox ──────────────────────────────
-        window._toggleTask = function(taskIdx, checked, rcId) {
-            if (!loggedUser) return;
         // ── Switch Day Tab ────────────────────────────────────
         window._switchDay = function(di) {
             document.querySelectorAll('.tasks-day-tab').forEach(b => b.classList.remove('active'));
