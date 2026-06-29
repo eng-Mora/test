@@ -6,8 +6,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Tajawal:wght@300;400;500;700&display=swap');
 
 /* ── Variables ── */
+/* ══ DARK MODE (default) ══ */
 :root {
-    /* Dark palette */
     --bg:           #0d0d10;
     --bg-2:         #121216;
     --bg-3:         #18181e;
@@ -15,37 +15,64 @@
     --surface-2:    #25252f;
     --surface-3:    #2e2e3b;
 
-    /* Accent — deep crimson */
     --red:          #9b1d2a;
     --red-h:        #b82434;
     --red-dim:      rgba(155,29,42,0.18);
     --red-glow:     rgba(155,29,42,0.32);
 
-    /* Text */
     --txt:          #eeeef4;
     --txt-2:        #9898aa;
     --txt-3:        #55556a;
 
-    /* Borders */
     --border:       rgba(255,255,255,0.07);
     --border-2:     rgba(255,255,255,0.13);
 
-    /* Shadows */
     --sh-xs: 0 1px 4px rgba(0,0,0,0.4);
     --sh-sm: 0 4px 16px rgba(0,0,0,0.45);
     --sh-md: 0 10px 32px rgba(0,0,0,0.55);
     --sh-lg: 0 24px 64px rgba(0,0,0,0.65);
     --sh-red: 0 8px 28px rgba(155,29,42,0.35);
 
-    /* Radii */
     --r-s:  8px;
     --r-m:  14px;
     --r-l:  22px;
     --r-xl: 36px;
     --r-2xl:50px;
 
-    /* Easing */
     --ease: cubic-bezier(0.4,0,0.2,1);
+
+    /* theme toggle icon */
+    --theme-icon: "☀️";
+}
+
+/* ══ LIGHT MODE ══ */
+body.light-mode {
+    --bg:           #f4f5f7;
+    --bg-2:         #eceef2;
+    --bg-3:         #e4e6eb;
+    --surface:      #ffffff;
+    --surface-2:    #f0f1f5;
+    --surface-3:    #e2e4ea;
+
+    --red:          #9b1d2a;
+    --red-h:        #b82434;
+    --red-dim:      rgba(155,29,42,0.10);
+    --red-glow:     rgba(155,29,42,0.20);
+
+    --txt:          #1a1a2e;
+    --txt-2:        #5a5a72;
+    --txt-3:        #9898b0;
+
+    --border:       rgba(0,0,0,0.07);
+    --border-2:     rgba(0,0,0,0.12);
+
+    --sh-xs: 0 1px 4px rgba(0,0,0,0.08);
+    --sh-sm: 0 4px 16px rgba(0,0,0,0.10);
+    --sh-md: 0 10px 32px rgba(0,0,0,0.12);
+    --sh-lg: 0 24px 64px rgba(0,0,0,0.15);
+    --sh-red: 0 8px 28px rgba(155,29,42,0.25);
+
+    --theme-icon: "🌙";
 }
 
 /* ── Reset ── */
@@ -75,7 +102,9 @@ body::before {
     pointer-events: none;
     z-index: 0;
     opacity: 0.4;
+    transition: opacity 0.35s;
 }
+body.light-mode::before { opacity: 0.08; }
 
 /* ── Top accent line ── */
 body::after {
@@ -85,6 +114,117 @@ body::after {
     height: 2px;
     background: linear-gradient(90deg, transparent 0%, var(--red) 30%, var(--red-h) 50%, var(--red) 70%, transparent 100%);
     z-index: 2000;
+}
+
+
+/* ══════════════════════════════════════════════
+   THEME TOGGLE BUTTON
+══════════════════════════════════════════════ */
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 72px;          /* جنب sidebar-toggle على اليمين */
+    background: var(--surface);
+    color: var(--txt);
+    border: 1px solid var(--border-2);
+    width: 42px; height: 42px;
+    border-radius: var(--r-s);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.05rem;
+    z-index: 1100;
+    box-shadow: var(--sh-sm);
+    transition: background 0.25s var(--ease), border-color 0.25s var(--ease),
+                transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+    cursor: pointer;
+}
+.theme-toggle:hover {
+    background: var(--red);
+    border-color: var(--red);
+    transform: scale(1.06);
+    box-shadow: var(--sh-red);
+}
+
+/* transition سلس لكل الألوان */
+body, body * {
+    transition: background-color 0.3s var(--ease),
+                border-color 0.3s var(--ease),
+                color 0.3s var(--ease),
+                box-shadow 0.3s var(--ease);
+}
+/* استثني الـ transitions اللي ليها قيمة خاصة */
+.sidebar, .sidebar-toggle, .theme-toggle,
+.login-btn, .chapter-btn, .logout-btn,
+.tasks-day-tab, .tasks-progress-bar-fill,
+.task-status-icon, .tasks-done-toast {
+    transition: all 0.25s var(--ease);
+}
+
+/* light mode: tasks section خلفيات */
+body.light-mode .tasks-section {
+    background: rgba(245,243,255,0.9);
+    border-color: rgba(139,92,246,0.2);
+    box-shadow: 0 4px 20px rgba(99,102,241,0.08);
+}
+body.light-mode .tasks-header {
+    background: linear-gradient(90deg, rgba(99,102,241,0.12) 0%, rgba(139,92,246,0.07) 100%);
+    border-color: rgba(139,92,246,0.15);
+}
+body.light-mode .tasks-header h3 { color: #5b21b6; }
+body.light-mode .tasks-progress-badge {
+    background: rgba(99,102,241,0.12);
+    color: #4f46e5;
+    border-color: rgba(99,102,241,0.3);
+}
+body.light-mode .tasks-progress-badge.all-done {
+    background: rgba(34,197,94,0.12);
+    color: #15803d;
+    border-color: rgba(34,197,94,0.35);
+}
+body.light-mode .task-item { border-bottom-color: rgba(0,0,0,0.06); }
+body.light-mode .task-item:hover { background: rgba(99,102,241,0.05); }
+body.light-mode .task-text { color: #374151; }
+body.light-mode .task-item.done .task-text { color: #9ca3af; }
+body.light-mode .task-status-icon {
+    border-color: rgba(99,102,241,0.4);
+    background: rgba(99,102,241,0.06);
+}
+body.light-mode .task-status-icon::after { background: rgba(99,102,241,0.4); }
+body.light-mode .tasks-progress-bar-bg { background: rgba(0,0,0,0.07); }
+body.light-mode .tasks-day-tabs { border-bottom-color: rgba(0,0,0,0.07); }
+body.light-mode .tasks-day-tab {
+    background: rgba(0,0,0,0.03);
+    border-color: rgba(0,0,0,0.09);
+}
+body.light-mode .tasks-day-tab:hover {
+    background: rgba(99,102,241,0.08);
+    border-color: rgba(99,102,241,0.25);
+}
+body.light-mode .tasks-day-tab.active {
+    background: rgba(99,102,241,0.14);
+    border-color: rgba(99,102,241,0.5);
+    box-shadow: 0 0 10px rgba(99,102,241,0.12);
+}
+body.light-mode .tasks-day-tab-label { color: #4f46e5; }
+body.light-mode .tasks-day-tab-badge { color: #6b7280; background: rgba(0,0,0,0.06); }
+body.light-mode .tasks-day-tab-badge.done { background: rgba(34,197,94,0.12); color: #15803d; }
+body.light-mode .tasks-day-title { color: #6b7280; border-bottom-color: rgba(0,0,0,0.07); }
+body.light-mode .tasks-done-toast {
+    background: linear-gradient(135deg, #fff 0%, #f5f3ff 100%);
+    border-color: rgba(34,197,94,0.4);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.12), 0 0 0 1px rgba(34,197,94,0.12);
+}
+body.light-mode .tasks-done-toast-title { color: #15803d; }
+body.light-mode .tasks-done-toast-msg { color: #1f2937; }
+
+/* light mode: video selector options */
+body.light-mode .video-selector option,
+body.light-mode .branch-selector option {
+    background: #fff;
+    color: #1a1a2e;
+}
+
+@media (max-width: 639px) {
+    .theme-toggle { top: 14px; right: 64px; }
 }
 
 /* ══════════════════════════════════════════════
