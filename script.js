@@ -529,33 +529,98 @@ document.addEventListener('DOMContentLoaded', async function () {
         </div>`;
 
         // ── Tasks Section ──────────────────────────────────────
+        // ── Tasks Section (Day-Based) ─────────────────────────
         if (tasks.length > 0) {
-            const doneCount = Object.values(myProgress.tasks || {}).filter(Boolean).length;
-            const pct = tasks.length > 0 ? Math.round((doneCount / tasks.length) * 100) : 0;
-            const allDone = doneCount === tasks.length;
-            html += `<div class="tasks-section" id="tasksSection">
-                <div class="tasks-header">
-                    <h3>📋 المهام المطلوبة</h3>
-                    <span class="tasks-progress-badge${allDone ? ' all-done' : ''}" id="tasksBadge">${doneCount}/${tasks.length} ✓</span>
-                </div>
-                <div class="tasks-list">`;
-            tasks.forEach((task, i) => {
-                const done = myProgress.tasks && myProgress.tasks[i] === true;
-                html += `<label class="task-item ${done ? 'done' : ''}" id="task_${i}">
-                    <input type="checkbox" class="task-checkbox" ${done ? 'checked' : ''} onchange="window._toggleTask(${i}, this.checked, '${rv.rcId}')">
-                    <div class="task-status-icon"></div>
-                    <span class="task-text">${task.text || task}</span>
-                </label>`;
-            });
-            html += `</div>
-                <div class="tasks-progress-bar-wrap">
+            // تحديد إذا كان الفورمات أيام أو flat
+            const isDayBased = tasks.length > 0 && tasks[0] && typeof tasks[0] === 'object' && 'tasks' in tasks[0];
+
+            if (isDayBased) {
+                // ── حساب الـ progress لكل يوم ──────────────────
+                // myProgress.tasks = { d0: {0:true, 1:false}, d1: {...} }
+                const dayProgress = myProgress.tasks || {};
+                let totalTasks = 0, totalDone = 0;
+                tasks.forEach(function(day, di) {
+                    const dayT = day.tasks || [];
+                    const dp = dayProgress['d'+di] || {};
+                    totalTasks += dayT.length;
+                    dayT.forEach(function(_, ti) { if(dp[ti]===true) totalDone++; });
+                });
+                const pct = totalTasks > 0 ? Math.round((totalDone/totalTasks)*100) : 0;
+                const allDone = totalTasks > 0 && totalDone === totalTasks;
+
+                html += `<div class="tasks-section" id="tasksSection">
+                    <div class="tasks-header">
+                        <h3>📋 المهام المطلوبة</h3>
+                        <span class="tasks-progress-badge${allDone?' all-done':''}" id="tasksBadge">${totalDone}/${totalTasks} ✓</span>
+                    </div>
+
+                    <!-- Day Tabs -->
+                    <div class="tasks-day-tabs" id="tasksDayTabs">`;
+                tasks.forEach((day, di) => {
+                    const dayT = day.tasks || [];
+                    const dp = dayProgress['d'+di] || {};
+                    const dDone = dayT.filter((_, ti) => dp[ti]===true).length;
+                    const dAll  = dDone === dayT.length && dayT.length > 0;
+                    html += `<button class="tasks-day-tab${di===0?' active':''}" onclick="window._switchDay(${di})" id="dayTab_${di}">
+                        <span class="tasks-day-tab-label">${day.label||'اليوم '+(di+1)}</span>
+                        <span class="tasks-day-tab-badge${dAll?' done':''}">${dDone}/${dayT.length}</span>
+                    </button>`;
+                });
+                html += `</div>`;
+
+                // ── Day Panels ──────────────────────────────────
+                tasks.forEach((day, di) => {
+                    const dayT = day.tasks || [];
+                    const dp   = dayProgress['d'+di] || {};
+                    html += `<div class="tasks-day-panel${di===0?' active':''}" id="dayPanel_${di}">`;
+                    if (day.title) html += `<div class="tasks-day-title">${day.title}</div>`;
+                    html += `<div class="tasks-list">`;
+                    dayT.forEach((task, ti) => {
+                        const done = dp[ti] === true;
+                        html += `<label class="task-item${done?' done':''}" id="task_${di}_${ti}">
+                            <input type="checkbox" class="task-checkbox" ${done?'checked':''} onchange="window._toggleTask(${di}, ${ti}, this.checked, '${rv.rcId}')">
+                            <div class="task-status-icon"></div>
+                            <span class="task-text">${task.text||task}</span>
+                        </label>`;
+                    });
+                    if (!dayT.length) html += `<p style="color:#6b7280;font-size:.85rem;text-align:center;padding:.5rem 0">لا توجد مهام لهذا اليوم</p>`;
+                    html += `</div></div>`;
+                });
+
+                html += `<div class="tasks-progress-bar-wrap">
                     <div class="tasks-progress-bar-bg">
                         <div class="tasks-progress-bar-fill" id="tasksBarFill" style="width:${pct}%"></div>
                     </div>
-                </div>
-            </div>`;
+                </div></div>`;
 
-            // Toast notification (خارج الـ section)
+            } else {
+                // ── Flat fallback (old format) ──────────────────
+                const doneCount = Object.values(myProgress.tasks || {}).filter(Boolean).length;
+                const pct = tasks.length > 0 ? Math.round((doneCount / tasks.length) * 100) : 0;
+                const allDone = doneCount === tasks.length;
+                html += `<div class="tasks-section" id="tasksSection">
+                    <div class="tasks-header">
+                        <h3>📋 المهام المطلوبة</h3>
+                        <span class="tasks-progress-badge${allDone?' all-done':''}" id="tasksBadge">${doneCount}/${tasks.length} ✓</span>
+                    </div>
+                    <div class="tasks-list">`;
+                tasks.forEach((task, i) => {
+                    const done = myProgress.tasks && myProgress.tasks[i] === true;
+                    html += `<label class="task-item${done?' done':''}" id="task_flat_${i}">
+                        <input type="checkbox" class="task-checkbox" ${done?'checked':''} onchange="window._toggleTask(-1, ${i}, this.checked, '${rv.rcId}')">
+                        <div class="task-status-icon"></div>
+                        <span class="task-text">${task.text||task}</span>
+                    </label>`;
+                });
+                html += `</div>
+                    <div class="tasks-progress-bar-wrap">
+                        <div class="tasks-progress-bar-bg">
+                            <div class="tasks-progress-bar-fill" id="tasksBarFill" style="width:${pct}%"></div>
+                        </div>
+                    </div></div>`;
+            }
+
+            // Toast notification
             html += `<div class="tasks-done-toast" id="tasksDoneToast">
                 <div class="tasks-done-toast-icon">🎯</div>
                 <div class="tasks-done-toast-body">
@@ -630,21 +695,60 @@ document.addEventListener('DOMContentLoaded', async function () {
         // ── toggle task checkbox ──────────────────────────────
         window._toggleTask = function(taskIdx, checked, rcId) {
             if (!loggedUser) return;
-            set(ref(db, `studentProgress/${loggedUser}/${rcId}/tasks/${taskIdx}`), checked);
-            // تحديث UI
-            const item = document.getElementById('task_' + taskIdx);
-            if (item) item.classList.toggle('done', checked);
-            // تحديث العداد والشريط
+        // ── Switch Day Tab ────────────────────────────────────
+        window._switchDay = function(di) {
+            document.querySelectorAll('.tasks-day-tab').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tasks-day-panel').forEach(p => p.classList.remove('active'));
+            const tab = document.getElementById('dayTab_'+di);
+            const panel = document.getElementById('dayPanel_'+di);
+            if(tab) tab.classList.add('active');
+            if(panel) panel.classList.add('active');
+        };
+
+        // ── Toggle Task ───────────────────────────────────────
+        window._toggleTask = function (dayIdx, taskIdx, checked, rcId) {
+            const loggedUser = localStorage.getItem('username');
+            if (!loggedUser) return;
+
+            if (dayIdx >= 0) {
+                // Day-based: path = studentProgress/{user}/{rcId}/tasks/d{di}/{ti}
+                set(ref(db, `studentProgress/${loggedUser}/${rcId}/tasks/d${dayIdx}/${taskIdx}`), checked);
+                const item = document.getElementById(`task_${dayIdx}_${taskIdx}`);
+                if (item) item.classList.toggle('done', checked);
+            } else {
+                // Flat fallback
+                set(ref(db, `studentProgress/${loggedUser}/${rcId}/tasks/${taskIdx}`), checked);
+                const item = document.getElementById(`task_flat_${taskIdx}`);
+                if (item) item.classList.toggle('done', checked);
+            }
+
+            // ── إعادة حساب الـ progress الكلي ──────────────
+            const allBoxes = document.querySelectorAll('.task-checkbox');
+            const total    = allBoxes.length;
+            const doneNow  = Array.from(allBoxes).filter(b => b.checked).length;
+
             const badge = document.getElementById('tasksBadge');
             const bar   = document.getElementById('tasksBarFill');
             if (badge) {
-                const allBoxes = document.querySelectorAll('.task-checkbox');
-                const total    = allBoxes.length;
-                const doneNow  = Array.from(allBoxes).filter(b => b.checked).length;
                 badge.textContent = `${doneNow}/${total} ✓`;
                 const allDone = doneNow === total;
                 badge.classList.toggle('all-done', allDone);
-                if (bar) bar.style.width = total > 0 ? Math.round((doneNow / total) * 100) + '%' : '0%';
+                if (bar) bar.style.width = total > 0 ? Math.round((doneNow/total)*100)+'%' : '0%';
+
+                // تحديث badge اليوم الحالي
+                if (dayIdx >= 0) {
+                    const dayBoxes = document.querySelectorAll(`#dayPanel_${dayIdx} .task-checkbox`);
+                    const dayDone  = Array.from(dayBoxes).filter(b=>b.checked).length;
+                    const dayTab   = document.getElementById('dayTab_'+dayIdx);
+                    if (dayTab) {
+                        const dBadge = dayTab.querySelector('.tasks-day-tab-badge');
+                        if (dBadge) {
+                            dBadge.textContent = `${dayDone}/${dayBoxes.length}`;
+                            dBadge.classList.toggle('done', dayDone===dayBoxes.length && dayBoxes.length>0);
+                        }
+                    }
+                }
+
                 // Toast لما يخلص كل المهام
                 if (allDone && checked) {
                     const toast = document.getElementById('tasksDoneToast');
