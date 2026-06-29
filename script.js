@@ -649,6 +649,15 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         videoContainer.innerHTML = html;
 
+        // ── بناء المهام في السايدبار ──────────────────────────
+        if (tasks.length > 0) {
+            const isDayBased = tasks.length > 0 && tasks[0] && typeof tasks[0] === 'object' && 'tasks' in tasks[0];
+            buildSidebarTasks(tasks, myProgress, isDayBased);
+        } else {
+            const sbPanel = document.getElementById('sidebarTasksPanel');
+            if (sbPanel) sbPanel.style.display = 'none';
+        }
+
         // تعبئة اسم الطالب
         if (loggedUser) {
             videoContainer.querySelectorAll('option[data-video-code]').forEach(opt => {
@@ -787,6 +796,140 @@ document.addEventListener('DOMContentLoaded', async function () {
                 }
             }
         };
+
+        // ── Sidebar Tasks Sync ───────────────────────────────
+        // بيبني المهام في السايدبار ويزامنها مع checkboxes الصفحة
+        function buildSidebarTasks(tasks, myProgress, isDayBased) {
+            const panel  = document.getElementById('sidebarTasksPanel');
+            const body   = document.getElementById('sidebarTasksBody');
+            const badge  = document.getElementById('sidebarTasksBadge');
+            if (!panel || !body) return;
+
+            if (!tasks || !tasks.length) {
+                panel.style.display = 'none';
+                return;
+            }
+            panel.style.display = '';
+
+            // حساب الـ progress الكلي للـ badge
+            function updateSidebarBadge() {
+                const allBoxes  = document.querySelectorAll('.task-checkbox');
+                const total     = allBoxes.length;
+                const doneCount = Array.from(allBoxes).filter(b => b.checked).length;
+                if (badge) {
+                    badge.textContent = `${doneCount}/${total}`;
+                    badge.classList.toggle('all-done', total > 0 && doneCount === total);
+                }
+                // sync كل item في السايدبار
+                document.querySelectorAll('.sb-task-item').forEach(item => {
+                    const ref = item.dataset.taskRef;
+                    const chk = ref ? document.querySelector(`.task-checkbox[data-sb-ref="${ref}"]`) : null;
+                    if (chk) {
+                        item.classList.toggle('done', chk.checked);
+                        const icon = item.querySelector('.sb-task-icon');
+                        if (icon) icon.textContent = chk.checked ? '✓' : '';
+                        const txt = item.querySelector('.sb-task-text');
+                        if (txt) txt.style.textDecoration = chk.checked ? 'line-through' : '';
+                    }
+                });
+            }
+
+            let html = '';
+            let sbCurDay = 0;
+
+            if (isDayBased) {
+                // Day tabs
+                html += '<div class="sb-day-tabs">';
+                tasks.forEach((day, di) => {
+                    const dayT = day.tasks || [];
+                    const dp   = (myProgress.tasks || {})['d'+di] || {};
+                    const done = dayT.filter((_, ti) => dp[ti] === true).length;
+                    html += `<button class="sb-day-tab${di===0?' active':''}" onclick="window._sbSwitchDay(${di})" id="sbDayTab_${di}">
+                        <span>${day.label || ('اليوم '+(di+1))}</span>
+                        <span class="sb-day-tab-badge${done===dayT.length&&dayT.length>0?' done':''}" id="sbDayBadge_${di}">${done}/${dayT.length}</span>
+                    </button>`;
+                });
+                html += '</div>';
+
+                // Day panels
+                tasks.forEach((day, di) => {
+                    const dayT = day.tasks || [];
+                    const dp   = (myProgress.tasks || {})['d'+di] || {};
+                    html += `<div class="sb-day-panel${di===0?' active':''}" id="sbDayPanel_${di}">`;
+                    if (!dayT.length) {
+                        html += '<p class="sb-no-tasks">لا توجد مهام</p>';
+                    }
+                    dayT.forEach((task, ti) => {
+                        const done = dp[ti] === true;
+                        const ref  = `d${di}_${ti}`;
+                        html += `<div class="sb-task-item${done?' done':''}" data-task-ref="${ref}" onclick="window._sbToggle(${di},${ti},this)">
+                            <div class="sb-task-icon">${done?'✓':''}</div>
+                            <span class="sb-task-text">${task.text||task}</span>
+                        </div>`;
+                    });
+                    html += '</div>';
+                });
+            } else {
+                // Flat
+                const dp = myProgress.tasks || {};
+                tasks.forEach((task, i) => {
+                    const done = dp[i] === true;
+                    html += `<div class="sb-task-item${done?' done':''}" data-task-ref="flat_${i}" onclick="window._sbToggle(-1,${i},this)">
+                        <div class="sb-task-icon">${done?'✓':''}</div>
+                        <span class="sb-task-text">${task.text||task}</span>
+                    </div>`;
+                });
+            }
+
+            body.innerHTML = html;
+            updateSidebarBadge();
+
+            // ربط الـ sb items بالـ checkboxes الأصلية عشان يتزامنوا
+            window._sbSwitchDay = function(di) {
+                document.querySelectorAll('.sb-day-tab').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.sb-day-panel').forEach(p => p.classList.remove('active'));
+                const t = document.getElementById('sbDayTab_'+di);
+                const p = document.getElementById('sbDayPanel_'+di);
+                if (t) t.classList.add('active');
+                if (p) p.classList.add('active');
+            };
+
+            window._sbToggle = function(di, ti, el) {
+                // toggle الـ checkbox الأصلي في الصفحة
+                let chkSelector;
+                if (di >= 0) chkSelector = `#task_${di}_${ti} .task-checkbox`;
+                else         chkSelector = `#task_flat_${ti} .task-checkbox`;
+                const chk = document.querySelector(chkSelector);
+                if (chk) {
+                    chk.checked = !chk.checked;
+                    chk.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+                // sync الـ sb item نفسه مباشرة
+                const done = chk ? chk.checked : el.classList.contains('done');
+                el.classList.toggle('done', done);
+                const icon = el.querySelector('.sb-task-icon');
+                if (icon) icon.textContent = done ? '✓' : '';
+
+                // تحديث sb day badge
+                if (di >= 0) {
+                    const dayBoxes = document.querySelectorAll(`#dayPanel_${di} .task-checkbox`);
+                    const dayDone  = Array.from(dayBoxes).filter(b => b.checked).length;
+                    const sbBadge  = document.getElementById('sbDayBadge_'+di);
+                    if (sbBadge) {
+                        sbBadge.textContent = `${dayDone}/${dayBoxes.length}`;
+                        sbBadge.classList.toggle('done', dayDone===dayBoxes.length && dayBoxes.length>0);
+                    }
+                    const sbTab = document.getElementById('sbDayTab_'+di);
+                    if (sbTab) sbTab.classList.toggle('active', true);
+                }
+                updateSidebarBadge();
+            };
+
+            // مراقبة الـ checkboxes الأصلية لو اتغيرت من الصفحة — sync السايدبار
+            document.querySelectorAll('.task-checkbox').forEach(chk => {
+                chk.addEventListener('change', () => setTimeout(updateSidebarBadge, 50));
+            });
+        }
 
         // عرض الفيديو الأول تلقائياً
         if (sorted.length > 0) {
