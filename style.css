@@ -148,19 +148,13 @@ body.light-mode .theme-toggle {
     box-shadow: 0 4px 16px rgba(0,0,0,0.12);
 }
 
-/* transition سلس لكل الألوان */
-body, body * {
-    transition: background-color 0.3s var(--ease),
-                border-color 0.3s var(--ease),
-                color 0.3s var(--ease),
-                box-shadow 0.3s var(--ease);
-}
-/* استثني الـ transitions اللي ليها قيمة خاصة */
-.sidebar, .sidebar-toggle, .theme-toggle,
-.login-btn, .chapter-btn, .logout-btn,
-.tasks-day-tab, .tasks-progress-bar-fill,
-.task-status-icon, .tasks-done-toast {
-    transition: all 0.25s var(--ease);
+/* transition سلس للـ theme فقط على العناصر اللي بتتغير */
+body { transition: background-color 0.3s var(--ease), color 0.3s var(--ease); }
+.sidebar, .video-container, #home, #contact,
+.welcome-banner, .branch-selection, .video-menu,
+.video-player, .video, .logout-container,
+.tasks-section, .profile-info, .chapters-nav {
+    transition: background-color 0.3s var(--ease), border-color 0.3s var(--ease), box-shadow 0.3s var(--ease);
 }
 
 /* light mode: tasks section خلفيات */
@@ -1217,10 +1211,10 @@ ul, ol { padding-right: 20px; }
 ══════════════════════════════════════════ */
 .tasks-done-toast {
     position: fixed;
-    bottom: -120px;
+    top: -120px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 9999;
+    z-index: 1200;
     background: linear-gradient(135deg, #0f172a 0%, #1a1035 100%);
     border: 1px solid rgba(34,197,94,0.5);
     border-radius: 18px;
@@ -1231,12 +1225,12 @@ ul, ol { padding-right: 20px; }
     min-width: 280px;
     max-width: 340px;
     box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(34,197,94,0.15);
-    transition: bottom .55s cubic-bezier(.34,1.4,.64,1);
+    transition: top .55s cubic-bezier(.34,1.4,.64,1);
     pointer-events: none;
 }
 
 .tasks-done-toast.show {
-    bottom: 28px;
+    top: 18px;
     pointer-events: auto;
 }
 
@@ -1367,8 +1361,8 @@ ul, ol { padding-right: 20px; }
     .task-item      { padding: .55rem .2rem; }
     .task-text      { font-size: .9rem; }
     .task-status-icon { width: 28px; height: 28px; margin-left: .75rem; }
-    .tasks-done-toast { min-width: 260px; max-width: 90vw; bottom: -110px; }
-    .tasks-done-toast.show { bottom: 20px; }
+    .tasks-done-toast { min-width: 260px; max-width: 90vw; top: -110px; }
+    .tasks-done-toast.show { top: 14px; }
     .tasks-day-tabs { gap: .25rem; padding: .5rem .6rem .3rem; }
     .tasks-day-tab  { min-width: 60px; padding: .4rem .6rem; }
     .tasks-day-tab-label { font-size: .75rem; }
