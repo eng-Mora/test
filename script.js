@@ -182,6 +182,45 @@ document.addEventListener('DOMContentLoaded', async function () {
         return { ok: false }; // جهاز مختلف عن المسجل
     }
 
+    // ── Device Lock لكودات المراجعة (reviews) — نفس منطق الطلاب بالضبط ──
+    // بما إن أكواد المراجعة مش لها node مستقل في reviews، نخزن الجهاز
+    // في node منفصل: reviewDevices/{code}
+    async function checkReviewDeviceLock(code, reviewInfo) {
+        const myDeviceId = getOrCreateDeviceId();
+        let regData = null;
+        try {
+            const snap = await get(ref(db, `reviewDevices/${code}`));
+            regData = snap.exists() ? snap.val() : null;
+        } catch (e) { regData = null; }
+
+        const registeredId = regData && regData.deviceId;
+
+        if (!registeredId) {
+            // أول مرة يتسجل فيها جهاز لهذا الكود — نسجله ونسمح
+            try { await set(ref(db, `reviewDevices/${code}/deviceId`), myDeviceId); } catch (e) { /* non-blocking */ }
+            return { ok: true };
+        }
+        if (registeredId === myDeviceId) {
+            return { ok: true }; // نفس الجهاز المسجل من قبل
+        }
+        // ── جهاز مختلف — نسجل المحاولة المرفوضة في blockedAttempts ──
+        try {
+            const ip = await getClientIp();
+            const lastIp = regData && regData.lastSuccessIp ? regData.lastSuccessIp : null;
+            const sameNetwork = !!(lastIp && ip && lastIp === ip);
+            await push(ref(db, `blockedAttempts/${code}`), {
+                at: Date.now(),
+                ip: ip,
+                deviceType: getDeviceType(),
+                browser: getBrowserName(),
+                studentName: (reviewInfo && reviewInfo.desc) ? reviewInfo.desc : 'مراجعة',
+                sameNetwork: sameNetwork,
+                read: false
+            });
+        } catch (e) { /* non-blocking */ }
+        return { ok: false }; // جهاز مختلف عن المسجل
+    }
+
     // Check if code is a review access code → return review info
     async function getReviewByCode(code) {
         try {
@@ -244,9 +283,24 @@ document.addEventListener('DOMContentLoaded', async function () {
             let rvUrl = null;
             try { rvUrl = await getReviewByCode(urlUser); } catch (e) { rvUrl = null; }
             if (rvUrl) {
+                // ── فحص الجهاز — يمنع استخدام كود المراجعة من جهاز مختلف ──
+                const reviewDeviceCheckUrl = await checkReviewDeviceLock(urlUser, rvUrl);
+                if (!reviewDeviceCheckUrl.ok) {
+                    showLogin();
+                    document.getElementById('errorMessage').style.color = '#dc3545';
+                    document.getElementById('errorMessage').textContent = '🔒 هذا الكود مستخدم على جهاز آخر، تواصل مع المشرف';
+                    return;
+                }
                 localStorage.setItem('isLoggedIn', 'true');
                 localStorage.setItem('username', urlUser);
                 localStorage.setItem('loginType', 'review');
+                getClientIp().then(ip => {
+                    push(ref(db, `loginLogs/${urlUser}`), {
+                        at: Date.now(), name: rvUrl.desc || 'مراجعة', ip,
+                        deviceType: getDeviceType(), browser: getBrowserName()
+                    });
+                    set(ref(db, `reviewDevices/${urlUser}/lastSuccessIp`), ip);
+                });
                 await loadReviewContent(rvUrl, urlUser);
                 showMain();
                 return;
@@ -265,7 +319,20 @@ document.addEventListener('DOMContentLoaded', async function () {
             if (loginType === 'review') {
                 let rv = null;
                 try { rv = await getReviewByCode(username); } catch (e) { rv = null; }
-                if (rv) { await loadReviewContent(rv, username); showMain(); return; }
+                if (rv) {
+                    // ── فحص الجهاز — حتى في الدخول التلقائي من localStorage ──
+                    const reviewDeviceCheckAuto = await checkReviewDeviceLock(username, rv);
+                    if (!reviewDeviceCheckAuto.ok) {
+                        localStorage.removeItem('isLoggedIn');
+                        localStorage.removeItem('username');
+                        localStorage.removeItem('loginType');
+                        showLogin();
+                        document.getElementById('errorMessage').style.color = '#dc3545';
+                        document.getElementById('errorMessage').textContent = '🔒 هذا الكود مستخدم على جهاز آخر، تواصل مع المشرف';
+                        return;
+                    }
+                    await loadReviewContent(rv, username); showMain(); return;
+                }
             }
             const student = await getStudent(username);
             if (student && student.videoCode) {
@@ -310,10 +377,24 @@ document.addEventListener('DOMContentLoaded', async function () {
         let rv = null;
         try { rv = await getReviewByCode(username); } catch (e) { rv = null; }
         if (rv) {
+            // ── فحص الجهاز — يمنع استخدام كود المراجعة من جهاز مختلف ──
+            const reviewDeviceCheck = await checkReviewDeviceLock(username, rv);
+            if (!reviewDeviceCheck.ok) {
+                errEl.style.color = '#dc3545';
+                errEl.textContent = '🔒 هذا الكود مستخدم على جهاز آخر، تواصل مع المشرف';
+                return;
+            }
             errEl.textContent = '';
             localStorage.setItem('isLoggedIn', 'true');
             localStorage.setItem('username', username);
             localStorage.setItem('loginType', 'review');
+            getClientIp().then(ip => {
+                push(ref(db, `loginLogs/${username}`), {
+                    at: Date.now(), name: rv.desc || 'مراجعة', ip,
+                    deviceType: getDeviceType(), browser: getBrowserName()
+                });
+                set(ref(db, `reviewDevices/${username}/lastSuccessIp`), ip);
+            });
             await loadReviewContent(rv, username);
             showMain();
             videoContainer.scrollIntoView({ behavior: 'smooth' });
