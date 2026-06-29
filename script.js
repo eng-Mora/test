@@ -543,8 +543,8 @@ document.addEventListener('DOMContentLoaded', async function () {
                 const done = myProgress.tasks && myProgress.tasks[i] === true;
                 html += `<label class="task-item ${done ? 'done' : ''}" id="task_${i}">
                     <input type="checkbox" class="task-checkbox" ${done ? 'checked' : ''} onchange="window._toggleTask(${i}, this.checked, '${rv.rcId}')">
+                    <div class="task-status-icon"></div>
                     <span class="task-text">${task.text || task}</span>
-                    <span class="task-check-icon">✓</span>
                 </label>`;
             });
             html += `</div>
@@ -552,6 +552,15 @@ document.addEventListener('DOMContentLoaded', async function () {
                     <div class="tasks-progress-bar-bg">
                         <div class="tasks-progress-bar-fill" id="tasksBarFill" style="width:${pct}%"></div>
                     </div>
+                </div>
+            </div>`;
+
+            // Toast notification (خارج الـ section)
+            html += `<div class="tasks-done-toast" id="tasksDoneToast">
+                <div class="tasks-done-toast-icon">🎯</div>
+                <div class="tasks-done-toast-body">
+                    <div class="tasks-done-toast-title">أنجزت كل المهام! 🔥</div>
+                    <div class="tasks-done-toast-msg">تسلم كدا، انت ماشي على الخطة مظبوط ❤️</div>
                 </div>
             </div>`;
         }
@@ -636,6 +645,14 @@ document.addEventListener('DOMContentLoaded', async function () {
                 const allDone = doneNow === total;
                 badge.classList.toggle('all-done', allDone);
                 if (bar) bar.style.width = total > 0 ? Math.round((doneNow / total) * 100) + '%' : '0%';
+                // Toast لما يخلص كل المهام
+                if (allDone && checked) {
+                    const toast = document.getElementById('tasksDoneToast');
+                    if (toast) {
+                        toast.classList.add('show');
+                        setTimeout(() => toast.classList.remove('show'), 4500);
+                    }
+                }
             }
         };
 
