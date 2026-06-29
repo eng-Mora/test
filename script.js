@@ -531,10 +531,12 @@ document.addEventListener('DOMContentLoaded', async function () {
         // ── Tasks Section ──────────────────────────────────────
         if (tasks.length > 0) {
             const doneCount = Object.values(myProgress.tasks || {}).filter(Boolean).length;
+            const pct = tasks.length > 0 ? Math.round((doneCount / tasks.length) * 100) : 0;
+            const allDone = doneCount === tasks.length;
             html += `<div class="tasks-section" id="tasksSection">
                 <div class="tasks-header">
                     <h3>📋 المهام المطلوبة</h3>
-                    <span class="tasks-progress-badge" id="tasksBadge">${doneCount}/${tasks.length} ✓</span>
+                    <span class="tasks-progress-badge${allDone ? ' all-done' : ''}" id="tasksBadge">${doneCount}/${tasks.length} ✓</span>
                 </div>
                 <div class="tasks-list">`;
             tasks.forEach((task, i) => {
@@ -545,7 +547,13 @@ document.addEventListener('DOMContentLoaded', async function () {
                     <span class="task-check-icon">✓</span>
                 </label>`;
             });
-            html += `</div></div>`;
+            html += `</div>
+                <div class="tasks-progress-bar-wrap">
+                    <div class="tasks-progress-bar-bg">
+                        <div class="tasks-progress-bar-fill" id="tasksBarFill" style="width:${pct}%"></div>
+                    </div>
+                </div>
+            </div>`;
         }
 
         videoContainer.innerHTML = html;
@@ -617,13 +625,17 @@ document.addEventListener('DOMContentLoaded', async function () {
             // تحديث UI
             const item = document.getElementById('task_' + taskIdx);
             if (item) item.classList.toggle('done', checked);
-            // تحديث العداد
+            // تحديث العداد والشريط
             const badge = document.getElementById('tasksBadge');
+            const bar   = document.getElementById('tasksBarFill');
             if (badge) {
                 const allBoxes = document.querySelectorAll('.task-checkbox');
-                const doneNow = Array.from(allBoxes).filter(b => b.checked).length;
-                badge.textContent = `${doneNow}/${allBoxes.length} ✓`;
-                badge.style.background = doneNow === allBoxes.length ? '#22c55e' : '';
+                const total    = allBoxes.length;
+                const doneNow  = Array.from(allBoxes).filter(b => b.checked).length;
+                badge.textContent = `${doneNow}/${total} ✓`;
+                const allDone = doneNow === total;
+                badge.classList.toggle('all-done', allDone);
+                if (bar) bar.style.width = total > 0 ? Math.round((doneNow / total) * 100) + '%' : '0%';
             }
         };
 
