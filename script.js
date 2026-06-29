@@ -545,106 +545,18 @@ document.addEventListener('DOMContentLoaded', async function () {
             <button onclick="window.logout()" class="logout-btn">تسجيل الخروج</button>
         </div>`;
 
-        // ── Tasks Section ──────────────────────────────────────
-        // ── Tasks Section (Day-Based) ─────────────────────────
-        if (tasks.length > 0) {
-            // تحديد إذا كان الفورمات أيام أو flat
-            const isDayBased = tasks.length > 0 && tasks[0] && typeof tasks[0] === 'object' && 'tasks' in tasks[0];
-
-            if (isDayBased) {
-                // ── حساب الـ progress لكل يوم ──────────────────
-                // myProgress.tasks = { d0: {0:true, 1:false}, d1: {...} }
-                const dayProgress = myProgress.tasks || {};
-                let totalTasks = 0, totalDone = 0;
-                tasks.forEach(function(day, di) {
-                    const dayT = day.tasks || [];
-                    const dp = dayProgress['d'+di] || {};
-                    totalTasks += dayT.length;
-                    dayT.forEach(function(_, ti) { if(dp[ti]===true) totalDone++; });
-                });
-                const pct = totalTasks > 0 ? Math.round((totalDone/totalTasks)*100) : 0;
-                const allDone = totalTasks > 0 && totalDone === totalTasks;
-
-                html += `<div class="tasks-section" id="tasksSection">
-                    <div class="tasks-header">
-                        <h3>📋 المهام المطلوبة</h3>
-                        <span class="tasks-progress-badge${allDone?' all-done':''}" id="tasksBadge">${totalDone}/${totalTasks} ✓</span>
-                    </div>
-
-                    <!-- Day Tabs -->
-                    <div class="tasks-day-tabs" id="tasksDayTabs">`;
-                tasks.forEach((day, di) => {
-                    const dayT = day.tasks || [];
-                    const dp = dayProgress['d'+di] || {};
-                    const dDone = dayT.filter((_, ti) => dp[ti]===true).length;
-                    const dAll  = dDone === dayT.length && dayT.length > 0;
-                    html += `<button class="tasks-day-tab${di===0?' active':''}" onclick="window._switchDay(${di})" id="dayTab_${di}">
-                        <span class="tasks-day-tab-label">${day.label||'اليوم '+(di+1)}</span>
-                        <span class="tasks-day-tab-badge${dAll?' done':''}">${dDone}/${dayT.length}</span>
-                    </button>`;
-                });
-                html += `</div>`;
-
-                // ── Day Panels ──────────────────────────────────
-                tasks.forEach((day, di) => {
-                    const dayT = day.tasks || [];
-                    const dp   = dayProgress['d'+di] || {};
-                    html += `<div class="tasks-day-panel${di===0?' active':''}" id="dayPanel_${di}" data-success-msg="${(day.successMessage||'').replace(/"/g,'&quot;')}">`;
-                    if (day.title) html += `<div class="tasks-day-title">${day.title}</div>`;
-                    html += `<div class="tasks-list">`;
-                    dayT.forEach((task, ti) => {
-                        const done = dp[ti] === true;
-                        html += `<label class="task-item${done?' done':''}" id="task_${di}_${ti}">
-                            <input type="checkbox" class="task-checkbox" ${done?'checked':''} onchange="window._toggleTask(${di}, ${ti}, this.checked, '${rv.rcId}')">
-                            <div class="task-status-icon"></div>
-                            <span class="task-text">${task.text||task}</span>
-                        </label>`;
-                    });
-                    if (!dayT.length) html += `<p style="color:#6b7280;font-size:.85rem;text-align:center;padding:.5rem 0">لا توجد مهام لهذا اليوم</p>`;
-                    html += `</div></div>`;
-                });
-
-                html += `<div class="tasks-progress-bar-wrap">
-                    <div class="tasks-progress-bar-bg">
-                        <div class="tasks-progress-bar-fill" id="tasksBarFill" style="width:${pct}%"></div>
-                    </div>
-                </div></div>`;
-
-            } else {
-                // ── Flat fallback (old format) ──────────────────
-                const doneCount = Object.values(myProgress.tasks || {}).filter(Boolean).length;
-                const pct = tasks.length > 0 ? Math.round((doneCount / tasks.length) * 100) : 0;
-                const allDone = doneCount === tasks.length;
-                html += `<div class="tasks-section" id="tasksSection">
-                    <div class="tasks-header">
-                        <h3>📋 المهام المطلوبة</h3>
-                        <span class="tasks-progress-badge${allDone?' all-done':''}" id="tasksBadge">${doneCount}/${tasks.length} ✓</span>
-                    </div>
-                    <div class="tasks-list">`;
-                tasks.forEach((task, i) => {
-                    const done = myProgress.tasks && myProgress.tasks[i] === true;
-                    html += `<label class="task-item${done?' done':''}" id="task_flat_${i}">
-                        <input type="checkbox" class="task-checkbox" ${done?'checked':''} onchange="window._toggleTask(-1, ${i}, this.checked, '${rv.rcId}')">
-                        <div class="task-status-icon"></div>
-                        <span class="task-text">${task.text||task}</span>
-                    </label>`;
-                });
-                html += `</div>
-                    <div class="tasks-progress-bar-wrap">
-                        <div class="tasks-progress-bar-bg">
-                            <div class="tasks-progress-bar-fill" id="tasksBarFill" style="width:${pct}%"></div>
-                        </div>
-                    </div></div>`;
-            }
-
-            // Toast notification
-            html += `<div class="tasks-done-toast" id="tasksDoneToast">
-                <div class="tasks-done-toast-icon">🎯</div>
+        // ── Tasks في السايدبار فقط — مش في الصفحة ─────────────
+        // الـ toast بس هنحطه في الـ body مرة واحدة لو مش موجود
+        if (!document.getElementById('tasksDoneToast')) {
+            const toastEl = document.createElement('div');
+            toastEl.className = 'tasks-done-toast';
+            toastEl.id = 'tasksDoneToast';
+            toastEl.innerHTML = `<div class="tasks-done-toast-icon">🎯</div>
                 <div class="tasks-done-toast-body">
-                    <div class="tasks-done-toast-title">أنجزت كل المهام! 🔥</div>
+                    <div class="tasks-done-toast-title">أنجزت مهام اليوم! 🔥</div>
                     <div class="tasks-done-toast-msg">تسلم كدا، انت ماشي على الخطة مظبوط ❤️</div>
-                </div>
-            </div>`;
+                </div>`;
+            document.body.appendChild(toastEl);
         }
 
         videoContainer.innerHTML = html;
@@ -652,6 +564,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         // ── بناء المهام في السايدبار ──────────────────────────
         if (tasks.length > 0) {
             const isDayBased = tasks.length > 0 && tasks[0] && typeof tasks[0] === 'object' && 'tasks' in tasks[0];
+            window.rcIdRef = rv.rcId;   // للاستخدام في _sbToggle
             buildSidebarTasks(tasks, myProgress, isDayBased);
         } else {
             const sbPanel = document.getElementById('sidebarTasksPanel');
@@ -855,7 +768,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 tasks.forEach((day, di) => {
                     const dayT = day.tasks || [];
                     const dp   = (myProgress.tasks || {})['d'+di] || {};
-                    html += `<div class="sb-day-panel${di===0?' active':''}" id="sbDayPanel_${di}">`;
+                    html += `<div class="sb-day-panel${di===0?' active':''}" id="sbDayPanel_${di}" data-success-msg="${(day.successMessage||'').replace(/"/g,'&quot;')}">`;
                     if (!dayT.length) {
                         html += '<p class="sb-no-tasks">لا توجد مهام</p>';
                     }
@@ -895,40 +808,53 @@ document.addEventListener('DOMContentLoaded', async function () {
             };
 
             window._sbToggle = function(di, ti, el) {
-                // toggle الـ checkbox الأصلي في الصفحة
-                let chkSelector;
-                if (di >= 0) chkSelector = `#task_${di}_${ti} .task-checkbox`;
-                else         chkSelector = `#task_flat_${ti} .task-checkbox`;
-                const chk = document.querySelector(chkSelector);
-                if (chk) {
-                    chk.checked = !chk.checked;
-                    chk.dispatchEvent(new Event('change', { bubbles: true }));
-                }
-                // sync الـ sb item نفسه مباشرة
-                const done = chk ? chk.checked : el.classList.contains('done');
-                el.classList.toggle('done', done);
-                const icon = el.querySelector('.sb-task-icon');
-                if (icon) icon.textContent = done ? '✓' : '';
+                const wasDone = el.classList.contains('done');
+                const nowDone = !wasDone;
 
-                // تحديث sb day badge
+                // تحديث الـ UI فوراً
+                el.classList.toggle('done', nowDone);
+                const icon = el.querySelector('.sb-task-icon');
+                if (icon) icon.textContent = nowDone ? '✓' : '';
+
+                // حفظ في Firebase مباشرة
+                const loggedUser = localStorage.getItem('username');
+                if (loggedUser && rcIdRef) {
+                    if (di >= 0) {
+                        set(ref(db, `studentProgress/${loggedUser}/${rcIdRef}/tasks/d${di}/${ti}`), nowDone);
+                    } else {
+                        set(ref(db, `studentProgress/${loggedUser}/${rcIdRef}/tasks/${ti}`), nowDone);
+                    }
+                }
+
+                // تحديث badge اليوم في السايدبار
                 if (di >= 0) {
-                    const dayBoxes = document.querySelectorAll(`#dayPanel_${di} .task-checkbox`);
-                    const dayDone  = Array.from(dayBoxes).filter(b => b.checked).length;
+                    const dayItems = document.querySelectorAll(`#sbDayPanel_${di} .sb-task-item`);
+                    const dayDone  = Array.from(dayItems).filter(b => b.classList.contains('done')).length;
                     const sbBadge  = document.getElementById('sbDayBadge_'+di);
                     if (sbBadge) {
-                        sbBadge.textContent = `${dayDone}/${dayBoxes.length}`;
-                        sbBadge.classList.toggle('done', dayDone===dayBoxes.length && dayBoxes.length>0);
+                        sbBadge.textContent = `${dayDone}/${dayItems.length}`;
+                        sbBadge.classList.toggle('done', dayDone===dayItems.length && dayItems.length>0);
                     }
-                    const sbTab = document.getElementById('sbDayTab_'+di);
-                    if (sbTab) sbTab.classList.toggle('active', true);
+
+                    // Toast لما يخلص مهام اليوم
+                    if (nowDone && dayDone === dayItems.length && dayItems.length > 0) {
+                        const dayPanel  = document.getElementById('sbDayPanel_'+di);
+                        const dayMsg    = dayPanel ? dayPanel.dataset.successMsg : '';
+                        const toast     = document.getElementById('tasksDoneToast');
+                        if (toast) {
+                            const msgEl   = toast.querySelector('.tasks-done-toast-msg');
+                            const titleEl = toast.querySelector('.tasks-done-toast-title');
+                            if (msgEl)   msgEl.textContent   = dayMsg || 'تسلم كدا، انت ماشي على الخطة مظبوط ❤️';
+                            if (titleEl) titleEl.textContent = 'أنجزت مهام اليوم! 🔥';
+                            toast.classList.add('show');
+                            setTimeout(() => toast.classList.remove('show'), 4500);
+                        }
+                    }
                 }
                 updateSidebarBadge();
             };
 
-            // مراقبة الـ checkboxes الأصلية لو اتغيرت من الصفحة — sync السايدبار
-            document.querySelectorAll('.task-checkbox').forEach(chk => {
-                chk.addEventListener('change', () => setTimeout(updateSidebarBadge, 50));
-            });
+
         }
 
         // عرض الفيديو الأول تلقائياً
