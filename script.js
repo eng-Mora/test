@@ -572,7 +572,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 tasks.forEach((day, di) => {
                     const dayT = day.tasks || [];
                     const dp   = dayProgress['d'+di] || {};
-                    html += `<div class="tasks-day-panel${di===0?' active':''}" id="dayPanel_${di}">`;
+                    html += `<div class="tasks-day-panel${di===0?' active':''}" id="dayPanel_${di}" data-success-msg="${(day.successMessage||'').replace(/"/g,'&quot;')}">`;
                     if (day.title) html += `<div class="tasks-day-title">${day.title}</div>`;
                     html += `<div class="tasks-list">`;
                     dayT.forEach((task, ti) => {
@@ -744,10 +744,24 @@ document.addEventListener('DOMContentLoaded', async function () {
                             dBadge.classList.toggle('done', dayDone===dayBoxes.length && dayBoxes.length>0);
                         }
                     }
+                    // Toast لما يخلص مهام اليوم ده بس
+                    if (checked && dayDone === dayBoxes.length && dayBoxes.length > 0) {
+                        const dayPanel = document.getElementById('dayPanel_'+dayIdx);
+                        const dayMsg   = dayPanel ? dayPanel.dataset.successMsg : '';
+                        const toast    = document.getElementById('tasksDoneToast');
+                        if (toast) {
+                            const msgEl = toast.querySelector('.tasks-done-toast-msg');
+                            if (msgEl) msgEl.textContent = dayMsg || 'تسلم كدا، انت ماشي على الخطة مظبوط ❤️';
+                            const titleEl = toast.querySelector('.tasks-done-toast-title');
+                            if (titleEl) titleEl.textContent = 'أنجزت مهام اليوم! 🔥';
+                            toast.classList.add('show');
+                            setTimeout(() => toast.classList.remove('show'), 4500);
+                        }
+                    }
                 }
 
-                // Toast لما يخلص كل المهام
-                if (allDone && checked) {
+                // Toast لما يخلص كل المهام (كل الأيام — flat fallback فقط)
+                if (allDone && checked && dayIdx < 0) {
                     const toast = document.getElementById('tasksDoneToast');
                     if (toast) {
                         toast.classList.add('show');
