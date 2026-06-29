@@ -91,6 +91,23 @@ const BRANCH_CHAPTERS = {
 
 document.addEventListener('DOMContentLoaded', async function () {
 
+    // ── Theme Toggle ─────────────────────────────────────────
+    (function () {
+        const btn = document.getElementById('themeToggle');
+        const saved = localStorage.getItem('theme');
+        if (saved === 'light') {
+            document.body.classList.add('light-mode');
+            if (btn) btn.textContent = '🌙';
+        }
+        if (btn) {
+            btn.addEventListener('click', function () {
+                const isLight = document.body.classList.toggle('light-mode');
+                btn.textContent = isLight ? '🌙' : '☀️';
+                localStorage.setItem('theme', isLight ? 'light' : 'dark');
+            });
+        }
+    })();
+
     const loginContainer = document.getElementById('loginContainer');
     const mainContent = document.getElementById('main');
     const videoContainer = document.getElementById('videos');
