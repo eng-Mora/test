@@ -255,8 +255,24 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     // Check if code is a review access code → return review info
+    // بتستخدم index مخزون في localStorage لو موجود عشان تتجنب تحميل reviews كلها
     async function getReviewByCode(code) {
         try {
+            // حاول من الـ index الـ cached أولاً
+            const cachedRcId = localStorage.getItem('rv_idx_' + code);
+            if (cachedRcId) {
+                const snap = await get(ref(db, 'reviews/' + cachedRcId));
+                if (snap.exists()) {
+                    const rc = snap.val();
+                    const accessCodes = rc.accessCodes ? Object.values(rc.accessCodes).map(String) : [];
+                    if (accessCodes.includes(String(code))) {
+                        return { rcId: cachedRcId, code: rc.code || cachedRcId, desc: rc.desc || '', videos: rc.videos || {} };
+                    }
+                }
+                // الـ cache بقى قديم — امسحه وكمّل للفحص الكامل
+                localStorage.removeItem('rv_idx_' + code);
+            }
+            // فحص كامل — بس لو مفيش cache
             const snap = await get(ref(db, 'reviews'));
             if (!snap || !snap.exists()) return null;
             const reviews = snap.val();
@@ -265,6 +281,8 @@ document.addEventListener('DOMContentLoaded', async function () {
                 if (!rc || !rc.accessCodes) continue;
                 const accessCodes = Object.values(rc.accessCodes);
                 if (accessCodes.map(String).includes(String(code))) {
+                    // خزّن الـ index عشان المرة الجاية تبقى أسرع
+                    localStorage.setItem('rv_idx_' + code, rcId);
                     return { rcId, code: rc.code || rcId, desc: rc.desc || '', videos: rc.videos || {} };
                 }
             }
@@ -631,84 +649,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             } catch (e) { /* non-blocking */ }
         };
 
-        // ── Switch Day Tab ────────────────────────────────────
-        window._switchDay = function(di) {
-            document.querySelectorAll('.tasks-day-tab').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tasks-day-panel').forEach(p => p.classList.remove('active'));
-            const tab = document.getElementById('dayTab_'+di);
-            const panel = document.getElementById('dayPanel_'+di);
-            if(tab) tab.classList.add('active');
-            if(panel) panel.classList.add('active');
-        };
-
-        // ── Toggle Task ───────────────────────────────────────
-        window._toggleTask = function (dayIdx, taskIdx, checked, rcId) {
-            const loggedUser = localStorage.getItem('username');
-            if (!loggedUser) return;
-
-            if (dayIdx >= 0) {
-                // Day-based: path = studentProgress/{user}/{rcId}/tasks/d{di}/{ti}
-                set(ref(db, `studentProgress/${loggedUser}/${rcId}/tasks/d${dayIdx}/${taskIdx}`), checked);
-                const item = document.getElementById(`task_${dayIdx}_${taskIdx}`);
-                if (item) item.classList.toggle('done', checked);
-            } else {
-                // Flat fallback
-                set(ref(db, `studentProgress/${loggedUser}/${rcId}/tasks/${taskIdx}`), checked);
-                const item = document.getElementById(`task_flat_${taskIdx}`);
-                if (item) item.classList.toggle('done', checked);
-            }
-
-            // ── إعادة حساب الـ progress الكلي ──────────────
-            const allBoxes = document.querySelectorAll('.task-checkbox');
-            const total    = allBoxes.length;
-            const doneNow  = Array.from(allBoxes).filter(b => b.checked).length;
-
-            const badge = document.getElementById('tasksBadge');
-            const bar   = document.getElementById('tasksBarFill');
-            if (badge) {
-                badge.textContent = `${doneNow}/${total} ✓`;
-                const allDone = doneNow === total;
-                badge.classList.toggle('all-done', allDone);
-                if (bar) bar.style.width = total > 0 ? Math.round((doneNow/total)*100)+'%' : '0%';
-
-                // تحديث badge اليوم الحالي
-                if (dayIdx >= 0) {
-                    const dayBoxes = document.querySelectorAll(`#dayPanel_${dayIdx} .task-checkbox`);
-                    const dayDone  = Array.from(dayBoxes).filter(b=>b.checked).length;
-                    const dayTab   = document.getElementById('dayTab_'+dayIdx);
-                    if (dayTab) {
-                        const dBadge = dayTab.querySelector('.tasks-day-tab-badge');
-                        if (dBadge) {
-                            dBadge.textContent = `${dayDone}/${dayBoxes.length}`;
-                            dBadge.classList.toggle('done', dayDone===dayBoxes.length && dayBoxes.length>0);
-                        }
-                    }
-                    // Toast لما يخلص مهام اليوم ده بس
-                    if (checked && dayDone === dayBoxes.length && dayBoxes.length > 0) {
-                        const dayPanel = document.getElementById('dayPanel_'+dayIdx);
-                        const dayMsg   = dayPanel ? dayPanel.dataset.successMsg : '';
-                        const toast    = document.getElementById('tasksDoneToast');
-                        if (toast) {
-                            const msgEl = toast.querySelector('.tasks-done-toast-msg');
-                            if (msgEl) msgEl.textContent = dayMsg || 'تسلم كدا، انت ماشي على الخطة مظبوط ❤️';
-                            const titleEl = toast.querySelector('.tasks-done-toast-title');
-                            if (titleEl) titleEl.textContent = 'أنجزت مهام اليوم! 🔥';
-                            toast.classList.add('show');
-                            setTimeout(() => toast.classList.remove('show'), 4500);
-                        }
-                    }
-                }
-
-                // Toast لما يخلص كل المهام (كل الأيام — flat fallback فقط)
-                if (allDone && checked && dayIdx < 0) {
-                    const toast = document.getElementById('tasksDoneToast');
-                    if (toast) {
-                        toast.classList.add('show');
-                        setTimeout(() => toast.classList.remove('show'), 4500);
-                    }
-                }
-            }
-        };
+        // tasks في السايدبار فقط — _switchDay و _toggleTask اتشالوا
 
         // ── Sidebar Tasks Sync ───────────────────────────────
         // بيبني المهام في السايدبار ويزامنها مع checkboxes الصفحة
@@ -724,31 +665,18 @@ document.addEventListener('DOMContentLoaded', async function () {
             }
             panel.style.display = '';
 
-            // حساب الـ progress الكلي للـ badge
+            // حساب الـ progress الكلي من الـ sb-task-items مباشرة
             function updateSidebarBadge() {
-                const allBoxes  = document.querySelectorAll('.task-checkbox');
-                const total     = allBoxes.length;
-                const doneCount = Array.from(allBoxes).filter(b => b.checked).length;
+                const allItems  = document.querySelectorAll('.sb-task-item');
+                const total     = allItems.length;
+                const doneCount = Array.from(allItems).filter(el => el.classList.contains('done')).length;
                 if (badge) {
                     badge.textContent = `${doneCount}/${total}`;
                     badge.classList.toggle('all-done', total > 0 && doneCount === total);
                 }
-                // sync كل item في السايدبار
-                document.querySelectorAll('.sb-task-item').forEach(item => {
-                    const ref = item.dataset.taskRef;
-                    const chk = ref ? document.querySelector(`.task-checkbox[data-sb-ref="${ref}"]`) : null;
-                    if (chk) {
-                        item.classList.toggle('done', chk.checked);
-                        const icon = item.querySelector('.sb-task-icon');
-                        if (icon) icon.textContent = chk.checked ? '✓' : '';
-                        const txt = item.querySelector('.sb-task-text');
-                        if (txt) txt.style.textDecoration = chk.checked ? 'line-through' : '';
-                    }
-                });
             }
 
             let html = '';
-            let sbCurDay = 0;
 
             if (isDayBased) {
                 // Day tabs
