@@ -12,52 +12,54 @@ const app = initializeApp({
 });
 const db = getDatabase(app);
 
-// ── Device Fingerprint — معرف ثابت لكل جهاز/متصفح ──────────
-// بيتولّد مرة واحدة بس ويتخزن في localStorage، وييفضل ثابت طول عمر المتصفح
-// (حتى لو الطالب قفل المتصفح وفتحه تاني، أو غيّر شبكة الإنترنت/IP)
+// ── Device ID — معرف عشوائي فريد لكل جهاز/متصفح ──────────
+// بيتولّد مرة واحدة بس (crypto.randomUUID) وبيتخزن في مكانين مختلفين
+// (localStorage + cookie) عشان لو iOS Safari مسح واحد يفضل التاني موجود.
+// ملحوظة: متعمدين معملناش الـ ID من خصائص الجهاز (fingerprint) لأن
+// أجهزة من نفس الموديل/الإصدار بتطلع بنفس الـ fingerprint بالظبط،
+// وده كان بيخلي أكتر من جهاز حقيقي يتقبلوا كـ "نفس الجهاز".
+
+function readCookie(name) {
+    const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+    return match ? decodeURIComponent(match[1]) : null;
+}
+
+function writeCookie(name, value) {
+    // سنة كاملة، عبر كل المسارات
+    try {
+        document.cookie = `${name}=${encodeURIComponent(value)}; max-age=${60 * 60 * 24 * 365}; path=/; SameSite=Lax`;
+    } catch (e) { /* non-blocking */ }
+}
+
+function generateDeviceId() {
+    if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+        return 'dev-' + window.crypto.randomUUID();
+    }
+    // fallback لو randomUUID مش متاح (متصفح قديم جدًا)
+    return 'dev-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
+}
+
 function getOrCreateDeviceId() {
-    // iOS Safari بيمسح localStorage في بعض الحالات —
-    // نبني fingerprint من خصائص الجهاز الثابتة كـ primary،
-    // ونخزنه في localStorage كـ cache بس مش نعتمد عليه لوحده
+    // 1. جرب localStorage الأول
+    let fromLocal = null;
+    try { fromLocal = localStorage.getItem('deviceId'); } catch (e) { /* non-blocking */ }
 
-    function buildFingerprint() {
-        const nav = window.navigator;
-        const scr = window.screen;
-        const parts = [
-            nav.userAgent || '',
-            nav.language || '',
-            (nav.languages || []).join(','),
-            scr.width + 'x' + scr.height,
-            scr.colorDepth || '',
-            nav.hardwareConcurrency || '',
-            nav.platform || '',
-            Intl.DateTimeFormat().resolvedOptions().timeZone || '',
-        ];
-        // hash بسيط
-        let h = 0;
-        const str = parts.join('|');
-        for (let i = 0; i < str.length; i++) {
-            h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
-        }
-        return 'fp-' + Math.abs(h).toString(36);
+    // 2. جرب الـ cookie
+    const fromCookie = readCookie('deviceId');
+
+    // لو الاتنين موجودين ومتطابقين، أو واحد منهم موجود — استخدمه واتأكد إنه متخزن في المكانين
+    const id = fromLocal || fromCookie;
+    if (id) {
+        try { localStorage.setItem('deviceId', id); } catch (e) { /* non-blocking */ }
+        writeCookie('deviceId', id);
+        return id;
     }
 
-    const fp = buildFingerprint();
-
-    // لو في localStorage نسخة قديمة random — نستبدلها بالـ fingerprint
-    let stored = localStorage.getItem('deviceId');
-    if (!stored || stored.startsWith('dev-')) {
-        // stored قديم أو مش موجود — خلّي الـ fingerprint هو الـ id
-        try { localStorage.setItem('deviceId', fp); } catch(e) {}
-        return fp;
-    }
-    // لو stored fingerprint بالفعل — تأكد إنه ماشي مع الجهاز ده
-    if (stored === fp) return fp;
-
-    // stored مختلف — ممكن يكون جهاز تاني أو iOS مسح وجدد
-    // نعيد الـ fingerprint عشان يتطابق مع Firebase لو اتسجل قبل كده بـ fp
-    try { localStorage.setItem('deviceId', fp); } catch(e) {}
-    return fp;
+    // 3. مفيش أي نسخة متخزنة — جهاز جديد فعليًا، نولّد ID عشوائي فريد
+    const newId = generateDeviceId();
+    try { localStorage.setItem('deviceId', newId); } catch (e) { /* non-blocking */ }
+    writeCookie('deviceId', newId);
+    return newId;
 }
 
 // ── جلب IP الطالب عبر خدمة خارجية مجانية ──────────────────
@@ -270,22 +272,21 @@ document.addEventListener('DOMContentLoaded', async function () {
             return { ok: true }; // نفس الجهاز المسجل من قبل
         }
 
-        // ── iOS Safari fix: لو IP نفس آخر دخول ناجح نحدّث الـ deviceId ──
+        // ── جهاز مختلف فعليًا — نسجل المحاولة المرفوضة في blockedAttempts ──
+        // (شلنا هنا الـ IP-bypass القديم لأن الـ IP بيتشارك بين مستخدمين كتير
+        // على نفس شبكة الموبايل/الواي فاي في مصر، وده كان بيسمح لأي حد
+        // على نفس الشبكة إنه يسجل نفسه كـ"الجهاز الرسمي" الجديد)
         try {
             const ip = await getClientIp();
             const lastIp = regData && regData.lastSuccessIp ? regData.lastSuccessIp : null;
-            if (lastIp && ip && lastIp === ip) {
-                const lock2 = await getReviewLockPath(code);
-                await set(ref(db, `${lock2.path}/deviceId`), myDeviceId);
-                return { ok: true };
-            }
+            const sameNetwork = !!(lastIp && ip && lastIp === ip);
             await push(ref(db, `blockedAttempts/${code}`), {
                 at: Date.now(),
                 ip: ip,
                 deviceType: getDeviceType(),
                 browser: getBrowserName(),
                 studentName: (reviewInfo && reviewInfo.desc) ? reviewInfo.desc : 'مراجعة',
-                sameNetwork: false,
+                sameNetwork: sameNetwork,
                 read: false
             });
         } catch (e) { /* non-blocking */ }
