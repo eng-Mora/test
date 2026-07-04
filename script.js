@@ -168,6 +168,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     const showMain = () => { loginContainer.style.display = 'none'; mainContent.style.display = 'block'; };
 
     window.logout = function () {
+        if (deviceWatcherRef) { off(deviceWatcherRef); deviceWatcherRef = null; }
+        if (banWatcherRef) { off(banWatcherRef); banWatcherRef = null; }
         localStorage.removeItem('isLoggedIn');
         localStorage.removeItem('username');
         localStorage.removeItem('loginType');
@@ -192,6 +194,32 @@ document.addEventListener('DOMContentLoaded', async function () {
         });
     }
 
+    // ── Device Watcher — يراقب لحظيًا لو الجلسة دي بقت غير صالحة ──
+    // بيحصل في حالتين: (1) الأدمن عمل Reset للجهاز، (2) جهاز تاني دخل بنفس
+    // الكود وبقى هو المسجل بدل الجهاز الحالي. في الحالتين، الجهاز الحالي
+    // لازم يتقفل فورًا (من غير ما يستنى إعادة تحميل الصفحة).
+    let deviceWatcherRef = null;
+    function startDeviceWatcher(watchPath) {
+        if (deviceWatcherRef) off(deviceWatcherRef); // امسح المراقب القديم لو موجود
+        const myDeviceId = getOrCreateDeviceId();
+        deviceWatcherRef = ref(db, watchPath);
+        onValue(deviceWatcherRef, (snap) => {
+            const currentId = snap.exists() ? snap.val() : null;
+            if (currentId === myDeviceId) return; // كله تمام، لسه نفس الجهاز
+            // ── الجهاز ده بقى مش الجهاز الرسمي المسجل على الكود ──
+            off(deviceWatcherRef);
+            deviceWatcherRef = null;
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('username');
+            localStorage.removeItem('loginType');
+            showLogin();
+            document.getElementById('errorMessage').style.color = '#dc3545';
+            document.getElementById('errorMessage').textContent = currentId === null
+                ? '🔄 تم إعادة ضبط هذا الكود بواسطة المشرف. الرجاء تسجيل الدخول مرة أخرى.'
+                : '🔒 تم تسجيل الدخول بهذا الكود من جهاز آخر، تم إنهاء الجلسة هنا.';
+        });
+    }
+
     // Check students collection
     async function getStudent(username) {
         try {
@@ -202,6 +230,17 @@ document.addEventListener('DOMContentLoaded', async function () {
             window.__lastAuthError = 'getStudent: ' + (e && e.message ? e.message : String(e));
             return null;
         }
+    }
+
+    // ── الاسم الحقيقي لصاحب كود المراجعة ──────────────────────
+    // لو الكود ده مسجل كمان كطالب (حتى لو من غير videoCode)، استخدم اسمه الحقيقي
+    // بدل الاسم العام "مراجعة"
+    async function resolveReviewDisplayName(code, rv) {
+        try {
+            const s = await getStudent(code);
+            if (s && s.name) return s.name;
+        } catch (e) { /* non-blocking */ }
+        return (rv && rv.desc) ? rv.desc : 'مراجعة';
     }
 
     // ── Device Lock — تتأكد إن الكود مش مستخدم على جهاز تاني ──
@@ -270,10 +309,10 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (!registeredId) {
             // أول مرة يتسجل فيها جهاز لهذا الكود — نسجله ونسمح
             try { await set(ref(db, `${lockPath}/deviceId`), myDeviceId); } catch (e) { /* non-blocking */ }
-            return { ok: true };
+            return { ok: true, watchPath: `${lockPath}/deviceId` };
         }
         if (registeredId === myDeviceId) {
-            return { ok: true }; // نفس الجهاز المسجل من قبل
+            return { ok: true, watchPath: `${lockPath}/deviceId` }; // نفس الجهاز المسجل من قبل
         }
 
         // ── جهاز مختلف فعليًا — نسجل المحاولة المرفوضة في blockedAttempts ──
@@ -284,12 +323,14 @@ document.addEventListener('DOMContentLoaded', async function () {
             const ip = await getClientIp();
             const lastIp = regData && regData.lastSuccessIp ? regData.lastSuccessIp : null;
             const sameNetwork = !!(lastIp && ip && lastIp === ip);
+            const displayName = await resolveReviewDisplayName(code, reviewInfo);
             await push(ref(db, `blockedAttempts/${code}`), {
                 at: Date.now(),
                 ip: ip,
                 deviceType: getDeviceType(),
                 browser: getBrowserName(),
-                studentName: (reviewInfo && reviewInfo.desc) ? reviewInfo.desc : 'مراجعة',
+                studentName: displayName,
+                loginType: 'review',
                 sameNetwork: sameNetwork,
                 read: false
             });
@@ -361,7 +402,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 set(ref(db, `students/${urlUser}/lastSeen`), now);
                 getClientIp().then(ip => {
                     push(ref(db, `loginLogs/${urlUser}`), {
-                        at: now, name: studentFromUrl.name, ip,
+                        at: now, name: studentFromUrl.name, loginType: 'student', ip,
                         deviceType: getDeviceType(), browser: getBrowserName()
                     });
                     set(ref(db, `students/${urlUser}/lastSuccessIp`), ip);
@@ -372,6 +413,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 await loadVideoContent(studentFromUrl.videoCode, urlUser, studentFromUrl);
                 showMain();
                 startBanWatcher(urlUser);
+                startDeviceWatcher(`students/${urlUser}/deviceId`);
                 return;
             }
             // جرب review code
@@ -390,8 +432,9 @@ document.addEventListener('DOMContentLoaded', async function () {
                 localStorage.setItem('username', urlUser);
                 localStorage.setItem('loginType', 'review');
                 getClientIp().then(async ip => {
+                    const displayName = await resolveReviewDisplayName(urlUser, rvUrl);
                     push(ref(db, `loginLogs/${urlUser}`), {
-                        at: Date.now(), name: rvUrl.desc || 'مراجعة', ip,
+                        at: Date.now(), name: displayName, loginType: 'review', ip,
                         deviceType: getDeviceType(), browser: getBrowserName()
                     });
                     const lock = await getReviewLockPath(urlUser);
@@ -399,6 +442,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 });
                 await loadReviewContent(rvUrl, urlUser);
                 showMain();
+                startDeviceWatcher(reviewDeviceCheckUrl.watchPath);
                 return;
             }
             // الكود مش موجود — وريه رسالة خطأ في اللوجين
@@ -427,7 +471,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                         document.getElementById('errorMessage').textContent = '🔒 هذا الكود مستخدم على جهاز آخر، تواصل مع المشرف';
                         return;
                     }
-                    await loadReviewContent(rv, username); showMain(); return;
+                    await loadReviewContent(rv, username); showMain(); startDeviceWatcher(reviewDeviceCheckAuto.watchPath); return;
                 }
             }
             const student = await getStudent(username);
@@ -457,6 +501,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 await loadVideoContent(student.videoCode, username, student);
                 showMain();
                 startBanWatcher(username);
+                startDeviceWatcher(`students/${username}/deviceId`);
             } else { showLogin(); }
         } else { showLogin(); }
     }
@@ -486,8 +531,9 @@ document.addEventListener('DOMContentLoaded', async function () {
             localStorage.setItem('username', username);
             localStorage.setItem('loginType', 'review');
             getClientIp().then(async ip => {
+                const displayName = await resolveReviewDisplayName(username, rv);
                 push(ref(db, `loginLogs/${username}`), {
-                    at: Date.now(), name: rv.desc || 'مراجعة', ip,
+                    at: Date.now(), name: displayName, loginType: 'review', ip,
                     deviceType: getDeviceType(), browser: getBrowserName()
                 });
                 const lock = await getReviewLockPath(username);
@@ -495,6 +541,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             });
             await loadReviewContent(rv, username);
             showMain();
+            startDeviceWatcher(reviewDeviceCheck.watchPath);
             videoContainer.scrollIntoView({ behavior: 'smooth' });
             return;
         }
@@ -523,7 +570,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             set(ref(db, `students/${username}/lastSeen`), now);
             getClientIp().then(ip => {
                 push(ref(db, `loginLogs/${username}`), {
-                    at: now, name: student.name, ip,
+                    at: now, name: student.name, loginType: 'student', ip,
                     deviceType: getDeviceType(), browser: getBrowserName()
                 });
                 set(ref(db, `students/${username}/lastSuccessIp`), ip);
@@ -532,6 +579,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             await loadVideoContent(student.videoCode, username, student);
             showMain();
             startBanWatcher(username);
+            startDeviceWatcher(`students/${username}/deviceId`);
             videoContainer.scrollIntoView({ behavior: 'smooth' });
         } else {
             errEl.style.color = '#dc3545';
@@ -837,12 +885,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         }
 
-        // عرض الفيديو الأول تلقائياً
-        if (sorted.length > 0) {
-            const sel = document.getElementById('rvSelect');
-            if (sel) sel.value = '0';
-            window._rvShow('0');
-        }
+        // ملحوظة: مفيش عرض تلقائي لأول فيديو — الطالب لازم يختار من الليست بنفسه
     }
 
     // ── Build video card HTML ─────────────────────────────────
