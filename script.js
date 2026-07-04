@@ -197,7 +197,11 @@ document.addEventListener('DOMContentLoaded', async function () {
         try {
             const snap = await get(ref(db, 'students/' + username));
             return snap.exists() ? snap.val() : null;
-        } catch { return null; }
+        } catch (e) {
+            console.warn('getStudent error (non-blocking):', e);
+            window.__lastAuthError = 'getStudent: ' + (e && e.message ? e.message : String(e));
+            return null;
+        }
     }
 
     // ── Device Lock — تتأكد إن الكود مش مستخدم على جهاز تاني ──
@@ -328,6 +332,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             return null;
         } catch (e) {
             console.warn('getReviewByCode error (non-blocking):', e);
+            window.__lastAuthError = 'getReviewByCode: ' + (e && e.message ? e.message : String(e));
             return null;
         }
     }
@@ -461,6 +466,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         e.preventDefault();
         const username = document.getElementById('username').value.trim();
         const errEl = document.getElementById('errorMessage');
+        window.__lastAuthError = null; // ← تصفير قبل كل محاولة، للتشخيص المؤقت
         errEl.style.color = '#888';
         errEl.textContent = '⏳ جاري التحقق...';
 
@@ -529,7 +535,14 @@ document.addEventListener('DOMContentLoaded', async function () {
             videoContainer.scrollIntoView({ behavior: 'smooth' });
         } else {
             errEl.style.color = '#dc3545';
-            errEl.textContent = 'Invalid access code, please try again';
+            // ── وضع تشخيص مؤقت: لو فيه error حقيقي اتمسك (شبكة/Firebase) وريه تحت الرسالة ──
+            if (window.__lastAuthError) {
+                errEl.innerHTML = 'Invalid access code, please try again' +
+                    '<br><span style="font-size:11px;opacity:.75;direction:ltr;display:inline-block;margin-top:4px;">DEBUG: ' +
+                    window.__lastAuthError.replace(/</g, '&lt;') + '</span>';
+            } else {
+                errEl.textContent = 'Invalid access code, please try again';
+            }
         }
     });
 
