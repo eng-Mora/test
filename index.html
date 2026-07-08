@@ -261,7 +261,7 @@ tbody tr:hover{background:var(--surface-2);}
 </head>
 <body>
 
-<div id="bootLoader"><div class="pulse-dot"></div><span>جاري تحميل النظام…</span></div>
+<div id="bootLoader"><div class="pulse-dot"></div><span id="bootLoaderMsg">جاري تحميل النظام…</span><span id="bootLoaderErr" style="color:var(--red); font-size:12.5px; max-width:340px; text-align:center; display:none;"></span></div>
 
 <div id="toastWrap"></div>
 
@@ -330,12 +330,23 @@ tbody tr:hover{background:var(--surface-2);}
 const firebaseConfig = {
   apiKey: "AIzaSyBBHUWqxFsaIn442PSuieSlbhrpB7awwAw",
   authDomain: "exam-result-system-ca200.firebaseapp.com",
+  databaseURL: "https://exam-result-system-ca200-default-rtdb.firebaseio.com",
   projectId: "exam-result-system-ca200",
   storageBucket: "exam-result-system-ca200.firebasestorage.app",
   messagingSenderId: "149705342999",
   appId: "1:149705342999:web:f62b7172af711a94531c52"
-};firebase.initializeApp(firebaseConfig);
-const rtdb = firebase.database();
+};
+let rtdb;
+try{
+  firebase.initializeApp(firebaseConfig);
+  rtdb = firebase.database();
+}catch(e){
+  console.error('Firebase init error', e);
+  window.addEventListener('DOMContentLoaded', ()=>{
+    const errBox = document.getElementById('bootLoaderErr');
+    if(errBox){ errBox.style.display='block'; errBox.textContent = 'فشل تهيئة Firebase: ' + e.message; }
+  });
+}
 
 /* ---------- 2) أدوات عامة ---------- */
 const Utils = {
@@ -366,6 +377,7 @@ const DB = {
   initListeners(cb){
     const keys = Object.keys(this.cache);
     let loaded = 0;
+    const errBox = document.getElementById('bootLoaderErr');
     keys.forEach(key=>{
       const ref = rtdb.ref(key);
       const handler = ref.on('value', snap=>{
@@ -373,9 +385,19 @@ const DB = {
         loaded++;
         if(loaded===keys.length && cb) { cb(); cb=null; }
         UI.onDataChange(key);
-      }, err=>{ console.error('DB read error @'+key, err); if(loaded<keys.length){loaded++; if(loaded===keys.length && cb){cb(); cb=null;}} });
+      }, err=>{
+        console.error('DB read error @'+key, err);
+        if(errBox){ errBox.style.display='block'; errBox.textContent = 'خطأ في الاتصال بقاعدة البيانات (' + key + '): ' + (err && err.message ? err.message : err); }
+        if(loaded<keys.length){loaded++; if(loaded===keys.length && cb){cb(); cb=null;}}
+      });
       this.listeners.push({ref,handler});
     });
+    setTimeout(()=>{
+      if(loaded<keys.length && errBox && errBox.style.display==='none'){
+        errBox.style.display='block';
+        errBox.textContent = 'النظام مستني رد من Firebase من 8 ثواني ولسه محصلش. تأكد إن الـ Realtime Database متفعّلة في مشروعك وإن الـ databaseURL صح، وإن الـ Rules بتسمح بالقراءة.';
+      }
+    }, 8000);
   },
 
   add(collection, data){
@@ -684,6 +706,11 @@ const PageAfterRender = {};
 const Boot = {
   init(){
     UI.applyTheme();
+    if(!rtdb){
+      const errBox = document.getElementById('bootLoaderErr');
+      if(errBox){ errBox.style.display='block'; errBox.textContent = 'تعذر الاتصال بـ Firebase — تأكد من صحة الإعدادات.'; }
+      return;
+    }
     DB.initListeners(()=>{
       document.getElementById('bootLoader').style.display='none';
       if(Auth.restoreSession()){
