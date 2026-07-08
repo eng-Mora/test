@@ -1090,6 +1090,7 @@ PageRenderers.teachers = function(){
   </div>`;
 };
 
+const Teachers = {};
 Teachers.openForm = function(id){
   const t = id ? DB.get('teachers', id) : {};
   UI.modal(`
@@ -1229,6 +1230,7 @@ PageRenderers.classrooms = function(){
   `;
 };
 
+const Classrooms = {};
 Classrooms.weeklyGrid = function(rooms){
   if(!rooms.length) return '';
   const days = ['السبت','الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة'];
@@ -1316,6 +1318,7 @@ PageRenderers.groups = function(){
   </div>`;
 };
 
+const Groups = {};
 Groups.openForm = function(id){
   const g = id? DB.get('groups', id):{};
   const teachers = DB.list('teachers');
