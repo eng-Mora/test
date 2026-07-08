@@ -696,7 +696,7 @@ const Pages = {
       if(PageAfterRender[key]) PageAfterRender[key]();
     }catch(e){
       console.error('render error', key, e);
-      if(!silent) root.innerHTML = '<div class="empty-state"><div class="ic">⚠️</div>حصل خطأ في عرض الصفحة</div>';
+      if(!silent) root.innerHTML = '<div class="empty-state"><div class="ic">⚠️</div>حصل خطأ في عرض الصفحة<div style="direction:ltr; text-align:left; font-size:12px; color:var(--text-faint); margin-top:10px; white-space:pre-wrap; max-width:600px;">'+ Utils.esc((e && e.message)||String(e)) + '\n' + Utils.esc((e && e.stack)||'') +'</div></div>';
     }
   }
 };
