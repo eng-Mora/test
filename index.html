@@ -2,888 +2,717 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
-<title>مورا شات</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>لوحة تحكم Mora</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Markazi+Text:wght@500;600;700&family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <style>
   :root{
-    --bg-dark:#132420;
-    --bg-dark-2:#1B332C;
-    --bg-dark-3:#20463b;
-    --bg-parchment:#F6F0E4;
-    --bg-parchment-2:#EFE6D3;
-    --accent-amber:#C98A3E;
-    --accent-amber-deep:#A8702E;
-    --accent-teal:#3E8E7E;
-    --text-dark:#21302B;
-    --text-light:#F6F0E4;
-    --text-muted:#8FA79E;
-    --text-muted-2:#7c8f89;
-    --danger:#C1524A;
-    --radius:16px;
-    --radius-sm:10px;
+    --bg:#0b0a12;
+    --panel:#151220;
+    --panel-2:#1c1829;
+    --line:#2b2640;
+    --text:#efe9f7;
+    --text-dim:#948da7;
+    --violet:#8b7bff;
+    --violet-2:#c9a8ff;
+    --violet-dim:#463c73;
+    --violet-glow:rgba(139,123,255,.35);
+    --danger:#ff7a6e;
+    --ok:#7be2a0;
+    --radius:18px;
   }
   *{box-sizing:border-box;}
-  html,body{height:100%;}
+  html,body{height:100%;margin:0;}
   body{
-    margin:0;
-    font-family:'Tajawal',sans-serif;
-    background:var(--bg-dark);
-    color:var(--text-dark);
-    overflow:hidden;
-  }
-  .display-font{font-family:'Markazi Text',serif;}
-
-  /* ===== Loading ===== */
-  #loadingScreen{
-    position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
-    background:var(--bg-dark);color:var(--text-light);z-index:999;flex-direction:column;gap:14px;
-  }
-  .spinner{
-    width:38px;height:38px;border-radius:50%;
-    border:3px solid rgba(246,240,228,0.2);
-    border-top-color:var(--accent-amber);
-    animation:spin 0.9s linear infinite;
-  }
-  @keyframes spin{to{transform:rotate(360deg);}}
-
-  /* ===== Login ===== */
-  #loginScreen{
-    position:fixed;inset:0;display:none;align-items:center;justify-content:center;
     background:
-      radial-gradient(circle at 20% 15%, rgba(201,138,62,0.18), transparent 45%),
-      radial-gradient(circle at 85% 80%, rgba(62,142,126,0.22), transparent 50%),
-      var(--bg-dark);
+      radial-gradient(900px 500px at 15% -10%, rgba(139,123,255,.14), transparent 60%),
+      radial-gradient(700px 500px at 100% 0%, rgba(201,168,255,.10), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Sans Arabic', sans-serif;
+    min-height:100%;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
     padding:24px;
   }
-  .login-card{
-    width:100%;max-width:400px;
-    background:var(--bg-dark-2);
-    border:1px solid rgba(246,240,228,0.08);
-    border-radius:22px;
-    padding:38px 30px 30px;
-    box-shadow:0 30px 60px -20px rgba(0,0,0,0.6);
-    text-align:center;
+
+  .card{
+    width:100%;
+    max-width:460px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:26px;
+    margin-top:4vh;
+    transition:max-width .15s;
   }
-  .login-mark{
-    width:58px;height:58px;border-radius:16px;margin:0 auto 18px;
-    background:linear-gradient(135deg,var(--accent-amber),var(--accent-amber-deep));
+  .card.wide{ max-width:640px; }
+
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:11px;
+    margin-bottom:22px;
+  }
+  .brand-logo{
+    width:34px;height:34px;
+    border-radius:11px;
+    flex-shrink:0;
+    background:conic-gradient(from 200deg, var(--violet), var(--violet-2), #6a5cf0, var(--violet));
     display:flex;align-items:center;justify-content:center;
-    font-size:28px;color:#1c1206;font-weight:700;
-    box-shadow:0 10px 24px -8px rgba(201,138,62,0.6);
+    box-shadow:0 0 0 1px rgba(255,255,255,.06) inset, 0 0 18px var(--violet-glow);
   }
-  .login-title{
-    color:var(--text-light);font-size:32px;font-weight:600;margin:0 0 4px;
-    letter-spacing:0.5px;
+  .brand-logo span{ font-family:'Cairo',sans-serif; font-weight:800; font-size:16px; color:#100c1e; }
+  .brand h1{ font-family:'Cairo',sans-serif; font-size:17px; font-weight:800; margin:0; }
+  .brand span.tag{
+    display:block; font-size:11px; color:var(--text-dim);
+    font-family:'JetBrains Mono',monospace; letter-spacing:.5px; margin-top:1px;
   }
-  .login-sub{color:var(--text-muted);font-size:14px;margin:0 0 28px;}
-  .field{text-align:right;margin-bottom:14px;}
+
+  h3{ margin:0 0 4px; font-size:17px; font-family:'Cairo',sans-serif; font-weight:800; }
+  .sub{ color:var(--text-dim); font-size:12.5px; margin:0 0 18px; line-height:1.7; }
+
+  .field{ margin-bottom:14px; }
   .field label{
-    display:block;color:var(--text-muted);font-size:12.5px;margin-bottom:6px;font-weight:700;
+    display:block; font-size:12.5px; color:var(--text-dim);
+    margin-bottom:6px; font-family:'JetBrains Mono',monospace;
   }
-  .field input{
-    width:100%;padding:13px 14px;border-radius:12px;border:1px solid rgba(246,240,228,0.12);
-    background:var(--bg-dark);color:var(--text-light);font-family:'Tajawal',sans-serif;
-    font-size:15px;outline:none;transition:border-color .15s;
+  .field input, .field select, .field textarea{
+    width:100%;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    color:var(--text);
+    padding:11px 12px;
+    border-radius:10px;
+    font-size:13.5px;
+    font-family:'JetBrains Mono',monospace;
+    direction:ltr;
+    text-align:left;
   }
-  .field input:focus{border-color:var(--accent-amber);}
-  .field input::placeholder{color:var(--text-muted-2);}
+  .field textarea{ font-family:'IBM Plex Sans Arabic',sans-serif; direction:rtl; text-align:right; resize:vertical; min-height:80px; }
+  .field select{ font-family:'IBM Plex Sans Arabic',sans-serif; direction:rtl; text-align:right; }
+  .field input:focus, .field select:focus, .field textarea:focus{ outline:none; border-color:var(--violet-dim); box-shadow:0 0 0 3px rgba(139,123,255,.08); }
+
   .btn{
-    display:inline-flex;align-items:center;justify-content:center;gap:8px;
-    padding:13px 20px;border-radius:12px;border:none;cursor:pointer;
-    font-family:'Tajawal',sans-serif;font-size:15px;font-weight:700;
-    transition:transform .12s, filter .12s;
+    width:100%;
+    padding:12px;
+    border-radius:11px;
+    border:1px solid var(--line);
+    background:var(--panel-2);
+    color:var(--text);
+    font-family:'IBM Plex Sans Arabic';
+    font-size:14px;
+    cursor:pointer;
+    transition:.15s;
   }
-  .btn:active{transform:scale(0.97);}
-  .btn-primary{
-    background:linear-gradient(135deg,var(--accent-amber),var(--accent-amber-deep));
-    color:#1c1206;width:100%;margin-top:8px;
-  }
-  .btn-primary:hover{filter:brightness(1.06);}
-  .btn-ghost{background:transparent;color:var(--text-muted);}
-  .btn-teal{background:var(--accent-teal);color:#08211b;}
-  .login-error{color:#e08a84;font-size:13px;margin-top:10px;min-height:16px;}
+  .btn.primary{ background:linear-gradient(135deg, var(--violet), var(--violet-2)); color:#100c1e; border-color:transparent; font-weight:700; }
+  .btn:hover{ filter:brightness(1.1); }
 
-  /* ===== App shell ===== */
-  #appScreen{position:fixed;inset:0;display:none;}
-  .app-shell{display:flex;height:100%;width:100%;}
+  .google-btn{
+    width:100%;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    padding:11px 16px;
+    border-radius:11px;
+    border:1px solid var(--line);
+    background:#f5f3ff;
+    color:#1a1a2e;
+    font-family:'IBM Plex Sans Arabic';
+    font-size:13.5px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .google-btn:hover{ filter:brightness(1.04); }
 
-  /* Sidebar */
-  .sidebar{
-    width:380px;min-width:380px;background:var(--bg-dark-2);
-    display:flex;flex-direction:column;border-left:1px solid rgba(246,240,228,0.06);
-  }
-  .sidebar-header{
-    padding:18px 18px 14px;display:flex;align-items:center;justify-content:space-between;
-    border-bottom:1px solid rgba(246,240,228,0.06);
-  }
-  .brand{display:flex;align-items:center;gap:10px;}
-  .brand-mark{
-    width:36px;height:36px;border-radius:10px;
-    background:linear-gradient(135deg,var(--accent-amber),var(--accent-amber-deep));
-    display:flex;align-items:center;justify-content:center;font-weight:700;color:#1c1206;font-size:18px;
-  }
-  .brand-name{color:var(--text-light);font-size:20px;font-weight:900;}
-  .header-actions{display:flex;gap:6px;}
-  .icon-btn{
-    width:36px;height:36px;border-radius:10px;border:none;background:transparent;
-    color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;
-    transition:background .15s,color .15s;
-  }
-  .icon-btn:hover{background:rgba(246,240,228,0.08);color:var(--text-light);}
-  .icon-btn svg{width:19px;height:19px;}
+  .row2{ display:flex; gap:8px; }
+  .row2 .btn{ flex:1; }
 
-  .sidebar-search{padding:12px 16px;}
-  .sidebar-search input{
-    width:100%;padding:10px 14px;border-radius:10px;border:1px solid rgba(246,240,228,0.1);
-    background:var(--bg-dark);color:var(--text-light);font-family:'Tajawal',sans-serif;font-size:14px;outline:none;
-  }
-  .sidebar-search input:focus{border-color:var(--accent-teal);}
-
-  .chat-list{flex:1;overflow-y:auto;padding:4px 8px 12px;}
-  .chat-list::-webkit-scrollbar{width:6px;}
-  .chat-list::-webkit-scrollbar-thumb{background:rgba(246,240,228,0.12);border-radius:3px;}
-
-  .chat-item{
-    display:flex;align-items:center;gap:12px;padding:11px 10px;border-radius:12px;cursor:pointer;
-    transition:background .15s;position:relative;
-  }
-  .chat-item:hover{background:rgba(246,240,228,0.05);}
-  .chat-item.active{background:rgba(201,138,62,0.16);}
-  .avatar{
-    width:46px;height:46px;min-width:46px;border-radius:50%;
-    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:17px;color:#fff;
-    background:linear-gradient(135deg,var(--accent-teal),#2b6355);position:relative;
-  }
-  .avatar.group{background:linear-gradient(135deg,var(--accent-amber),var(--accent-amber-deep));color:#1c1206;}
-  .online-dot{
-    position:absolute;bottom:-1px;left:-1px;width:12px;height:12px;border-radius:50%;
-    background:#4ADE80;border:2.5px solid var(--bg-dark-2);
-  }
-  .chat-item-body{flex:1;min-width:0;}
-  .chat-item-top{display:flex;justify-content:space-between;align-items:baseline;gap:6px;}
-  .chat-item-name{color:var(--text-light);font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .chat-item-time{color:var(--text-muted-2);font-size:11px;white-space:nowrap;}
-  .chat-item-preview{color:var(--text-muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
-  .unread-dot{width:9px;height:9px;border-radius:50%;background:var(--accent-amber);min-width:9px;}
-
-  .empty-list{padding:40px 20px;text-align:center;color:var(--text-muted);font-size:13.5px;line-height:1.9;}
-  .empty-list svg{width:44px;height:44px;color:var(--text-muted-2);margin-bottom:10px;}
-
-  /* Chat area */
-  .chat-area{flex:1;display:flex;flex-direction:column;background:var(--bg-parchment);position:relative;}
-  .chat-area-empty{
-    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-    color:var(--text-muted-2);gap:14px;
-  }
-  .chat-area-empty .display-font{font-size:26px;color:#5a6f68;}
-  .chat-header{
-    padding:14px 22px;background:var(--bg-parchment-2);border-bottom:1px solid rgba(33,48,43,0.08);
-    display:flex;align-items:center;gap:12px;
-  }
-  .chat-header-info{flex:1;min-width:0;}
-  .chat-header-name{font-size:16.5px;font-weight:700;color:var(--text-dark);}
-  .chat-header-status{font-size:12.5px;color:var(--text-muted-2);margin-top:1px;}
-
-  .messages{flex:1;overflow-y:auto;padding:22px;display:flex;flex-direction:column;gap:3px;}
-  .messages::-webkit-scrollbar{width:6px;}
-  .messages::-webkit-scrollbar-thumb{background:rgba(33,48,43,0.15);border-radius:3px;}
-  .msg-row{display:flex;margin-bottom:8px;}
-  .msg-row.mine{justify-content:flex-start;}
-  .msg-row.theirs{justify-content:flex-end;}
-  .bubble{
-    max-width:62%;padding:10px 14px;border-radius:16px;font-size:14.5px;line-height:1.65;
-    position:relative;word-wrap:break-word;
-  }
-  .msg-row.mine .bubble{
-    background:linear-gradient(135deg,var(--accent-amber),var(--accent-amber-deep));
-    color:#20140a;border-bottom-left-radius:4px;
-  }
-  .msg-row.theirs .bubble{
-    background:#fff;color:var(--text-dark);border-bottom-right-radius:4px;
-    box-shadow:0 1px 2px rgba(33,48,43,0.08);
-  }
-  .bubble .sender-name{display:block;font-size:11.5px;font-weight:700;color:var(--accent-teal);margin-bottom:2px;}
-  .bubble .msg-time{display:block;font-size:10px;opacity:0.6;margin-top:4px;text-align:left;}
-
-  .composer{
-    display:flex;gap:10px;padding:14px 18px;background:var(--bg-parchment-2);
-    border-top:1px solid rgba(33,48,43,0.08);align-items:flex-end;
-  }
-  .composer textarea{
-    flex:1;resize:none;border-radius:14px;border:1px solid rgba(33,48,43,0.12);
-    padding:12px 16px;font-family:'Tajawal',sans-serif;font-size:14.5px;outline:none;
-    max-height:120px;background:#fff;color:var(--text-dark);line-height:1.5;
-  }
-  .composer textarea:focus{border-color:var(--accent-teal);}
-  .send-btn{
-    width:46px;height:46px;border-radius:50%;border:none;cursor:pointer;
-    background:linear-gradient(135deg,var(--accent-amber),var(--accent-amber-deep));
-    display:flex;align-items:center;justify-content:center;flex-shrink:0;
-    box-shadow:0 6px 14px -4px rgba(201,138,62,0.55);
-  }
-  .send-btn svg{width:20px;height:20px;color:#20140a;transform:scaleX(-1);}
-  .send-btn:active{transform:scale(0.94);}
-
-  /* Modals */
-  .modal-overlay{
-    position:fixed;inset:0;background:rgba(10,15,13,0.6);display:none;
-    align-items:center;justify-content:center;z-index:200;padding:20px;
-  }
-  .modal{
-    width:100%;max-width:420px;background:var(--bg-dark-2);border-radius:20px;
-    padding:24px;color:var(--text-light);max-height:85vh;display:flex;flex-direction:column;
-  }
-  .modal-title{font-size:19px;font-weight:900;margin:0 0 16px;}
-  .modal-close{position:absolute;top:16px;left:16px;}
-  .modal-body{overflow-y:auto;}
-  .search-result{
-    display:flex;align-items:center;gap:12px;padding:10px;border-radius:12px;
-  }
-  .search-result:hover{background:rgba(246,240,228,0.05);}
-  .search-result-name{font-weight:700;font-size:14.5px;}
-  .search-result-phone{font-size:12px;color:var(--text-muted);direction:ltr;text-align:right;}
-  .chip{
-    display:inline-flex;align-items:center;gap:6px;background:rgba(62,142,126,0.18);
-    color:var(--text-light);padding:6px 10px 6px 6px;border-radius:20px;font-size:13px;margin:3px;
-  }
-  .chip button{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;padding:0;}
-  .no-results{color:var(--text-muted);text-align:center;padding:24px 8px;font-size:13.5px;}
-
-  .toast{
-    position:fixed;bottom:26px;left:50%;transform:translateX(-50%);
-    background:var(--bg-dark-3);color:var(--text-light);padding:12px 20px;border-radius:12px;
-    font-size:13.5px;z-index:500;box-shadow:0 10px 30px rgba(0,0,0,0.4);display:none;
+  hr{ border:none; border-top:1px solid var(--line); margin:20px 0; }
+  .admin-label{
+    font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--violet-2);
+    letter-spacing:1px; text-transform:uppercase; margin-bottom:12px;
   }
 
-  /* Mobile */
-  @media (max-width:760px){
-    .sidebar{width:100%;min-width:0;position:absolute;inset:0;z-index:5;}
-    .chat-area{position:absolute;inset:0;z-index:10;transform:translateX(100%);transition:transform .2s;}
-    .chat-area.mobile-open{transform:translateX(0);}
-    .sidebar.mobile-hidden{display:none;}
-    .back-btn{display:flex !important;}
-    .bubble{max-width:78%;}
+  .status{
+    font-size:12.5px;
+    padding:10px 12px;
+    border-radius:10px;
+    margin-bottom:16px;
+    display:none;
+    line-height:1.7;
   }
-  .back-btn{display:none;}
+  .status.show{ display:block; }
+  .status.ok{ background:rgba(123,226,160,.08); border:1px solid rgba(123,226,160,.3); color:var(--ok); }
+  .status.err{ background:rgba(255,122,110,.08); border:1px solid rgba(255,122,110,.3); color:#ffbcb4; }
+
+  .key-hint{ font-size:11.5px; color:var(--text-dim); margin-top:6px; line-height:1.7; }
+
+  #gate .field{ margin-bottom:18px; }
+  #panel{ display:none; }
+
+  /* ===== tabs ===== */
+  .tabbar{
+    display:flex;
+    gap:6px;
+    margin-bottom:20px;
+    border-bottom:1px solid var(--line);
+    padding-bottom:0;
+  }
+  .tab-btn{
+    background:none; border:none; cursor:pointer;
+    color:var(--text-dim);
+    font-family:'IBM Plex Sans Arabic';
+    font-size:13.5px;
+    padding:9px 4px 12px;
+    border-bottom:2px solid transparent;
+    margin-inline-end:14px;
+  }
+  .tab-btn.active{ color:var(--text); border-bottom-color:var(--violet); font-weight:700; }
+  .tab-content{ display:none; }
+  .tab-content.active{ display:block; }
+
+  /* ===== users / chats lists ===== */
+  .list-item{
+    display:flex; align-items:center; gap:10px;
+    padding:11px 10px;
+    border:1px solid var(--line);
+    border-radius:12px;
+    margin-bottom:8px;
+    cursor:default;
+  }
+  .list-item.clickable{ cursor:pointer; }
+  .list-item.clickable:hover{ border-color:var(--violet-dim); }
+  .list-item img{ width:34px;height:34px;border-radius:50%; flex-shrink:0; background:var(--panel-2); }
+  .list-item .avatar-fallback{
+    width:34px;height:34px;border-radius:50%; flex-shrink:0;
+    background:var(--violet-dim); color:var(--text);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Cairo'; font-weight:700; font-size:13px;
+  }
+  .list-item .meta{ flex:1; min-width:0; }
+  .list-item .meta .name{ font-size:13.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .list-item .meta .sub2{ font-size:11.5px; color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .list-item .side{ font-size:11px; color:var(--text-dim); font-family:'JetBrains Mono'; flex-shrink:0; text-align:left; }
+
+  .empty-hint{ text-align:center; color:var(--text-dim); font-size:13px; padding:30px 10px; }
+
+  .transcript{ display:none; }
+  .transcript.active{ display:block; }
+  .transcript-back{
+    display:flex; align-items:center; gap:6px;
+    color:var(--violet-2); font-size:13px; cursor:pointer;
+    margin-bottom:14px; background:none; border:none; font-family:inherit; padding:0;
+  }
+  .t-msg{ margin-bottom:12px; font-size:13.5px; line-height:1.8; }
+  .t-msg .who{ font-family:'JetBrains Mono'; font-size:10.5px; color:var(--violet-2); margin-bottom:3px; letter-spacing:.5px; }
+  .t-msg .body{ background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:9px 12px; white-space:pre-wrap; word-wrap:break-word; }
+  .t-msg.user .body{ background:rgba(139,123,255,.08); }
+  .t-msg .edit-link{
+    font-family:'JetBrains Mono'; font-size:10.5px; color:var(--text-dim);
+    background:none; border:none; cursor:pointer; padding:0; margin-top:4px;
+  }
+  .t-msg .edit-link:hover{ color:var(--violet-2); }
+  .t-msg textarea{
+    width:100%; background:var(--panel-2); border:1px solid var(--violet-dim);
+    color:var(--text); border-radius:10px; padding:9px 12px; font-size:13.5px;
+    font-family:'IBM Plex Sans Arabic'; resize:vertical; min-height:60px;
+  }
+  .t-msg .edit-actions{ display:flex; gap:6px; margin-top:6px; }
+  .t-msg .edit-actions .btn{ padding:7px; font-size:12px; }
+
+  .takeover-bar{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:var(--panel-2); border:1px solid var(--line); border-radius:12px;
+    padding:11px 14px; margin-bottom:16px;
+  }
+  .takeover-bar span{ font-size:12.5px; }
+  .switch{ position:relative; width:40px; height:22px; flex-shrink:0; }
+  .switch input{ opacity:0; width:0; height:0; }
+  .switch-track{
+    position:absolute; inset:0; background:var(--line); border-radius:999px; cursor:pointer; transition:.15s;
+  }
+  .switch-track::before{
+    content:""; position:absolute; width:16px; height:16px; border-radius:50%;
+    background:#fff; top:3px; right:3px; transition:.15s;
+  }
+  .switch input:checked + .switch-track{ background:var(--violet); }
+  .switch input:checked + .switch-track::before{ transform:translateX(-18px); }
+
+  .admin-reply-box{ display:flex; flex-direction:column; gap:8px; margin-top:14px; }
+  .admin-reply-box textarea{
+    width:100%; min-height:70px; background:var(--panel-2); border:1px solid var(--line);
+    color:var(--text); border-radius:12px; padding:11px 12px; font-size:13.5px;
+    font-family:'IBM Plex Sans Arabic'; resize:vertical;
+  }
+
+  .spinner-hint{ text-align:center; color:var(--text-dim); font-size:12.5px; padding:16px; }
 </style>
 </head>
 <body>
 
-<div id="loadingScreen">
-  <div class="spinner"></div>
-  <div style="font-size:13.5px;">جاري التحميل...</div>
-</div>
-
-<!-- Login -->
-<div id="loginScreen">
-  <div class="login-card">
-    <div class="login-mark">م</div>
-    <h1 class="login-title display-font">مورا شات</h1>
-    <p class="login-sub">سجّل دخولك برقم تليفونك للمتابعة</p>
-    <div class="field">
-      <label>الاسم</label>
-      <input type="text" id="loginName" placeholder="اكتب اسمك">
+<div class="card" id="card">
+  <div class="brand">
+    <div class="brand-logo"><span>M</span></div>
+    <div>
+      <h1>Mora AI</h1>
+      <span class="tag">لوحة تحكم الأدمن</span>
     </div>
-    <div class="field">
-      <label>رقم التليفون</label>
-      <input type="tel" id="loginPhone" placeholder="01xxxxxxxxx" dir="ltr" style="text-align:right;">
-    </div>
-    <button class="btn btn-primary" onclick="handleLogin()">دخول</button>
-    <div class="login-error" id="loginError"></div>
   </div>
-</div>
 
-<!-- App -->
-<div id="appScreen">
-  <div class="app-shell">
-    <div class="sidebar" id="sidebar">
-      <div class="sidebar-header">
-        <div class="brand">
-          <div class="brand-mark">م</div>
-          <div class="brand-name display-font">مورا شات</div>
-        </div>
-        <div class="header-actions">
-          <button class="icon-btn" title="محادثة جديدة" onclick="openNewChatModal()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-          </button>
-          <button class="icon-btn" title="إنشاء جروب" onclick="openNewGroupModal()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          </button>
-          <button class="icon-btn" title="تسجيل الخروج" onclick="handleLogout()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          </button>
-        </div>
-      </div>
-      <div class="sidebar-search">
-        <input type="text" id="filterChats" placeholder="فلترة المحادثات بالاسم" oninput="renderChatList()">
-      </div>
-      <div class="chat-list" id="chatList"></div>
+  <!-- بوابة الدخول -->
+  <div id="gate">
+    <h3>دخول الأدمن</h3>
+    <p class="sub">الصفحة دي مش مربوطة بواجهة الشات، وميظهرش منها أي حاجة لليوزر. اكتب كلمة المرور للدخول.</p>
+    <div class="field">
+      <label>PASSWORD</label>
+      <input type="password" id="gatePass" placeholder="••••••••">
+    </div>
+    <div id="gateStatus" class="status err"></div>
+    <button class="btn primary" id="gateSubmit">دخول</button>
+  </div>
+
+  <!-- اللوحة نفسها -->
+  <div id="panel">
+    <div class="tabbar">
+      <button class="tab-btn active" data-tab="tabSettings">الإعدادات</button>
+      <button class="tab-btn" data-tab="tabUsers">المشتركين</button>
+      <button class="tab-btn" data-tab="tabChats">المحادثات</button>
     </div>
 
-    <div class="chat-area" id="chatArea">
-      <div class="chat-area-empty" id="chatAreaEmpty">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:64px;height:64px;color:#a9b8b2;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        <div class="display-font">اختَر محادثة أو ابدأ واحدة جديدة</div>
+    <!-- تاب الإعدادات -->
+    <div class="tab-content active" id="tabSettings">
+      <p class="sub">أي تعديل هنا بيتحفظ في قاعدة بيانات مشتركة، وبيوصل لكل اليوزرز فورًا من غير ما يحتاجوا يعملوا حاجة، وعلى أي جهاز يفتحوا منه.</p>
+
+      <div id="saveStatus" class="status ok">اتحفظ بنجاح ✓</div>
+
+      <div class="field">
+        <label>API KEY</label>
+        <input type="password" id="apiKeyInput" placeholder="حط المفتاح هنا">
+        <p class="key-hint">مفتاح Gemini مجاني من <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" style="color:var(--violet-2)">aistudio.google.com/apikey</a></p>
       </div>
-      <div id="chatActive" style="display:none;height:100%;display:flex;flex-direction:column;">
-        <div class="chat-header">
-          <button class="icon-btn back-btn" onclick="closeMobileChat()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
-          </button>
-          <div class="avatar" id="chatHeaderAvatar">?</div>
-          <div class="chat-header-info">
-            <div class="chat-header-name" id="chatHeaderName">-</div>
-            <div class="chat-header-status" id="chatHeaderStatus">-</div>
+
+      <div class="field">
+        <label>MODEL</label>
+        <select id="modelSelect">
+          <option value="gemini-3.5-flash">سريع (موصى بيه)</option>
+          <option value="gemini-3.1-pro-preview">قوي (أدق، أبطأ شوية)</option>
+          <option value="gemini-3.1-flash-lite-preview">خفيف وسريع جدًا</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>شخصية Mora (system prompt)</label>
+        <textarea id="systemInput" placeholder="مثال: اسمك مورا، رد دايمًا باللهجة المصرية وبأسلوب ودود ومختصر"></textarea>
+      </div>
+
+      <hr>
+      <div class="admin-label">تغيير كلمة مرور الدخول للوحة</div>
+      <div class="field">
+        <label>كلمة مرور جديدة (اختياري)</label>
+        <input type="password" id="newPassInput" placeholder="سيبها فاضية لو مش عايز تغيّرها">
+      </div>
+
+      <div class="row2">
+        <button class="btn" id="logoutBtn">خروج</button>
+        <button class="btn primary" id="saveBtn">حفظ</button>
+      </div>
+    </div>
+
+    <!-- تاب المشتركين -->
+    <div class="tab-content" id="tabUsers">
+      <div id="usersGoogleGate">
+        <p class="sub">عرض المشتركين محتاج تسجل دخول بحساب جوجل بتاعك (نفس مستوى حماية بيانات اليوزرز الحقيقي، مش شكلي زي الباسورد).</p>
+        <button class="google-btn" id="usersGoogleBtn">
+          <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 01-1.8 2.71v2.26h2.9c1.7-1.57 2.7-3.88 2.7-6.61z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.19l-2.9-2.26c-.8.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.98v2.33A9 9 0 009 18z"/><path fill="#FBBC05" d="M3.95 10.69A5.4 5.4 0 013.68 9c0-.59.1-1.16.27-1.69V4.98H.98A9 9 0 000 9c0 1.45.35 2.83.98 4.02l2.97-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 00.98 4.98l2.97 2.33C4.66 5.17 6.65 3.58 9 3.58z"/></svg>
+          المتابعة بحساب جوجل
+        </button>
+        <p class="status err" id="usersAuthStatus"></p>
+      </div>
+      <div id="usersList" style="display:none;"></div>
+    </div>
+
+    <!-- تاب المحادثات -->
+    <div class="tab-content" id="tabChats">
+      <div id="chatsGoogleGate">
+        <p class="sub">عرض المحادثات محتاج تسجل دخول بحساب جوجل بتاعك برضو، لأن كل محادثة محمية وميقدرش يشوفها غير صاحبها أو الأدمن.</p>
+        <button class="google-btn" id="chatsGoogleBtn">
+          <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 01-1.8 2.71v2.26h2.9c1.7-1.57 2.7-3.88 2.7-6.61z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.19l-2.9-2.26c-.8.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.98v2.33A9 9 0 009 18z"/><path fill="#FBBC05" d="M3.95 10.69A5.4 5.4 0 013.68 9c0-.59.1-1.16.27-1.69V4.98H.98A9 9 0 000 9c0 1.45.35 2.83.98 4.02l2.97-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 00.98 4.98l2.97 2.33C4.66 5.17 6.65 3.58 9 3.58z"/></svg>
+          المتابعة بحساب جوجل
+        </button>
+        <p class="status err" id="chatsAuthStatus"></p>
+      </div>
+      <div id="chatsListWrap" style="display:none;">
+        <div id="chatsList"></div>
+        <div class="transcript" id="transcriptView">
+          <button class="transcript-back" id="transcriptBack">‹ رجوع لكل المحادثات</button>
+          <div class="takeover-bar">
+            <span>تولى الرد بنفسك بدل مورا</span>
+            <label class="switch">
+              <input type="checkbox" id="takeoverToggle">
+              <span class="switch-track"></span>
+            </label>
+          </div>
+          <div id="transcriptMsgs"></div>
+          <div class="admin-reply-box" id="adminReplyBox" style="display:none;">
+            <textarea id="adminReplyInput" placeholder="اكتب ردك… هيوصل لليوزر كأنه من مورا"></textarea>
+            <button class="btn primary" id="adminReplySend">إرسال</button>
           </div>
         </div>
-        <div class="messages" id="messagesBox"></div>
-        <div class="composer">
-          <textarea id="msgInput" rows="1" placeholder="اكتب رسالة..." onkeydown="handleComposerKey(event)"></textarea>
-          <button class="send-btn" onclick="sendMessage()">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
-          </button>
-        </div>
       </div>
     </div>
   </div>
 </div>
-
-<!-- New chat modal -->
-<div class="modal-overlay" id="newChatModal">
-  <div class="modal" style="position:relative;">
-    <button class="icon-btn modal-close" onclick="closeModal('newChatModal')">✕</button>
-    <h3 class="modal-title">محادثة جديدة</h3>
-    <div class="field" style="text-align:right;">
-      <label>ابحث برقم التليفون</label>
-      <input type="tel" id="searchPhoneInput" placeholder="01xxxxxxxxx" dir="ltr" style="text-align:right;" oninput="searchByPhone(this.value, 'newChatResults')">
-    </div>
-    <div class="modal-body" id="newChatResults"></div>
-  </div>
-</div>
-
-<!-- New group modal -->
-<div class="modal-overlay" id="newGroupModal">
-  <div class="modal" style="position:relative;">
-    <button class="icon-btn modal-close" onclick="closeModal('newGroupModal')">✕</button>
-    <h3 class="modal-title">إنشاء جروب جديد</h3>
-    <div class="field" style="text-align:right;">
-      <label>اسم الجروب</label>
-      <input type="text" id="groupNameInput" placeholder="اكتب اسم الجروب">
-    </div>
-    <div class="field" style="text-align:right;">
-      <label>أضف أعضاء برقم التليفون</label>
-      <input type="tel" id="groupSearchInput" placeholder="01xxxxxxxxx" dir="ltr" style="text-align:right;" oninput="searchByPhone(this.value, 'groupSearchResults', true)">
-    </div>
-    <div id="groupSelectedChips" style="margin-bottom:8px;"></div>
-    <div class="modal-body" id="groupSearchResults" style="flex:1;"></div>
-    <button class="btn btn-teal" style="margin-top:14px;" onclick="createGroup()">إنشاء الجروب</button>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
 
 <script>
-/* ========= Firebase init ========= */
-const firebaseConfig = {
-  apiKey: "AIzaSyBBHUWqxFsaIn442PSuieSlbhrpB7awwAw",
-  authDomain: "exam-result-system-ca200.firebaseapp.com",
-  databaseURL: "https://exam-result-system-ca200-default-rtdb.firebaseio.com",
-  projectId: "exam-result-system-ca200",
-  storageBucket: "exam-result-system-ca200.firebasestorage.app",
-  messagingSenderId: "149705342999",
-  appId: "1:149705342999:web:f62b7172af711a94531c52"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+(function(){
+  // ===== إعدادات Firebase (نفس مشروعك) =====
+  const firebaseConfig = {
+    apiKey: "AIzaSyBBHUWqxFsaIn442PSuieSlbhrpB7awwAw",
+    authDomain: "exam-result-system-ca200.firebaseapp.com",
+    databaseURL: "https://exam-result-system-ca200-default-rtdb.firebaseio.com",
+    projectId: "exam-result-system-ca200",
+    storageBucket: "exam-result-system-ca200.firebasestorage.app",
+    messagingSenderId: "149705342999",
+    appId: "1:149705342999:web:f62b7172af711a94531c52"
+  };
+  // ⚠️ لو الداتا بيز بتاعتك في منطقة تانية، غيّر databaseURL فوق ده لنفس القيمة
+  // اللي هتلاقيها في Firebase Console → Realtime Database
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  const auth = firebase.auth();
+  const googleProvider = new firebase.auth.GoogleAuthProvider();
+  const settingsRef = db.ref('mora_ai_settings');
+  const usersRef = db.ref('mora_ai_users');
+  const chatsRef = db.ref('mora_ai_chats');
+  const adminsRef = db.ref('mora_ai_admins');
 
-/* ========= State ========= */
-let myPhone = null;      // sanitized digits key
-let myName = null;
-let chatsMap = {};        // chatId -> chat object
-let usersCache = {};      // phoneKey -> {name, online, lastSeen}
-let currentChatId = null;
-let groupSelected = {};   // phoneKey -> name
-let messagesListenerRef = null;
-let userChatsRef = null;
+  const DEFAULT_ADMIN_PASS = 'mora2026';
 
-/* ========= Helpers ========= */
-function sanitizePhone(p){ return (p || '').replace(/[^0-9]/g,''); }
-function showToast(msg){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.style.display = 'block';
-  clearTimeout(t._timer);
-  t._timer = setTimeout(()=>{ t.style.display='none'; }, 2600);
-}
-function el(id){ return document.getElementById(id); }
-function timeLabel(ts){
-  if(!ts) return '';
-  const d = new Date(ts);
-  return d.toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'});
-}
-function dayOrTimeLabel(ts){
-  if(!ts) return '';
-  const d = new Date(ts);
-  const now = new Date();
-  const sameDay = d.toDateString() === now.toDateString();
-  if(sameDay) return timeLabel(ts);
-  return d.toLocaleDateString('ar-EG', {day:'2-digit', month:'2-digit'});
-}
-function initials(name){
-  return (name || '؟').trim().charAt(0);
-}
+  const $ = (id) => document.getElementById(id);
+  const card = $('card');
+  const gate = $('gate');
+  const panel = $('panel');
+  const gatePass = $('gatePass');
+  const gateStatus = $('gateStatus');
 
-/* ========= Boot / session ========= */
-window.addEventListener('DOMContentLoaded', () => {
-  const saved = localStorage.getItem('moraChatSession');
-  if(saved){
-    try{
-      const s = JSON.parse(saved);
-      myPhone = s.phone; myName = s.name;
-      bootApp();
+  let currentSettings = {};
+
+  function tryLogin(){
+    gateStatus.classList.remove('show');
+    gatePass.disabled = true;
+    settingsRef.once('value').then((snap) => {
+      const v = snap.val() || {};
+      currentSettings = v;
+      const adminPass = v.adminPass || DEFAULT_ADMIN_PASS;
+      gatePass.disabled = false;
+      if (gatePass.value === adminPass){
+        openPanel(v);
+      } else {
+        gateStatus.textContent = 'كلمة المرور غلط، حاول تاني.';
+        gateStatus.classList.add('show');
+        gatePass.style.borderColor = 'var(--danger)';
+        setTimeout(() => { gatePass.style.borderColor = ''; }, 900);
+      }
+    }).catch(() => {
+      gatePass.disabled = false;
+      gateStatus.textContent = 'تعذر الاتصال بقاعدة البيانات، تأكد من الإنترنت.';
+      gateStatus.classList.add('show');
+    });
+  }
+
+  function openPanel(v){
+    card.classList.add('wide');
+    gate.style.display = 'none';
+    panel.style.display = 'block';
+    $('apiKeyInput').value = v.apiKey || '';
+    $('modelSelect').value = v.model || 'gemini-3.5-flash';
+    $('systemInput').value = v.system || '';
+    $('newPassInput').value = '';
+  }
+
+  $('gateSubmit').addEventListener('click', tryLogin);
+  gatePass.addEventListener('keydown', (e) => { if (e.key === 'Enter') tryLogin(); });
+
+  $('logoutBtn').addEventListener('click', () => {
+    card.classList.remove('wide');
+    panel.style.display = 'none';
+    gate.style.display = 'block';
+    gatePass.value = '';
+    gatePass.focus();
+  });
+
+  $('saveBtn').addEventListener('click', () => {
+    const key = $('apiKeyInput').value.trim();
+    const model = $('modelSelect').value;
+    const system = $('systemInput').value.trim();
+    const newPass = $('newPassInput').value.trim();
+
+    const status = $('saveStatus');
+    status.classList.remove('show');
+
+    const update = { model, system };
+    if (key) update.apiKey = key;
+    if (newPass) update.adminPass = newPass;
+    else if (currentSettings.adminPass) update.adminPass = currentSettings.adminPass;
+
+    settingsRef.update(update).then(() => {
+      currentSettings = Object.assign({}, currentSettings, update);
+      status.className = 'status ok show';
+      status.textContent = newPass ? 'اتحفظ بنجاح، وكلمة المرور اتغيرت ✓' : 'اتحفظ بنجاح ✓';
+      setTimeout(() => status.classList.remove('show'), 2500);
+      $('newPassInput').value = '';
+    }).catch((err) => {
+      status.className = 'status err show';
+      status.textContent = 'حصل خطأ في الحفظ: ' + (err && err.message ? err.message : 'حاول تاني');
+    });
+  });
+
+  /* ===== التابات ===== */
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      $(btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  /* ===== دخول جوجل للأدمن (لعرض المشتركين والمحادثات) ===== */
+  let adminUser = null;
+  let isRegisteredAdmin = false;
+
+  function ensureAdminBootstrap(uid){
+    // أول شخص يدخل بجوجل من الصفحة دي بيتسجل كأدمن تلقائي، لو مفيش أدمن مسجل قبل كده
+    return adminsRef.child(uid).set(true).catch(() => {});
+  }
+
+  function tryGoogleLogin(statusEl, onSuccess){
+    statusEl.classList.remove('show');
+    auth.signInWithPopup(googleProvider).then((res) => {
+      const uid = res.user.uid;
+      adminUser = res.user;
+      // نحاول نسجله كأدمن (هينفع بس أول مرة، بعد كده الـ rules بترفض)
+      ensureAdminBootstrap(uid).finally(() => {
+        // نتأكد فعليًا إنه أدمن عن طريق محاولة قراءة بيانات محمية
+        usersRef.once('value').then(() => {
+          isRegisteredAdmin = true;
+          onSuccess();
+        }).catch(() => {
+          statusEl.textContent = 'الحساب ده مش مسجل كأدمن. لو انت مورا، ضيف الـ UID بتاعك يدويًا في مسار mora_ai_admins من Firebase Console.';
+          statusEl.classList.add('show');
+        });
+      });
+    }).catch((err) => {
+      statusEl.textContent = 'خطأ: ' + (err && err.code ? err.code : 'unknown');
+      statusEl.classList.add('show');
+    });
+  }
+
+  function timeAgo(ts){
+    if (!ts) return '—';
+    const diff = Date.now() - ts;
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'دلوقتي';
+    if (mins < 60) return `من ${mins} د`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `من ${hrs} س`;
+    const days = Math.floor(hrs / 24);
+    return `من ${days} يوم`;
+  }
+
+  function initials(name, email){
+    const s = (name || email || '؟').trim();
+    return s.charAt(0).toUpperCase();
+  }
+
+  /* ===== تاب المشتركين ===== */
+  $('usersGoogleBtn').addEventListener('click', () => {
+    tryGoogleLogin($('usersAuthStatus'), loadUsersList);
+  });
+
+  function loadUsersList(){
+    $('usersGoogleGate').style.display = 'none';
+    const list = $('usersList');
+    list.style.display = 'block';
+    list.innerHTML = '<div class="spinner-hint">بيتم التحميل…</div>';
+    usersRef.once('value').then((snap) => {
+      const v = snap.val() || {};
+      const rows = Object.keys(v).map(uid => Object.assign({ uid }, v[uid]));
+      rows.sort((a, b) => (b.lastSeen || 0) - (a.lastSeen || 0));
+      if (!rows.length){
+        list.innerHTML = '<div class="empty-hint">لسه مفيش مشتركين</div>';
+        return;
+      }
+      list.innerHTML = '';
+      rows.forEach(u => {
+        const row = document.createElement('div');
+        row.className = 'list-item';
+        const avatar = u.photoURL
+          ? `<img src="${u.photoURL}" referrerpolicy="no-referrer" alt="">`
+          : `<div class="avatar-fallback">${initials(u.name, u.email)}</div>`;
+        row.innerHTML = `
+          ${avatar}
+          <div class="meta">
+            <div class="name">${(u.name || 'بدون اسم')}</div>
+            <div class="sub2">${(u.email || '')}</div>
+          </div>
+          <div class="side">${timeAgo(u.lastSeen)}</div>
+        `;
+        list.appendChild(row);
+      });
+    }).catch((err) => {
+      list.innerHTML = '<div class="empty-hint">تعذر تحميل المشتركين: ' + (err && err.code ? err.code : 'خطأ') + '</div>';
+    });
+  }
+
+  /* ===== تاب المحادثات ===== */
+  $('chatsGoogleBtn').addEventListener('click', () => {
+    tryGoogleLogin($('chatsAuthStatus'), loadChatsList);
+  });
+
+  let usersCache = null;
+
+  function loadChatsList(){
+    $('chatsGoogleGate').style.display = 'none';
+    $('chatsListWrap').style.display = 'block';
+    const list = $('chatsList');
+    list.innerHTML = '<div class="spinner-hint">بيتم التحميل…</div>';
+
+    const usersPromise = usersCache ? Promise.resolve(usersCache) : usersRef.once('value').then(s => s.val() || {});
+
+    Promise.all([chatsRef.once('value'), usersPromise]).then(([chatSnap, usersVal]) => {
+      usersCache = usersVal;
+      const chats = chatSnap.val() || {};
+      const rows = Object.keys(chats).map(uid => {
+        const c = chats[uid] || {};
+        const u = usersVal[uid] || {};
+        const msgs = c.messages || [];
+        const lastText = msgs.length ? (msgs[msgs.length - 1].content || '').slice(0, 60) : '(محادثة فاضية)';
+        return { uid, updatedAt: c.updatedAt, count: msgs.length, lastText, name: u.name, email: u.email, photoURL: u.photoURL };
+      });
+      rows.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+      if (!rows.length){
+        list.innerHTML = '<div class="empty-hint">لسه مفيش محادثات</div>';
+        return;
+      }
+      list.innerHTML = '';
+      rows.forEach(r => {
+        const row = document.createElement('div');
+        row.className = 'list-item clickable';
+        const avatar = r.photoURL
+          ? `<img src="${r.photoURL}" referrerpolicy="no-referrer" alt="">`
+          : `<div class="avatar-fallback">${initials(r.name, r.email)}</div>`;
+        row.innerHTML = `
+          ${avatar}
+          <div class="meta">
+            <div class="name">${(r.name || r.email || 'يوزر بدون اسم')}</div>
+            <div class="sub2">${r.lastText || ''}</div>
+          </div>
+          <div class="side">${r.count} رسالة<br>${timeAgo(r.updatedAt)}</div>
+        `;
+        row.addEventListener('click', () => openTranscript(r.uid, chats[r.uid], r));
+        list.appendChild(row);
+      });
+    }).catch((err) => {
+      list.innerHTML = '<div class="empty-hint">تعذر تحميل المحادثات: ' + (err && err.code ? err.code : 'خطأ') + '</div>';
+    });
+  }
+
+  let currentUid = null;
+  let currentMessages = [];
+  let currentMeta = null;
+
+  function renderTranscript(){
+    const wrap = $('transcriptMsgs');
+    if (!currentMessages.length){
+      wrap.innerHTML = '<div class="empty-hint">المحادثة دي فاضية</div>';
       return;
-    }catch(e){}
-  }
-  el('loadingScreen').style.display = 'none';
-  el('loginScreen').style.display = 'flex';
-});
-
-function handleLogin(){
-  const name = el('loginName').value.trim();
-  const phoneRaw = el('loginPhone').value.trim();
-  const phoneKey = sanitizePhone(phoneRaw);
-  const errBox = el('loginError');
-  errBox.textContent = '';
-  if(!name){ errBox.textContent = 'من فضلك اكتب اسمك'; return; }
-  if(phoneKey.length < 8){ errBox.textContent = 'رقم التليفون غير صحيح'; return; }
-
-  el('loginScreen').style.display = 'none';
-  el('loadingScreen').style.display = 'flex';
-
-  const userRef = db.ref('users/' + phoneKey);
-  userRef.get().then(snap => {
-    const existing = snap.val();
-    const finalName = name || (existing && existing.name) || 'مستخدم';
-    return userRef.update({
-      phone: phoneKey,
-      displayPhone: phoneRaw,
-      name: finalName,
-      online: true,
-      lastSeen: firebase.database.ServerValue.TIMESTAMP
-    }).then(()=> finalName);
-  }).then(finalName => {
-    myPhone = phoneKey;
-    myName = finalName;
-    localStorage.setItem('moraChatSession', JSON.stringify({phone: myPhone, name: myName}));
-    bootApp();
-  }).catch(err => {
-    el('loadingScreen').style.display = 'none';
-    el('loginScreen').style.display = 'flex';
-    errBox.textContent = 'حصل خطأ، حاول تاني (' + err.message + ')';
-  });
-}
-
-function handleLogout(){
-  if(myPhone){
-    db.ref('users/' + myPhone).update({
-      online: false,
-      lastSeen: firebase.database.ServerValue.TIMESTAMP
-    });
-    db.ref('.info/connected').off();
-  }
-  localStorage.removeItem('moraChatSession');
-  location.reload();
-}
-
-function bootApp(){
-  const userRef = db.ref('users/' + myPhone);
-  userRef.update({ online: true });
-  const connectedRef = db.ref('.info/connected');
-  connectedRef.on('value', snap => {
-    if(snap.val() === true){
-      userRef.onDisconnect().update({ online:false, lastSeen: firebase.database.ServerValue.TIMESTAMP });
-      userRef.update({ online:true });
     }
-  });
-
-  el('loadingScreen').style.display = 'none';
-  el('appScreen').style.display = 'block';
-  listenUserChats();
-}
-
-/* ========= Chat list ========= */
-function listenUserChats(){
-  userChatsRef = db.ref('userChats/' + myPhone);
-  userChatsRef.on('value', snap => {
-    const val = snap.val() || {};
-    const chatIds = Object.keys(val);
-    // remove chats no longer present
-    Object.keys(chatsMap).forEach(id => {
-      if(!chatIds.includes(id)){
-        delete chatsMap[id];
+    wrap.innerHTML = '';
+    currentMessages.forEach((m, idx) => {
+      const el = document.createElement('div');
+      el.className = 't-msg ' + (m.role === 'user' ? 'user' : 'assistant');
+      const who = m.role === 'user' ? (currentMeta.name || currentMeta.email || 'اليوزر') : 'مورا';
+      const bodyText = (m.content || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      el.innerHTML = `<div class="who">${who}</div><div class="body">${bodyText}</div>`;
+      if (m.role === 'assistant'){
+        const editBtn = document.createElement('button');
+        editBtn.className = 'edit-link';
+        editBtn.textContent = 'تعديل';
+        editBtn.addEventListener('click', () => startEditMessage(el, idx));
+        el.appendChild(editBtn);
       }
+      wrap.appendChild(el);
     });
-    chatIds.forEach(chatId => attachChatListener(chatId));
-    renderChatList();
-  });
-}
-
-function attachChatListener(chatId){
-  if(chatsMap[chatId] && chatsMap[chatId]._listening) return;
-  db.ref('chats/' + chatId).on('value', snap => {
-    const data = snap.val();
-    if(!data) return;
-    data._listening = true;
-    chatsMap[chatId] = data;
-
-    if(data.type === 'private'){
-      const otherPhone = Object.keys(data.members || {}).find(p => p !== myPhone);
-      if(otherPhone){
-        watchUser(otherPhone);
-      }
-    }
-    renderChatList();
-    if(currentChatId === chatId){ renderChatHeader(chatId); }
-  });
-}
-
-function watchUser(phoneKey){
-  if(usersCache[phoneKey] && usersCache[phoneKey]._listening) return;
-  db.ref('users/' + phoneKey).on('value', snap => {
-    const u = snap.val() || {};
-    u._listening = true;
-    usersCache[phoneKey] = u;
-    renderChatList();
-    if(currentChatId && chatsMap[currentChatId] && chatsMap[currentChatId].type === 'private'){
-      const other = Object.keys(chatsMap[currentChatId].members||{}).find(p=>p!==myPhone);
-      if(other === phoneKey) renderChatHeader(currentChatId);
-    }
-  });
-}
-
-function getChatDisplayName(chatId){
-  const chat = chatsMap[chatId];
-  if(!chat) return '...';
-  if(chat.type === 'group') return chat.name || 'جروب بدون اسم';
-  const other = Object.keys(chat.members||{}).find(p=>p!==myPhone);
-  return (usersCache[other] && usersCache[other].name) || '...';
-}
-
-function renderChatList(){
-  const listEl = el('chatList');
-  const filter = (el('filterChats').value || '').trim();
-  const ids = Object.keys(chatsMap);
-
-  if(ids.length === 0){
-    listEl.innerHTML = `<div class="empty-list">
-      <div>لا توجد محادثات بعد</div>
-      <div>دوس على أيقونة البحث فوق وابحث برقم تليفون عشان تبدأ محادثة، أو أنشئ جروب جديد.</div>
-    </div>`;
-    return;
   }
 
-  let items = ids.map(id => ({id, chat: chatsMap[id]}));
-  items.sort((a,b) => {
-    const ta = (a.chat.lastMessage && a.chat.lastMessage.timestamp) || a.chat.createdAt || 0;
-    const tb = (b.chat.lastMessage && b.chat.lastMessage.timestamp) || b.chat.createdAt || 0;
-    return tb - ta;
-  });
-
-  if(filter){
-    items = items.filter(it => getChatDisplayName(it.id).includes(filter));
-  }
-
-  if(items.length === 0){
-    listEl.innerHTML = `<div class="empty-list"><div>لا توجد نتائج مطابقة</div></div>`;
-    return;
-  }
-
-  listEl.innerHTML = items.map(({id, chat}) => {
-    const name = getChatDisplayName(id);
-    const isGroup = chat.type === 'group';
-    const other = isGroup ? null : Object.keys(chat.members||{}).find(p=>p!==myPhone);
-    const isOnline = !isGroup && usersCache[other] && usersCache[other].online;
-    const lastMsg = chat.lastMessage;
-    const preview = lastMsg ? ((lastMsg.sender === myPhone ? 'أنت: ' : '') + lastMsg.text) : 'لا توجد رسائل بعد';
-    const time = lastMsg ? dayOrTimeLabel(lastMsg.timestamp) : '';
-    const lastRead = (chat.reads && chat.reads[myPhone]) || 0;
-    const unread = lastMsg && lastMsg.sender !== myPhone && lastMsg.timestamp > lastRead;
-    return `
-      <div class="chat-item ${currentChatId===id?'active':''}" onclick="openChat('${id}')">
-        <div class="avatar ${isGroup?'group':''}">
-          ${initials(name)}
-          ${isOnline ? '<span class="online-dot"></span>' : ''}
-        </div>
-        <div class="chat-item-body">
-          <div class="chat-item-top">
-            <span class="chat-item-name">${escapeHtml(name)}</span>
-            <span class="chat-item-time">${time}</span>
-          </div>
-          <div class="chat-item-top">
-            <span class="chat-item-preview">${escapeHtml(preview)}</span>
-            ${unread ? '<span class="unread-dot"></span>' : ''}
-          </div>
-        </div>
+  function startEditMessage(el, idx){
+    const original = currentMessages[idx].content || '';
+    el.innerHTML = `<div class="who">مورا (تعديل)</div><textarea>${original.replace(/</g,'&lt;')}</textarea>
+      <div class="edit-actions">
+        <button class="btn primary" data-act="save">حفظ</button>
+        <button class="btn" data-act="cancel">إلغاء</button>
       </div>`;
-  }).join('');
-}
-
-function escapeHtml(str){
-  const d = document.createElement('div');
-  d.textContent = str || '';
-  return d.innerHTML;
-}
-
-/* ========= Open chat ========= */
-function openChat(chatId){
-  currentChatId = chatId;
-  el('chatAreaEmpty').style.display = 'none';
-  el('chatActive').style.display = 'flex';
-  el('chatArea').classList.add('mobile-open');
-  el('sidebar').classList.add('mobile-hidden');
-
-  renderChatHeader(chatId);
-  listenMessages(chatId);
-  markRead(chatId);
-  renderChatList();
-}
-
-function closeMobileChat(){
-  el('chatArea').classList.remove('mobile-open');
-  el('sidebar').classList.remove('mobile-hidden');
-}
-
-function markRead(chatId){
-  db.ref(`chats/${chatId}/reads/${myPhone}`).set(firebase.database.ServerValue.TIMESTAMP);
-}
-
-function renderChatHeader(chatId){
-  const chat = chatsMap[chatId];
-  if(!chat) return;
-  const name = getChatDisplayName(chatId);
-  const isGroup = chat.type === 'group';
-  el('chatHeaderAvatar').className = 'avatar ' + (isGroup?'group':'');
-  el('chatHeaderAvatar').textContent = initials(name);
-  el('chatHeaderName').textContent = name;
-
-  if(isGroup){
-    const count = Object.keys(chat.members||{}).length;
-    el('chatHeaderStatus').textContent = `جروب - ${count} أعضاء`;
-  }else{
-    const other = Object.keys(chat.members||{}).find(p=>p!==myPhone);
-    const u = usersCache[other];
-    if(u && u.online){
-      el('chatHeaderStatus').textContent = 'متصل الآن';
-    }else if(u && u.lastSeen){
-      el('chatHeaderStatus').textContent = 'آخر ظهور ' + dayOrTimeLabel(u.lastSeen);
-    }else{
-      el('chatHeaderStatus').textContent = '';
-    }
-  }
-}
-
-/* ========= Messages ========= */
-function listenMessages(chatId){
-  if(messagesListenerRef) messagesListenerRef.off();
-  const box = el('messagesBox');
-  box.innerHTML = '';
-  messagesListenerRef = db.ref('messages/' + chatId).limitToLast(80);
-  messagesListenerRef.on('value', snap => {
-    const val = snap.val() || {};
-    const arr = Object.values(val).sort((a,b)=> (a.timestamp||0) - (b.timestamp||0));
-    const chat = chatsMap[chatId];
-    const isGroup = chat && chat.type === 'group';
-    box.innerHTML = arr.map(m => {
-      const mine = m.sender === myPhone;
-      return `
-        <div class="msg-row ${mine?'mine':'theirs'}">
-          <div class="bubble">
-            ${(!mine && isGroup) ? `<span class="sender-name">${escapeHtml(m.senderName||'')}</span>` : ''}
-            ${escapeHtml(m.text)}
-            <span class="msg-time">${timeLabel(m.timestamp)}</span>
-          </div>
-        </div>`;
-    }).join('');
-    box.scrollTop = box.scrollHeight;
-    markRead(chatId);
-  });
-}
-
-function handleComposerKey(e){
-  if(e.key === 'Enter' && !e.shiftKey){
-    e.preventDefault();
-    sendMessage();
-  }
-}
-
-function sendMessage(){
-  const input = el('msgInput');
-  const text = input.value.trim();
-  if(!text || !currentChatId) return;
-  input.value = '';
-
-  const msgRef = db.ref('messages/' + currentChatId).push();
-  msgRef.set({
-    sender: myPhone,
-    senderName: myName,
-    text: text,
-    timestamp: firebase.database.ServerValue.TIMESTAMP
-  });
-  db.ref('chats/' + currentChatId + '/lastMessage').set({
-    sender: myPhone,
-    text: text,
-    timestamp: firebase.database.ServerValue.TIMESTAMP
-  });
-}
-
-/* ========= New private chat (search by phone) ========= */
-function openNewChatModal(){
-  el('searchPhoneInput').value = '';
-  el('newChatResults').innerHTML = '';
-  el('newChatModal').style.display = 'flex';
-}
-function closeModal(id){ el(id).style.display = 'none'; }
-
-let searchDebounce = null;
-function searchByPhone(query, resultsElId, forGroup){
-  clearTimeout(searchDebounce);
-  const q = sanitizePhone(query);
-  const resultsEl = el(resultsElId);
-  if(q.length < 3){
-    resultsEl.innerHTML = '';
-    return;
-  }
-  searchDebounce = setTimeout(() => {
-    db.ref('users').orderByChild('phone').startAt(q).endAt(q + '\uf8ff').limitToFirst(20)
-      .get().then(snap => {
-        const val = snap.val() || {};
-        let results = Object.keys(val)
-          .filter(p => p !== myPhone)
-          .map(p => ({ phoneKey: p, ...val[p] }));
-
-        if(forGroup){
-          results = results.filter(r => !groupSelected[r.phoneKey]);
-        }
-
-        if(results.length === 0){
-          resultsEl.innerHTML = `<div class="no-results">لا يوجد مستخدم بهذا الرقم</div>`;
-          return;
-        }
-        resultsEl.innerHTML = results.map(r => `
-          <div class="search-result">
-            <div class="avatar">${initials(r.name)}</div>
-            <div style="flex:1;">
-              <div class="search-result-name">${escapeHtml(r.name)}</div>
-              <div class="search-result-phone">${escapeHtml(r.displayPhone || r.phone)}</div>
-            </div>
-            <button class="btn ${forGroup?'btn-teal':'btn-primary'}" style="padding:8px 14px;font-size:13px;"
-              onclick="${forGroup ? `addGroupMember('${r.phoneKey}', '${escapeHtml(r.name).replace(/'/g,"\\'")}')` : `startPrivateChat('${r.phoneKey}')`}">
-              ${forGroup ? 'إضافة' : 'ابدأ محادثة'}
-            </button>
-          </div>`).join('');
-      }).catch(err => {
-        resultsEl.innerHTML = `<div class="no-results">تعذر البحث. تأكد من إعداد فهرسة "phone" في قواعد الداتا بيز.</div>`;
-      });
-  }, 300);
-}
-
-function startPrivateChat(otherPhoneKey){
-  const chatId = [myPhone, otherPhoneKey].sort().join('_');
-  const chatRef = db.ref('chats/' + chatId);
-  chatRef.get().then(snap => {
-    if(!snap.exists()){
-      return chatRef.set({
-        type: 'private',
-        members: { [myPhone]: true, [otherPhoneKey]: true },
-        createdAt: firebase.database.ServerValue.TIMESTAMP
-      }).then(() => {
-        return Promise.all([
-          db.ref('userChats/' + myPhone + '/' + chatId).set(true),
-          db.ref('userChats/' + otherPhoneKey + '/' + chatId).set(true)
-        ]);
-      });
-    }
-  }).then(() => {
-    closeModal('newChatModal');
-    attachChatListener(chatId);
-    setTimeout(()=> openChat(chatId), 150);
-  }).catch(err => showToast('حصل خطأ: ' + err.message));
-}
-
-/* ========= New group ========= */
-function openNewGroupModal(){
-  groupSelected = {};
-  el('groupNameInput').value = '';
-  el('groupSearchInput').value = '';
-  el('groupSearchResults').innerHTML = '';
-  renderGroupChips();
-  el('newGroupModal').style.display = 'flex';
-}
-
-function addGroupMember(phoneKey, name){
-  groupSelected[phoneKey] = name;
-  renderGroupChips();
-  el('groupSearchResults').innerHTML = '';
-  el('groupSearchInput').value = '';
-}
-
-function removeGroupMember(phoneKey){
-  delete groupSelected[phoneKey];
-  renderGroupChips();
-}
-
-function renderGroupChips(){
-  const wrap = el('groupSelectedChips');
-  const keys = Object.keys(groupSelected);
-  if(keys.length === 0){
-    wrap.innerHTML = `<div style="color:var(--text-muted);font-size:12.5px;">لسه ماخترتش أعضاء</div>`;
-    return;
-  }
-  wrap.innerHTML = keys.map(k => `
-    <span class="chip">${escapeHtml(groupSelected[k])}
-      <button onclick="removeGroupMember('${k}')">✕</button>
-    </span>`).join('');
-}
-
-function createGroup(){
-  const name = el('groupNameInput').value.trim();
-  const memberKeys = Object.keys(groupSelected);
-  if(!name){ showToast('اكتب اسم الجروب'); return; }
-  if(memberKeys.length === 0){ showToast('أضف عضو واحد على الأقل'); return; }
-
-  const members = { [myPhone]: true };
-  memberKeys.forEach(k => members[k] = true);
-
-  const chatRef = db.ref('chats').push();
-  const chatId = chatRef.key;
-  chatRef.set({
-    type: 'group',
-    name: name,
-    members: members,
-    createdBy: myPhone,
-    createdAt: firebase.database.ServerValue.TIMESTAMP
-  }).then(() => {
-    const updates = {};
-    Object.keys(members).forEach(p => {
-      updates['userChats/' + p + '/' + chatId] = true;
+    el.querySelector('[data-act="save"]').addEventListener('click', () => {
+      const newText = el.querySelector('textarea').value;
+      currentMessages[idx].content = newText;
+      chatsRef.child(currentUid).update({
+        messages: currentMessages,
+        updatedAt: firebase.database.ServerValue.TIMESTAMP
+      }).then(() => renderTranscript()).catch((err) => alert('تعذر الحفظ: ' + (err && err.code ? err.code : 'خطأ')));
     });
-    return db.ref().update(updates);
-  }).then(() => {
-    closeModal('newGroupModal');
-    attachChatListener(chatId);
-    setTimeout(()=> openChat(chatId), 150);
-  }).catch(err => showToast('حصل خطأ: ' + err.message));
-}
+    el.querySelector('[data-act="cancel"]').addEventListener('click', renderTranscript);
+  }
 
-/* close modals on overlay click */
-document.querySelectorAll('.modal-overlay').forEach(ov => {
-  ov.addEventListener('click', e => { if(e.target === ov) ov.style.display = 'none'; });
-});
+  function openTranscript(uid, chatData, meta){
+    $('chatsList').style.display = 'none';
+    const tv = $('transcriptView');
+    tv.classList.add('active');
+    currentUid = uid;
+    currentMessages = ((chatData && chatData.messages) || []).slice();
+    currentMeta = meta;
+    $('takeoverToggle').checked = !!(chatData && chatData.humanControlled);
+    $('adminReplyBox').style.display = $('takeoverToggle').checked ? 'flex' : 'none';
+    $('adminReplyInput').value = '';
+    renderTranscript();
+  }
+
+  $('takeoverToggle').addEventListener('change', (e) => {
+    if (!currentUid) return;
+    const on = e.target.checked;
+    $('adminReplyBox').style.display = on ? 'flex' : 'none';
+    chatsRef.child(currentUid).update({ humanControlled: on }).catch((err) => {
+      alert('تعذر التحديث: ' + (err && err.code ? err.code : 'خطأ'));
+      e.target.checked = !on;
+      $('adminReplyBox').style.display = !on ? 'flex' : 'none';
+    });
+  });
+
+  $('adminReplySend').addEventListener('click', () => {
+    const text = $('adminReplyInput').value.trim();
+    if (!text || !currentUid) return;
+    currentMessages.push({ role: 'assistant', content: text });
+    chatsRef.child(currentUid).update({
+      messages: currentMessages,
+      humanControlled: true,
+      updatedAt: firebase.database.ServerValue.TIMESTAMP
+    }).then(() => {
+      $('adminReplyInput').value = '';
+      renderTranscript();
+    }).catch((err) => alert('تعذر الإرسال: ' + (err && err.code ? err.code : 'خطأ')));
+  });
+
+  $('transcriptBack').addEventListener('click', () => {
+    $('transcriptView').classList.remove('active');
+    $('chatsList').style.display = 'block';
+    currentUid = null;
+  });
+})();
 </script>
+
 </body>
 </html>
