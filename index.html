@@ -84,25 +84,25 @@
     gap: 14px;
   }
   .label {
-    width: 4in;
-    height: 2.5in;
+    width: 4cm;
+    height: 2.5cm;
     border: 1px dashed #bbb;
     background: #fff;
-    padding: 8px 10px;
+    padding: 2mm 3mm;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     box-sizing: border-box;
     overflow: hidden;
   }
-  .label .place { font-size: 13px; font-weight: 700; letter-spacing: 1px; text-align: center; }
-  .label .name { font-size: 16px; font-weight: 600; margin: 4px 0; line-height: 1.25; max-height: 2.2em; overflow: hidden; direction: rtl; text-align: center; }
-  .label .price { font-size: 18px; font-weight: 700; text-align: center; }
+  .label .place { font-size: 8px; font-weight: 700; letter-spacing: 0.5px; text-align: center; }
+  .label .name { font-size: 9px; font-weight: 600; margin: 1px 0; line-height: 1.15; max-height: 2.1em; overflow: hidden; direction: rtl; text-align: center; }
+  .label .price { font-size: 11px; font-weight: 700; text-align: center; }
   .label .bcwrap { text-align: center; }
-  .label svg { width: 100%; height: 55px; }
+  .label svg { width: 100%; height: 28px; }
 
   @media print {
-    @page { size: 4in 2.5in; margin: 0; }
+    @page { size: 4cm 2.5cm; margin: 0; }
     html, body { background: #fff; padding: 0; margin: 0; }
     .no-print { display: none !important; }
     .labels-wrap { display: block; gap: 0; }
@@ -110,8 +110,8 @@
       border: none;
       page-break-after: always;
       break-after: page;
-      width: 4in;
-      height: 2.5in;
+      width: 4cm;
+      height: 2.5cm;
       margin: 0;
     }
   }
@@ -121,7 +121,7 @@
 <div class="container">
   <div class="no-print">
     <h1>Pit House — مولد باركود المنتجات</h1>
-    <div class="sub">مقاس الليبل: 4×2.5 بوصة — Zebra GK420T — باركود Code128</div>
+    <div class="sub">مقاس الليبل: 4×2.5 سم — Zebra GK420T — باركود Code128</div>
   </div>
 
   <div class="panel no-print">
@@ -295,8 +295,9 @@ document.getElementById('genBtn').addEventListener('click', () => {
       JsBarcode('#' + svgId, p.id, {
         format: 'CODE128',
         displayValue: true,
-        fontSize: 12,
-        height: 40,
+        fontSize: 8,
+        width: 1,
+        height: 25,
         margin: 0
       });
     } catch (e) {
