@@ -84,8 +84,8 @@
     gap: 14px;
   }
   .label {
-    width: 3.5in;
-    height: 3in;
+    width: 4in;
+    height: 2.5in;
     border: 1px dashed #bbb;
     background: #fff;
     padding: 8px 10px;
@@ -93,31 +93,36 @@
     flex-direction: column;
     justify-content: space-between;
     box-sizing: border-box;
+    overflow: hidden;
   }
   .label .place { font-size: 13px; font-weight: 700; letter-spacing: 1px; text-align: center; }
-  .label .name { font-size: 16px; font-weight: 600; margin: 4px 0; line-height: 1.25; max-height: 2.6em; overflow: hidden; direction: rtl; text-align: center; }
+  .label .name { font-size: 16px; font-weight: 600; margin: 4px 0; line-height: 1.25; max-height: 2.2em; overflow: hidden; direction: rtl; text-align: center; }
   .label .price { font-size: 18px; font-weight: 700; text-align: center; }
   .label .bcwrap { text-align: center; }
-  .label svg { width: 100%; height: 60px; }
+  .label svg { width: 100%; height: 55px; }
 
   @media print {
-    @page { size: 3.5in 3in; margin: 0; }
-    body { background: #fff; padding: 0; }
+    @page { size: 4in 2.5in; margin: 0; }
+    html, body { background: #fff; padding: 0; margin: 0; }
     .no-print { display: none !important; }
-    .labels-wrap { gap: 0; }
+    .labels-wrap { display: block; gap: 0; }
     .label {
       border: none;
       page-break-after: always;
-      width: 3.5in;
-      height: 3in;
+      break-after: page;
+      width: 4in;
+      height: 2.5in;
+      margin: 0;
     }
   }
 </style>
 </head>
 <body>
 <div class="container">
-  <h1>Pit House — مولد باركود المنتجات</h1>
-  <div class="sub">مقاس الليبل: 4×2 بوصة — Zebra GK420T — باركود Code128</div>
+  <div class="no-print">
+    <h1>Pit House — مولد باركود المنتجات</h1>
+    <div class="sub">مقاس الليبل: 4×2.5 بوصة — Zebra GK420T — باركود Code128</div>
+  </div>
 
   <div class="panel no-print">
     <div class="row">
