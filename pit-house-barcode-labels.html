@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>Pit House - طباعة باركود</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/JsBarcode/3.11.5/JsBarcode.all.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    background: #f2f2f2;
+    margin: 0;
+    padding: 24px;
+    direction: rtl;
+  }
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 20px;
+    margin-bottom: 4px;
+  }
+  .sub {
+    color: #666;
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+  .panel {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+  }
+  .row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+  label { font-size: 13px; color: #444; min-width: 90px; }
+  input[type=text] {
+    flex: 1;
+    min-width: 200px;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+  button {
+    padding: 9px 18px;
+    border: none;
+    border-radius: 6px;
+    background: #1d1d1f;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  button.secondary { background: #666; }
+  button:disabled { background: #aaa; cursor: not-allowed; }
+  #status { font-size: 13px; color: #999; margin-top: 6px; }
+  #status.error { color: #c0392b; }
+  #status.ok { color: #1e824c; }
+
+  table.products {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  table.products th, table.products td {
+    text-align: right;
+    padding: 8px 6px;
+    border-bottom: 1px solid #eee;
+  }
+  table.products th { color: #666; font-weight: 600; }
+
+  .labels-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .label {
+    width: 3.5in;
+    height: 3in;
+    border: 1px dashed #bbb;
+    background: #fff;
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-sizing: border-box;
+  }
+  .label .place { font-size: 13px; font-weight: 700; letter-spacing: 1px; text-align: center; }
+  .label .name { font-size: 16px; font-weight: 600; margin: 4px 0; line-height: 1.25; max-height: 2.6em; overflow: hidden; direction: rtl; text-align: center; }
+  .label .price { font-size: 18px; font-weight: 700; text-align: center; }
+  .label .bcwrap { text-align: center; }
+  .label svg { width: 100%; height: 60px; }
+
+  @media print {
+    @page { size: 3.5in 3in; margin: 0; }
+    body { background: #fff; padding: 0; }
+    .no-print { display: none !important; }
+    .labels-wrap { gap: 0; }
+    .label {
+      border: none;
+      page-break-after: always;
+      width: 3.5in;
+      height: 3in;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Pit House — مولد باركود المنتجات</h1>
+  <div class="sub">مقاس الليبل: 4×2 بوصة — Zebra GK420T — باركود Code128</div>
+
+  <div class="panel no-print">
+    <div class="row">
+      <label>تسجيل الدخول</label>
+      <span id="authStatus">جاري تسجيل الدخول...</span>
+    </div>
+    <div class="row">
+      <label>مسار الداتا</label>
+      <input type="text" id="dbPath" value="products" placeholder="products">
+      <button id="fetchBtn" disabled>جلب المنتجات</button>
+    </div>
+    <div class="row">
+      <label>اسم المكان</label>
+      <input type="text" id="placeName" value="PIT HOUSE">
+    </div>
+    <div id="status">لسه ماجبتش داتا. دوس "جلب المنتجات".</div>
+  </div>
+
+  <div class="panel no-print" id="productsPanel" style="display:none;">
+    <div class="row" style="justify-content: space-between;">
+      <div><strong id="countLabel"></strong></div>
+      <div style="display:flex; gap:8px;">
+        <button class="secondary" id="selectAllBtn">تحديد الكل</button>
+        <button class="secondary" id="selectNoneBtn">إلغاء التحديد</button>
+        <button id="genBtn">توليد الليبلات</button>
+      </div>
+    </div>
+    <table class="products" id="productsTable"></table>
+  </div>
+
+  <div class="panel no-print" id="printPanel" style="display:none;">
+    <button id="printBtn">طباعة الليبلات</button>
+  </div>
+
+  <div class="labels-wrap" id="labelsWrap"></div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyD25krWnSJnFLT51o4OYXkBzxSb-b0sZMU",
+  authDomain: "pit-house.firebaseapp.com",
+  databaseURL: "https://pit-house-default-rtdb.firebaseio.com",
+  projectId: "pit-house",
+  storageBucket: "pit-house.firebasestorage.app",
+  messagingSenderId: "1049730961681",
+  appId: "1:1049730961681:web:f2a4028410cdaa34d6fcb0",
+  measurementId: "G-9Y4FPJN8HP"
+};
+
+const statusEl = document.getElementById('status');
+const productsPanel = document.getElementById('productsPanel');
+const productsTable = document.getElementById('productsTable');
+const countLabel = document.getElementById('countLabel');
+const printPanel = document.getElementById('printPanel');
+const labelsWrap = document.getElementById('labelsWrap');
+const authStatusEl = document.getElementById('authStatus');
+const fetchBtn = document.getElementById('fetchBtn');
+
+let currentProducts = [];
+let idToken = null;
+
+firebase.initializeApp(firebaseConfig);
+
+firebase.auth().signInAnonymously().catch((err) => {
+  authStatusEl.textContent = 'فشل تسجيل الدخول: ' + err.message;
+  authStatusEl.style.color = '#c0392b';
+});
+
+firebase.auth().onAuthStateChanged(async (user) => {
+  if (user) {
+    idToken = await user.getIdToken();
+    authStatusEl.textContent = 'تم تسجيل الدخول (Anonymous) ✓';
+    authStatusEl.style.color = '#1e824c';
+    fetchBtn.disabled = false;
+  } else {
+    idToken = null;
+    authStatusEl.textContent = 'غير مسجل دخول';
+    authStatusEl.style.color = '#c0392b';
+    fetchBtn.disabled = true;
+  }
+});
+
+function setStatus(msg, type) {
+  statusEl.textContent = msg;
+  statusEl.className = type || '';
+}
+
+document.getElementById('fetchBtn').addEventListener('click', async () => {
+  const path = document.getElementById('dbPath').value.trim() || 'products';
+  setStatus('جاري الجلب...', '');
+  productsPanel.style.display = 'none';
+  printPanel.style.display = 'none';
+  labelsWrap.innerHTML = '';
+
+  let url = `${firebaseConfig.databaseURL}/${path}.json`;
+  if (idToken) url += `?auth=${idToken}`;
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+
+    if (!data) {
+      setStatus('مفيش داتا لقيتها في المسار ده. جرب اسم مسار تاني.', 'error');
+      return;
+    }
+
+    currentProducts = Object.entries(data).map(([id, val]) => ({
+      id,
+      name: (val && (val.name || val.Name || val.title)) || '',
+      price: (val && (val.price !== undefined ? val.price : val.Price)) || ''
+    })).filter(p => p.name);
+
+    if (currentProducts.length === 0) {
+      setStatus('لقيت داتا بس مفيهاش حقل name واضح. تأكد من هيكل الداتا.', 'error');
+      return;
+    }
+
+    renderProductsTable();
+    setStatus(`تم جلب ${currentProducts.length} منتج بنجاح.`, 'ok');
+    productsPanel.style.display = 'block';
+  } catch (e) {
+    setStatus('فشل الاتصال بالداتا بيز: ' + e.message + ' — تأكد من صلاحيات القراءة (Rules) في Firebase.', 'error');
+  }
+});
+
+function renderProductsTable() {
+  countLabel.textContent = `${currentProducts.length} منتج`;
+  let html = '<tr><th></th><th>الاسم</th><th>السعر</th></tr>';
+  currentProducts.forEach(p => {
+    html += `<tr>
+      <td><input type="checkbox" class="prodChk" data-id="${p.id}" checked></td>
+      <td>${escapeHtml(p.name)}</td>
+      <td>${escapeHtml(String(p.price))}</td>
+    </tr>`;
+  });
+  productsTable.innerHTML = html;
+}
+
+document.getElementById('selectAllBtn').addEventListener('click', () => {
+  document.querySelectorAll('.prodChk').forEach(c => c.checked = true);
+});
+document.getElementById('selectNoneBtn').addEventListener('click', () => {
+  document.querySelectorAll('.prodChk').forEach(c => c.checked = false);
+});
+
+document.getElementById('genBtn').addEventListener('click', () => {
+  const place = document.getElementById('placeName').value.trim() || 'PIT HOUSE';
+  const selectedIds = Array.from(document.querySelectorAll('.prodChk:checked')).map(c => c.dataset.id);
+  const selected = currentProducts.filter(p => selectedIds.includes(p.id));
+
+  if (selected.length === 0) {
+    setStatus('اختار منتج واحد على الأقل.', 'error');
+    return;
+  }
+
+  labelsWrap.innerHTML = '';
+  selected.forEach(p => {
+    const label = document.createElement('div');
+    label.className = 'label';
+    const svgId = 'bc_' + p.id;
+    label.innerHTML = `
+      <div class="place">${escapeHtml(place)}</div>
+      <div class="name">${escapeHtml(p.name)}</div>
+      <div class="bcwrap"><svg id="${svgId}"></svg></div>
+      <div class="price">${escapeHtml(String(p.price))} EGP</div>
+    `;
+    labelsWrap.appendChild(label);
+    try {
+      JsBarcode('#' + svgId, p.id, {
+        format: 'CODE128',
+        displayValue: true,
+        fontSize: 12,
+        height: 40,
+        margin: 0
+      });
+    } catch (e) {
+      console.error('barcode error for', p.id, e);
+    }
+  });
+
+  printPanel.style.display = 'block';
+  setStatus(`تم توليد ${selected.length} ليبل. جاهزين للطباعة.`, 'ok');
+});
+
+document.getElementById('printBtn').addEventListener('click', () => {
+  window.print();
+});
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+</script>
+</body>
+</html>
