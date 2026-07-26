@@ -327,8 +327,9 @@ writeBtn.addEventListener('click', async () => {
     writeBtn.disabled = true;
     const ndef = new NDEFReader();
     const payload = JSON.stringify({ name, id });
+    const encoded = new TextEncoder().encode(payload);
     await ndef.write({
-      records: [{ recordType: 'mime', mediaType: 'application/json', data: payload }]
+      records: [{ recordType: 'mime', mediaType: 'application/json', data: encoded }]
     });
     addLog(`تم الكتابة بنجاح ✓  name="${name}" id="${id}"`, 'ok');
     statusLabel.textContent = 'تمت الكتابة';
