@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>قارئ NFC</title>
+<title>نظام الحضور والغياب — NFC</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -17,6 +17,7 @@
     --teal: #2DD9C3;
     --amber: #F5A524;
     --danger: #EF6461;
+    --green: #4ADE80;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
@@ -32,7 +33,7 @@
     justify-content:center;
     padding:32px 16px 60px;
   }
-  .wrap{width:100%;max-width:560px;}
+  .wrap{width:100%;max-width:600px;}
 
   .eyebrow{
     font-family:'JetBrains Mono', monospace;
@@ -50,12 +51,43 @@
 
   h1{
     font-family:'Space Grotesk', sans-serif;
-    font-size:30px;
+    font-size:28px;
     line-height:1.25;
     margin:0 0 6px;
     font-weight:700;
   }
-  .sub{color:var(--muted); font-size:14.5px; margin:0 0 28px; line-height:1.7;}
+  .sub{color:var(--muted); font-size:14.5px; margin:0 0 22px; line-height:1.7;}
+
+  /* Tabs */
+  .tabs{
+    display:flex;
+    gap:6px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:5px;
+    margin-bottom:22px;
+  }
+  .tab-btn{
+    flex:1;
+    background:transparent;
+    border:none;
+    border-radius:8px;
+    padding:11px 10px;
+    color:var(--muted);
+    font-family:'IBM Plex Sans Arabic', sans-serif;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    transition:all 0.15s;
+  }
+  .tab-btn.active{
+    background:var(--surface-2);
+    color:var(--text);
+    box-shadow:0 0 0 1px var(--line);
+  }
+  .panel{display:none;}
+  .panel.active{display:block;}
 
   /* --- Signature: NFC pulse target --- */
   .pulse-zone{
@@ -64,7 +96,7 @@
     display:flex;
     align-items:center;
     justify-content:center;
-    margin-bottom:28px;
+    margin-bottom:24px;
   }
   .pulse-ring{
     position:absolute;
@@ -72,6 +104,7 @@
     border:1px solid rgba(45,217,195,0.35);
     animation:pulse 2.6s ease-out infinite;
   }
+  .pulse-ring.off{animation:none; opacity:0; border-color:rgba(137,150,173,0.25);}
   .pulse-ring.r1{width:70px;height:70px;}
   .pulse-ring.r2{width:70px;height:70px;animation-delay:0.9s;}
   .pulse-ring.r3{width:70px;height:70px;animation-delay:1.8s;}
@@ -90,7 +123,9 @@
     background:linear-gradient(160deg, var(--surface-2), var(--surface));
     border:1px solid var(--line);
     display:flex;align-items:center;justify-content:center;
+    transition:border-color 0.2s, box-shadow 0.2s;
   }
+  .pulse-core.live{border-color:var(--teal); box-shadow:0 0 22px rgba(45,217,195,0.25);}
   .pulse-core svg{width:30px;height:30px;stroke:var(--teal);}
   .status-label{
     position:absolute;
@@ -115,7 +150,9 @@
     display:flex;
     align-items:center;
     gap:8px;
+    justify-content:space-between;
   }
+  .card-title .left{display:flex; align-items:center; gap:8px;}
   .card-title .idx{
     font-family:'JetBrains Mono', monospace;
     font-size:11px;
@@ -125,6 +162,15 @@
     border-radius:5px;
     display:flex;align-items:center;justify-content:center;
     flex-shrink:0;
+  }
+  .count-pill{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    color:var(--teal);
+    background:rgba(45,217,195,0.1);
+    border:1px solid rgba(45,217,195,0.3);
+    border-radius:20px;
+    padding:3px 11px;
   }
 
   label{
@@ -171,6 +217,8 @@
   button:disabled{opacity:0.45; cursor:not-allowed;}
   .btn-write{background:var(--amber); color:#20140A;}
   .btn-read{background:var(--teal); color:#03201C;}
+  .btn-stop{background:var(--danger); color:#2A0A09;}
+  .btn-ghost{background:var(--surface-2); color:var(--text); border:1px solid var(--line);}
   .btn-write:hover:not(:disabled){opacity:0.9;}
   .btn-read:hover:not(:disabled){opacity:0.9;}
 
@@ -191,6 +239,7 @@
   .log .line{white-space:pre-wrap; word-break:break-word;}
   .log .ok{color:var(--teal);}
   .log .err{color:var(--danger);}
+  .log .dup{color:var(--amber);}
 
   .result{
     display:none;
@@ -221,20 +270,79 @@
     line-height:1.8;
   }
   .warn b{color:var(--text);}
+
+  /* Attendance table */
+  .att-table-wrap{
+    max-height:340px;
+    overflow-y:auto;
+    border:1px solid var(--line);
+    border-radius:9px;
+  }
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  thead th{
+    position:sticky; top:0;
+    background:var(--surface-2);
+    text-align:right;
+    padding:10px 12px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:11.5px;
+    color:var(--muted);
+    font-weight:500;
+    border-bottom:1px solid var(--line);
+  }
+  tbody td{
+    padding:10px 12px;
+    border-bottom:1px solid var(--line);
+  }
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:rgba(255,255,255,0.02);}
+  .empty-row td{
+    text-align:center;
+    color:var(--muted);
+    padding:26px 12px;
+  }
+  .time-cell{font-family:'JetBrains Mono', monospace; color:var(--teal); direction:ltr; text-align:right;}
+  .id-cell{font-family:'JetBrains Mono', monospace; color:var(--muted); direction:ltr; text-align:right;}
+
+  .toast{
+    position:fixed;
+    bottom:24px; left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:12px 20px;
+    font-size:14px;
+    opacity:0;
+    pointer-events:none;
+    transition:all 0.25s;
+    max-width:90%;
+    text-align:center;
+    z-index:50;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  .toast.ok{border-color:rgba(74,222,128,0.4); color:var(--green);}
+  .toast.dup{border-color:rgba(245,165,36,0.4); color:var(--amber);}
+  .toast.err{border-color:rgba(239,100,97,0.4); color:var(--danger);}
 </style>
 </head>
 <body>
 <div class="wrap">
 
   <div class="eyebrow"><span class="dot"></span>WEB NFC · NDEFReader</div>
-  <h1>قارئ وكاتب بطاقات NFC</h1>
-  <p class="sub">قرّب البطاقة من ظهر الموبايل عشان تكتب بيانات (الاسم و ID) أو تقرأ اللي متسجل فيها بالفعل.</p>
+  <h1>نظام الحضور والغياب</h1>
+  <p class="sub">سجّل بيانات الطلاب على الكروت، وبعدين استخدم وضع تسجيل الحضور — أي طالب يقرّب كارته يتسجل حضوره تلقائيًا.</p>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="attendance">تسجيل الحضور</button>
+    <button class="tab-btn" data-tab="register">تسجيل بيانات الكارت</button>
+  </div>
 
   <div class="pulse-zone" id="pulseZone">
-    <div class="pulse-ring r1"></div>
-    <div class="pulse-ring r2"></div>
-    <div class="pulse-ring r3"></div>
-    <div class="pulse-core">
+    <div class="pulse-ring r1 off" id="ring1"></div>
+    <div class="pulse-ring r2 off" id="ring2"></div>
+    <div class="pulse-ring r3 off" id="ring3"></div>
+    <div class="pulse-core" id="pulseCore">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round">
         <path d="M6 12a6 6 0 0 1 12 0"/>
         <path d="M3 12a9 9 0 0 1 18 0"/>
@@ -244,46 +352,102 @@
     <div class="status-label" id="statusLabel">جاهز</div>
   </div>
 
-  <div class="card">
-    <div class="card-title"><span class="idx">١</span> كتابة بيانات على البطاقة</div>
-    <label>الاسم</label>
-    <input type="text" id="nameInput" placeholder="مثال: محمد أحمد">
-    <label>ID</label>
-    <input type="text" id="idInput" placeholder="مثال: 1024">
-    <div class="row">
-      <button class="btn-write" id="writeBtn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
-        اكتب على الكارت
-      </button>
+  <!-- ATTENDANCE PANEL -->
+  <div class="panel active" id="panel-attendance">
+    <div class="card">
+      <div class="card-title">
+        <span class="left"><span class="idx">١</span> وضع تسجيل الحضور</span>
+      </div>
+      <div class="row">
+        <button class="btn-read" id="startAttBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+          ابدأ استقبال الحضور
+        </button>
+        <button class="btn-stop" id="stopAttBtn" style="display:none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+          إيقاف
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <span class="left"><span class="idx">٢</span> سجل حضور اليوم — <span id="todayDate" style="color:var(--muted); font-weight:400; font-size:13px;"></span></span>
+        <span class="count-pill" id="countPill">0 طالب</span>
+      </div>
+      <div class="att-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>الاسم</th>
+              <th>ID</th>
+              <th>وقت الحضور</th>
+            </tr>
+          </thead>
+          <tbody id="attTableBody">
+            <tr class="empty-row"><td colspan="3">لسه محدش سجّل حضور النهارده</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="row" style="margin-top:14px;">
+        <button class="btn-ghost" id="exportBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg>
+          تصدير CSV
+        </button>
+        <button class="btn-ghost" id="clearBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15"/></svg>
+          مسح سجل اليوم
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REGISTER PANEL -->
+  <div class="panel" id="panel-register">
+    <div class="card">
+      <div class="card-title"><span class="left"><span class="idx">١</span> كتابة بيانات الطالب على الكارت</span></div>
+      <label>الاسم</label>
+      <input type="text" id="nameInput" placeholder="مثال: محمد أحمد">
+      <label>ID</label>
+      <input type="text" id="idInput" placeholder="مثال: 1024">
+      <div class="row">
+        <button class="btn-write" id="writeBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          اكتب على الكارت
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="left"><span class="idx">٢</span> قراءة تجريبية للتأكد من البيانات</span></div>
+      <div class="row">
+        <button class="btn-read" id="readBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+          ابدأ القراءة
+        </button>
+      </div>
+      <div class="result" id="result">
+        <div class="field"><span class="k">الاسم</span><span class="v" id="resName">—</span></div>
+        <div class="field"><span class="k">ID</span><span class="v" id="resId">—</span></div>
+      </div>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-title"><span class="idx">٢</span> قراءة بيانات من البطاقة</div>
-    <div class="row">
-      <button class="btn-read" id="readBtn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
-        ابدأ القراءة
-      </button>
-    </div>
-    <div class="result" id="result">
-      <div class="field"><span class="k">الاسم</span><span class="v" id="resName">—</span></div>
-      <div class="field"><span class="k">ID</span><span class="v" id="resId">—</span></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title"><span class="idx">٣</span> سجل العمليات</div>
+    <div class="card-title"><span class="left"><span class="idx">٣</span> سجل العمليات</span></div>
     <div class="log" id="log"><div class="line">— لسه مفيش عمليات —</div></div>
   </div>
 
   <div class="warn">
-    <b>ملحوظة مهمة:</b> ميزة Web NFC شغالة بس على متصفح Chrome على أجهزة أندرويد فيها NFC مفعّل، والصفحة لازم تكون شغالة على HTTPS (أو localhost). لو فتحت الصفحة على أيفون أو على كمبيوتر أو داخل معاينة كروم إكستنشن، الزراير مش هتشتغل لإن المتصفح مش بيدعم الخاصية دي أصلاً.
+    <b>ملحوظة مهمة:</b> ميزة Web NFC شغالة بس على متصفح Chrome على أجهزة أندرويد فيها NFC مفعّل، والصفحة لازم تكون شغالة على HTTPS. سجل الحضور بيتخزن في نفس المتصفح على نفس الجهاز (localStorage) — يعني لو غيّرت الموبايل أو مسحت بيانات المتصفح هيتمسح السجل، فمهم تصدّر CSV بعد كل يوم دراسي.
   </div>
 
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
+/* ---------- Elements ---------- */
 const logEl = document.getElementById('log');
 const statusLabel = document.getElementById('statusLabel');
 const writeBtn = document.getElementById('writeBtn');
@@ -291,7 +455,33 @@ const readBtn = document.getElementById('readBtn');
 const resultEl = document.getElementById('result');
 const resName = document.getElementById('resName');
 const resId = document.getElementById('resId');
+const startAttBtn = document.getElementById('startAttBtn');
+const stopAttBtn = document.getElementById('stopAttBtn');
+const attTableBody = document.getElementById('attTableBody');
+const countPill = document.getElementById('countPill');
+const todayDateEl = document.getElementById('todayDate');
+const exportBtn = document.getElementById('exportBtn');
+const clearBtn = document.getElementById('clearBtn');
+const toastEl = document.getElementById('toast');
+const pulseCore = document.getElementById('pulseCore');
+const rings = [document.getElementById('ring1'), document.getElementById('ring2'), document.getElementById('ring3')];
+const tabBtns = document.querySelectorAll('.tab-btn');
+const panels = { attendance: document.getElementById('panel-attendance'), register: document.getElementById('panel-register') };
 
+let ndefShared = null;
+let attendanceActive = false;
+
+/* ---------- Tabs ---------- */
+tabBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    tabBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    Object.values(panels).forEach(p => p.classList.remove('active'));
+    panels[btn.dataset.tab].classList.add('active');
+  });
+});
+
+/* ---------- Helpers ---------- */
 function addLog(msg, type){
   const first = logEl.querySelector('.line');
   if(first && first.textContent.includes('لسه مفيش')) logEl.innerHTML = '';
@@ -302,17 +492,109 @@ function addLog(msg, type){
   logEl.prepend(div);
 }
 
+function showToast(msg, type){
+  toastEl.textContent = msg;
+  toastEl.className = 'toast show' + (type ? ' ' + type : '');
+  setTimeout(() => { toastEl.classList.remove('show'); }, 2600);
+}
+
 function nfcSupported(){
   return 'NDEFReader' in window;
 }
+
+function setLiveVisual(on){
+  pulseCore.classList.toggle('live', on);
+  rings.forEach(r => r.classList.toggle('off', !on));
+}
+
+function todayKey(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+
+function todayDisplay(){
+  return new Date().toLocaleDateString('ar-EG', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+}
+
+function storageKey(){
+  return 'nfc_attendance_' + todayKey();
+}
+
+function loadAttendance(){
+  try{
+    const raw = localStorage.getItem(storageKey());
+    return raw ? JSON.parse(raw) : [];
+  }catch(e){
+    return [];
+  }
+}
+
+function saveAttendance(list){
+  try{
+    localStorage.setItem(storageKey(), JSON.stringify(list));
+  }catch(e){
+    addLog('تعذر حفظ السجل محليًا: ' + e.message, 'err');
+  }
+}
+
+function renderAttendance(){
+  const list = loadAttendance();
+  countPill.textContent = `${list.length} طالب`;
+  if(list.length === 0){
+    attTableBody.innerHTML = '<tr class="empty-row"><td colspan="3">لسه محدش سجّل حضور النهارده</td></tr>';
+    return;
+  }
+  attTableBody.innerHTML = list
+    .slice()
+    .reverse()
+    .map(r => `<tr><td>${escapeHtml(r.name)}</td><td class="id-cell">${escapeHtml(r.id)}</td><td class="time-cell">${r.time}</td></tr>`)
+    .join('');
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function extractNameId(records){
+  let foundName = null;
+  let foundId = null;
+  for(const record of records){
+    try{
+      const decoder = new TextDecoder(record.encoding || 'utf-8');
+      const text = decoder.decode(record.data);
+      const nameMatch = text.match(/name=([^;]*)/i);
+      const idMatch = text.match(/id=([^;]*)/i);
+      if(nameMatch) foundName = foundName || nameMatch[1];
+      if(idMatch) foundId = foundId || idMatch[1];
+      if(!foundName || !foundId){
+        try{
+          const json = JSON.parse(text);
+          if(json && typeof json === 'object'){
+            foundName = foundName || json.name;
+            foundId = foundId || json.id;
+          }
+        }catch(_){}
+      }
+    }catch(e){}
+  }
+  return { name: foundName, id: foundId };
+}
+
+todayDateEl.textContent = todayDisplay();
+renderAttendance();
 
 if(!nfcSupported()){
   addLog('المتصفح ده مش بيدعم Web NFC. استخدم Chrome على أندرويد.', 'err');
   writeBtn.disabled = true;
   readBtn.disabled = true;
+  startAttBtn.disabled = true;
   statusLabel.textContent = 'غير مدعوم';
 }
 
+/* ---------- Register: write ---------- */
 writeBtn.addEventListener('click', async () => {
   const name = document.getElementById('nameInput').value.trim();
   const id = document.getElementById('idInput').value.trim();
@@ -328,12 +610,9 @@ writeBtn.addEventListener('click', async () => {
     const ndef = new NDEFReader();
     const payload = `name=${name};id=${id}`;
 
-    // Try a few formats in sequence, since some cheap/generic tags
-    // reject certain NDEF record types even though they support NDEF overall.
     const attempts = [
       { label: 'text', records: [{ recordType: 'text', data: payload }] },
       { label: 'mime+ArrayBuffer', records: [{ recordType: 'mime', mediaType: 'text/plain', data: new TextEncoder().encode(payload) }] },
-      { label: 'empty-then-text', records: [{ recordType: 'empty' }, { recordType: 'text', data: payload }] },
     ];
 
     let lastErr = null;
@@ -350,97 +629,137 @@ writeBtn.addEventListener('click', async () => {
         addLog(`محاولة (${attempt.label}) فشلت: ${e.message}`, 'err');
       }
     }
-    if(!success){
-      throw lastErr;
-    }
+    if(!success) throw lastErr;
   }catch(err){
-    addLog('فشلت كل محاولات الكتابة: ' + err.message + ' — الكارت غالبًا مش متهيأ NDEF أو محمي ضد الكتابة.', 'err');
+    addLog('فشلت كل محاولات الكتابة: ' + err.message, 'err');
     statusLabel.textContent = 'فشل';
   }finally{
     writeBtn.disabled = false;
   }
 });
 
+/* ---------- Register: test read ---------- */
 readBtn.addEventListener('click', async () => {
   try{
     statusLabel.textContent = 'قرّب الكارت للقراءة…';
     readBtn.disabled = true;
     const ndef = new NDEFReader();
     await ndef.scan();
-
     addLog('بدأ وضع القراءة… قرّب الكارت دلوقتي.');
 
     ndef.onreading = (event) => {
-      const records = event.message.records;
-      if(!records || records.length === 0){
-        addLog('الكارت فاضي أو مفيهوش بيانات NDEF.', 'err');
-        return;
-      }
-
-      let foundName = null;
-      let foundId = null;
-      const rawPieces = [];
-
-      for(const record of records){
-        try{
-          let text = '';
-          if(record.recordType === 'text' || record.recordType === 'url' || record.recordType === 'mime'){
-            const decoder = new TextDecoder(record.encoding || 'utf-8');
-            text = decoder.decode(record.data);
-          }else{
-            // unknown record type, try to decode as text anyway
-            const decoder = new TextDecoder('utf-8');
-            text = decoder.decode(record.data);
-          }
-
-          rawPieces.push(`[${record.recordType}] ${text}`);
-
-          // try our own format first: name=X;id=Y
-          const nameMatch = text.match(/name=([^;]*)/i);
-          const idMatch = text.match(/id=([^;]*)/i);
-          if(nameMatch) foundName = foundName || nameMatch[1];
-          if(idMatch) foundId = foundId || idMatch[1];
-
-          // try JSON format: {"name":"..","id":".."}
-          if(!foundName || !foundId){
-            try{
-              const json = JSON.parse(text);
-              if(json && typeof json === 'object'){
-                foundName = foundName || json.name;
-                foundId = foundId || json.id;
-              }
-            }catch(_){/* not JSON, ignore */}
-          }
-        }catch(e){
-          rawPieces.push(`[${record.recordType}] (تعذر فك التشفير)`);
-        }
-      }
-
-      if(foundName || foundId){
-        resName.textContent = foundName || '—';
-        resId.textContent = foundId || '—';
+      const { name, id } = extractNameId(event.message.records);
+      if(name || id){
+        resName.textContent = name || '—';
+        resId.textContent = id || '—';
         resultEl.classList.add('show');
-        addLog(`تمت القراءة ✓  name="${foundName || '—'}" id="${foundId || '—'}"`, 'ok');
+        addLog(`تمت القراءة ✓  name="${name || '—'}" id="${id || '—'}"`, 'ok');
         statusLabel.textContent = 'تمت القراءة';
       }else{
-        resName.textContent = '—';
-        resId.textContent = '—';
-        resultEl.classList.add('show');
-        addLog('الكارت فيه بيانات بس مش بصيغة اسم/ID، البيانات الخام: ' + rawPieces.join(' | '), 'err');
+        addLog('الكارت مفيهوش بيانات اسم/ID معروفة.', 'err');
         statusLabel.textContent = 'بيانات غير معروفة';
       }
     };
-
-    ndef.onreadingerror = () => {
-      addLog('حصل خطأ أثناء قراءة الكارت.', 'err');
-    };
-
+    ndef.onreadingerror = () => addLog('حصل خطأ أثناء قراءة الكارت.', 'err');
   }catch(err){
     addLog('فشل بدء القراءة: ' + err.message, 'err');
     statusLabel.textContent = 'فشل';
   }finally{
     readBtn.disabled = false;
   }
+});
+
+/* ---------- Attendance mode ---------- */
+startAttBtn.addEventListener('click', async () => {
+  try{
+    statusLabel.textContent = 'وضع الحضور شغال — قرّب أي كارت';
+    startAttBtn.style.display = 'none';
+    stopAttBtn.style.display = 'flex';
+    setLiveVisual(true);
+    attendanceActive = true;
+
+    const ndef = new NDEFReader();
+    ndefShared = ndef;
+    await ndef.scan();
+    addLog('بدأ استقبال الحضور… أي طالب يقرّب كارته هيتسجل تلقائي.', 'ok');
+
+    ndef.onreading = (event) => {
+      if(!attendanceActive) return;
+      const { name, id } = extractNameId(event.message.records);
+
+      if(!name || !id){
+        addLog('كارت غير مسجل ببيانات طالب (اسم/ID) — اتجاهل.', 'err');
+        showToast('الكارت ده مش مسجل بيانات طالب', 'err');
+        return;
+      }
+
+      const list = loadAttendance();
+      const already = list.find(r => r.id === id);
+      if(already){
+        addLog(`${name} (ID: ${id}) مسجل حضور بالفعل الساعة ${already.time}`, 'dup');
+        showToast(`${name} مسجل حضور بالفعل (${already.time})`, 'dup');
+        return;
+      }
+
+      const time = new Date().toLocaleTimeString('ar-EG', { hour:'2-digit', minute:'2-digit' });
+      list.push({ name, id, time });
+      saveAttendance(list);
+      renderAttendance();
+      addLog(`تم تسجيل حضور: ${name} (ID: ${id}) الساعة ${time}`, 'ok');
+      showToast(`✓ اتسجل حضور: ${name}`, 'ok');
+    };
+
+    ndef.onreadingerror = () => {
+      addLog('حصل خطأ أثناء قراءة كارت في وضع الحضور.', 'err');
+    };
+  }catch(err){
+    addLog('فشل بدء وضع الحضور: ' + err.message, 'err');
+    statusLabel.textContent = 'فشل';
+    startAttBtn.style.display = 'flex';
+    stopAttBtn.style.display = 'none';
+    setLiveVisual(false);
+    attendanceActive = false;
+  }
+});
+
+stopAttBtn.addEventListener('click', () => {
+  attendanceActive = false;
+  ndefShared = null;
+  startAttBtn.style.display = 'flex';
+  stopAttBtn.style.display = 'none';
+  setLiveVisual(false);
+  statusLabel.textContent = 'جاهز';
+  addLog('تم إيقاف وضع استقبال الحضور.');
+});
+
+/* ---------- Export / Clear ---------- */
+exportBtn.addEventListener('click', () => {
+  const list = loadAttendance();
+  if(list.length === 0){
+    showToast('مفيش بيانات حضور تتصدّر النهارده', 'err');
+    return;
+  }
+  let csv = '\uFEFFالاسم,ID,وقت الحضور\n';
+  list.forEach(r => {
+    csv += `"${r.name.replace(/"/g,'""')}","${r.id.replace(/"/g,'""')}","${r.time}"\n`;
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `attendance_${todayKey()}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  addLog(`تم تصدير ${list.length} سجل حضور كـ CSV.`, 'ok');
+});
+
+clearBtn.addEventListener('click', () => {
+  if(!confirm('متأكد إنك عايز تمسح سجل حضور النهارده بالكامل؟ الخطوة دي مش هترجع.')) return;
+  localStorage.removeItem(storageKey());
+  renderAttendance();
+  addLog('تم مسح سجل حضور اليوم.', 'err');
 });
 </script>
 </body>
