@@ -326,15 +326,35 @@ writeBtn.addEventListener('click', async () => {
     statusLabel.textContent = 'قرّب الكارت للكتابة…';
     writeBtn.disabled = true;
     const ndef = new NDEFReader();
-    const payload = JSON.stringify({ name, id });
-    const encoded = new TextEncoder().encode(payload);
-    await ndef.write({
-      records: [{ recordType: 'mime', mediaType: 'application/json', data: encoded }]
-    });
-    addLog(`تم الكتابة بنجاح ✓  name="${name}" id="${id}"`, 'ok');
-    statusLabel.textContent = 'تمت الكتابة';
+    const payload = `name=${name};id=${id}`;
+
+    // Try a few formats in sequence, since some cheap/generic tags
+    // reject certain NDEF record types even though they support NDEF overall.
+    const attempts = [
+      { label: 'text', records: [{ recordType: 'text', data: payload }] },
+      { label: 'mime+ArrayBuffer', records: [{ recordType: 'mime', mediaType: 'text/plain', data: new TextEncoder().encode(payload) }] },
+      { label: 'empty-then-text', records: [{ recordType: 'empty' }, { recordType: 'text', data: payload }] },
+    ];
+
+    let lastErr = null;
+    let success = false;
+    for(const attempt of attempts){
+      try{
+        await ndef.write({ records: attempt.records });
+        addLog(`تم الكتابة بنجاح ✓ (${attempt.label})  name="${name}" id="${id}"`, 'ok');
+        statusLabel.textContent = 'تمت الكتابة';
+        success = true;
+        break;
+      }catch(e){
+        lastErr = e;
+        addLog(`محاولة (${attempt.label}) فشلت: ${e.message}`, 'err');
+      }
+    }
+    if(!success){
+      throw lastErr;
+    }
   }catch(err){
-    addLog('فشلت الكتابة: ' + err.message, 'err');
+    addLog('فشلت كل محاولات الكتابة: ' + err.message + ' — الكارت غالبًا مش متهيأ NDEF أو محمي ضد الكتابة.', 'err');
     statusLabel.textContent = 'فشل';
   }finally{
     writeBtn.disabled = false;
@@ -351,22 +371,63 @@ readBtn.addEventListener('click', async () => {
     addLog('بدأ وضع القراءة… قرّب الكارت دلوقتي.');
 
     ndef.onreading = (event) => {
-      const record = event.message.records[0];
-      if(!record){
-        addLog('الكارت فاضي أو الفورمات مش متعرف.', 'err');
+      const records = event.message.records;
+      if(!records || records.length === 0){
+        addLog('الكارت فاضي أو مفيهوش بيانات NDEF.', 'err');
         return;
       }
-      try{
-        const decoder = new TextDecoder(record.encoding || 'utf-8');
-        const text = decoder.decode(record.data);
-        const data = JSON.parse(text);
-        resName.textContent = data.name ?? '—';
-        resId.textContent = data.id ?? '—';
+
+      let foundName = null;
+      let foundId = null;
+      const rawPieces = [];
+
+      for(const record of records){
+        try{
+          let text = '';
+          if(record.recordType === 'text' || record.recordType === 'url' || record.recordType === 'mime'){
+            const decoder = new TextDecoder(record.encoding || 'utf-8');
+            text = decoder.decode(record.data);
+          }else{
+            // unknown record type, try to decode as text anyway
+            const decoder = new TextDecoder('utf-8');
+            text = decoder.decode(record.data);
+          }
+
+          rawPieces.push(`[${record.recordType}] ${text}`);
+
+          // try our own format first: name=X;id=Y
+          const nameMatch = text.match(/name=([^;]*)/i);
+          const idMatch = text.match(/id=([^;]*)/i);
+          if(nameMatch) foundName = foundName || nameMatch[1];
+          if(idMatch) foundId = foundId || idMatch[1];
+
+          // try JSON format: {"name":"..","id":".."}
+          if(!foundName || !foundId){
+            try{
+              const json = JSON.parse(text);
+              if(json && typeof json === 'object'){
+                foundName = foundName || json.name;
+                foundId = foundId || json.id;
+              }
+            }catch(_){/* not JSON, ignore */}
+          }
+        }catch(e){
+          rawPieces.push(`[${record.recordType}] (تعذر فك التشفير)`);
+        }
+      }
+
+      if(foundName || foundId){
+        resName.textContent = foundName || '—';
+        resId.textContent = foundId || '—';
         resultEl.classList.add('show');
-        addLog(`تمت القراءة ✓  name="${data.name}" id="${data.id}"`, 'ok');
+        addLog(`تمت القراءة ✓  name="${foundName || '—'}" id="${foundId || '—'}"`, 'ok');
         statusLabel.textContent = 'تمت القراءة';
-      }catch(e){
-        addLog('البيانات على الكارت مش بالفورمات المتوقع.', 'err');
+      }else{
+        resName.textContent = '—';
+        resId.textContent = '—';
+        resultEl.classList.add('show');
+        addLog('الكارت فيه بيانات بس مش بصيغة اسم/ID، البيانات الخام: ' + rawPieces.join(' | '), 'err');
+        statusLabel.textContent = 'بيانات غير معروفة';
       }
     };
 
