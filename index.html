@@ -336,7 +336,22 @@
   <div id="app"></div>
 </div>
 
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBBHUWqxFsaIn442PSuieSlbhrpB7awwAw",
+  authDomain: "exam-result-system-ca200.firebaseapp.com",
+  databaseURL: "https://exam-result-system-ca200-default-rtdb.firebaseio.com",
+  projectId: "exam-result-system-ca200",
+  storageBucket: "exam-result-system-ca200.firebasestorage.app",
+  messagingSenderId: "149705342999",
+  appId: "1:149705342999:web:f62b7172af711a94531c52"
+};
+const fbApp = initializeApp(firebaseConfig);
+const db = getDatabase(fbApp);
+
 /* ---------------- state ---------------- */
 const myId = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()));
 let myName = '';
