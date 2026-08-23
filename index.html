@@ -357,7 +357,6 @@ const myId = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()));
 let myName = '';
 let roomCode = null;
 let room = null;
-let pollTimer = null;
 let errorMsg = '';
 let generating = false;
 
@@ -371,25 +370,32 @@ const ROLES = [
 ];
 const roleLabel = id => (ROLES.find(r=>r.id===id)||{}).label || id;
 
-/* ---------------- storage helpers ---------------- */
-const roomKey = code => `room:${code}`;
+/* ---------------- database helpers (Firebase Realtime Database) ---------------- */
+const roomPath = code => `rooms/${code}`;
 
-async function loadRoom(code){
+async function loadRoomOnce(code){
   try{
-    const res = await window.storage.get(roomKey(code), true);
-    return res && res.value ? JSON.parse(res.value) : null;
+    const snap = await get(ref(db, roomPath(code)));
+    return snap.exists() ? normalizeRoom(snap.val()) : null;
   }catch(e){
     return null;
   }
 }
 async function saveRoom(code, obj){
   try{
-    await window.storage.set(roomKey(code), JSON.stringify(obj), true);
+    await set(ref(db, roomPath(code)), obj);
     return true;
   }catch(e){
-    errorMsg = 'حدث خطأ في حفظ بيانات الغرفة. حاول مرة أخرى.';
+    errorMsg = 'حدث خطأ في حفظ بيانات الغرفة. تأكد من صلاحيات القراءة/الكتابة في قاعدة البيانات وحاول مرة أخرى.';
     return false;
   }
+}
+function normalizeRoom(r){
+  if(!r) return r;
+  r.players = r.players || {};
+  r.readyPlayers = r.readyPlayers || [];
+  r.score = r.score || {prosecution:0, defense:0};
+  return r;
 }
 function genCode(){
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -398,17 +404,17 @@ function genCode(){
   return s;
 }
 
-/* ---------------- polling ---------------- */
-function startPolling(){
-  stopPolling();
-  pollTimer = setInterval(async ()=>{
-    if(!roomCode) return;
-    const fresh = await loadRoom(roomCode);
-    if(fresh){ room = fresh; render(); }
-  }, 2200);
+/* ---------------- realtime subscription ---------------- */
+let unsubscribeFn = null;
+function subscribeRoom(code){
+  unsubscribeRoomListener();
+  unsubscribeFn = onValue(ref(db, roomPath(code)), (snapshot)=>{
+    room = snapshot.exists() ? normalizeRoom(snapshot.val()) : null;
+    render();
+  });
 }
-function stopPolling(){
-  if(pollTimer){ clearInterval(pollTimer); pollTimer=null; }
+function unsubscribeRoomListener(){
+  if(unsubscribeFn){ unsubscribeFn(); unsubscribeFn=null; }
 }
 
 /* ---------------- case generation via Claude ---------------- */
@@ -467,12 +473,10 @@ async function beginCaseFlow(){
   render();
   try{
     const c = await generateCase();
-    const fresh = await loadRoom(roomCode) || room;
-    fresh.case = c;
-    fresh.status = 'in_progress';
-    fresh.readyPlayers = [];
-    fresh.verdict = null;
-    room = fresh;
+    room.case = c;
+    room.status = 'in_progress';
+    room.readyPlayers = [];
+    room.verdict = null;
     await saveRoom(roomCode, room);
   }catch(e){
     errorMsg = 'تعذّر توليد القضية. حاول مرة أخرى.';
@@ -501,7 +505,7 @@ async function createRoom(){
   if(!ok) { render(); return; }
   roomCode = code;
   room = newRoom;
-  startPolling();
+  subscribeRoom(code);
   render();
 }
 
@@ -512,12 +516,12 @@ async function joinRoomFlow(){
   const code = (codeEl.value||'').trim().toUpperCase();
   if(!myName){ errorMsg='اكتب اسمك أولاً'; render(); return; }
   if(!code){ errorMsg='اكتب كود الغرفة'; render(); return; }
-  const found = await loadRoom(code);
+  const found = await loadRoomOnce(code);
   if(!found){ errorMsg='لا توجد غرفة بهذا الكود'; render(); return; }
   errorMsg='';
   roomCode = code;
   room = found;
-  startPolling();
+  subscribeRoom(code);
   render();
 }
 
@@ -570,7 +574,7 @@ async function leaveRoom(){
     room.readyPlayers = (room.readyPlayers||[]).filter(id=>id!==myId);
     await saveRoom(roomCode, room);
   }
-  stopPolling();
+  unsubscribeRoomListener();
   roomCode=null; room=null; errorMsg='';
   render();
 }
@@ -790,6 +794,17 @@ function renderReveal(){
 }
 
 render();
+
+/* expose functions used by inline onclick handlers — ES modules don't auto-attach to window */
+window.createRoom = createRoom;
+window.joinRoomFlow = joinRoomFlow;
+window.pickRole = pickRole;
+window.beginCaseFlow = beginCaseFlow;
+window.markReady = markReady;
+window.submitVerdict = submitVerdict;
+window.newCase = newCase;
+window.leaveRoom = leaveRoom;
+window.copyCode = copyCode;
 </script>
 </body>
 </html>
