@@ -1378,6 +1378,12 @@ async function copyCode(){
   try{ await navigator.clipboard.writeText(roomCode); }catch(e){}
 }
 
+function confirmLeaveMidSession(){
+  if(confirm('هتخرج من الجلسة دلوقتي وانت لسه في نص القضية. متأكد؟')){
+    leaveRoom();
+  }
+}
+
 /* ---------------- render ---------------- */
 function initials(name){ return ((name||'?').trim().charAt(0) || '?').toUpperCase(); }
 
@@ -1807,6 +1813,7 @@ function renderCase(){
       <div class="case-header">
         <div class="role-pill">دورك: ${roleLabel(role)}</div>
         <div style="color:var(--muted); font-size:12px;">التهمة: ${c.charge} — المتهم: ${c.defendant_name} ${caseSourceLabel(room.caseSource)}</div>
+        <button class="btn secondary small" onclick="confirmLeaveMidSession()">مغادرة الجلسة</button>
       </div>
       <div style="text-align:center; color:var(--muted); font-size:12px; margin:-6px 0 14px;">
         📖 ورقتك هتفضل ظاهرة قدامك طول الوقت لحد ما القاضي يصدر الحكم النهائي
@@ -1939,6 +1946,7 @@ window.submitVerdict = submitVerdict;
 window.awardWitnessPoint = awardWitnessPoint;
 window.newCase = newCase;
 window.leaveRoom = leaveRoom;
+window.confirmLeaveMidSession = confirmLeaveMidSession;
 window.copyCode = copyCode;
 </script>
 </body>
