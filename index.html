@@ -302,6 +302,39 @@
   .score-table th{color:var(--brass-bright); font-weight:700;}
   .score-table td.big{font-size:22px; font-weight:700; font-family:'Amiri',serif; color:var(--parchment);}
 
+  .score-section-title{
+    font-size:12px; color:var(--muted); letter-spacing:.04em;
+    margin:20px 0 10px; text-align:center;
+  }
+  .score-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(110px,1fr));
+    gap:10px;
+  }
+  .score-card{
+    background:var(--wood-dark);
+    border:1px solid var(--panel-line);
+    border-radius:6px;
+    padding:12px 8px;
+    text-align:center;
+  }
+  .score-card .score-role{font-size:12px; color:var(--brass-bright); font-weight:700;}
+  .score-card .score-name{font-size:11px; color:var(--muted); margin:2px 0 6px;}
+  .score-card .score-num{font-size:22px; font-weight:700; font-family:'Amiri',serif; color:var(--parchment);}
+
+  .witness-rate-box{
+    margin-top:18px;
+    background:var(--wood-dark);
+    border:1px dashed var(--panel-line);
+    border-radius:6px;
+    padding:14px 16px;
+    text-align:right;
+  }
+  .witness-rate-row{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:10px; margin-top:8px; font-size:13px;
+  }
+
   .loader{
     text-align:center;
     padding:50px 10px;
@@ -324,6 +357,132 @@
   @media (prefers-reduced-motion: reduce){
     .stamp, .gavel{animation:none !important;}
   }
+
+  /* auth / profile / friends */
+  .topbar{
+    display:flex; justify-content:space-between; align-items:center;
+    flex-wrap:wrap; gap:10px; margin-bottom:18px;
+  }
+  .topbar-user{
+    display:flex; align-items:center; gap:10px; cursor:pointer;
+    background:var(--bg-panel); border:1px solid var(--panel-line);
+    padding:6px 14px 6px 6px; border-radius:30px;
+  }
+  .topbar-user span{font-size:14px; font-weight:700; color:var(--parchment);}
+  .avatar-img{width:32px; height:32px; border-radius:50%; object-fit:cover; border:1px solid var(--brass); display:block;}
+  .avatar-fallback{
+    width:32px; height:32px; border-radius:50%;
+    background:var(--wood); color:var(--brass-bright);
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:14px; border:1px solid var(--brass);
+  }
+  .topbar-actions{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
+  .badge{
+    display:inline-block; background:var(--danger); color:#fff;
+    font-size:10px; font-weight:700; border-radius:10px;
+    padding:1px 6px; margin-inline-start:4px; vertical-align:middle;
+  }
+  .toast{
+    text-align:center;
+    background:rgba(47,92,63,.18);
+    border:1px solid var(--stamp-green);
+    color:#bfe8cd;
+    padding:10px 14px;
+    border-radius:4px;
+    font-size:14px;
+    margin-bottom:16px;
+  }
+  input[type=password]{
+    font-family:'Tajawal',sans-serif;
+    width:100%;
+    padding:13px 14px;
+    border-radius:4px;
+    border:1px solid var(--panel-line);
+    background:#182019;
+    color:var(--text-light);
+    font-size:15px;
+  }
+  input[type=password]:focus{outline:2px solid var(--brass); border-color:var(--brass);}
+  .google-btn{
+    background:#fff !important; color:#3c4043 !important;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    box-shadow:0 4px 0 #b5b8bb, 0 6px 14px rgba(0,0,0,.35) !important;
+  }
+  .friend-row{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:9px 2px; border-bottom:1px solid var(--panel-line);
+    font-size:14px;
+  }
+  .friend-row:last-child{border-bottom:none;}
+
+  /* المايسترو — مراحل الجلسة الحية والتايمر */
+  .phase-card{
+    background:var(--wood-dark);
+    border:1px solid var(--brass);
+    border-radius:6px;
+    padding:24px 20px;
+    text-align:center;
+    margin-top:22px;
+  }
+  .phase-card .phase-icon{font-size:34px; display:block; margin-bottom:8px;}
+  .phase-card .phase-label{
+    font-family:'Amiri',serif; font-size:22px; color:var(--brass-bright);
+    font-weight:700; margin-bottom:6px;
+  }
+  .phase-card .phase-desc{color:var(--muted); font-size:13px; margin:0 auto 6px; max-width:420px;}
+  .my-turn-badge{
+    display:inline-block;
+    background:var(--stamp-green);
+    color:#fff;
+    font-size:12px; font-weight:700;
+    padding:4px 12px;
+    border-radius:20px;
+    margin-bottom:10px;
+  }
+  .phase-timer{
+    font-family:'Amiri',serif;
+    font-size:42px;
+    font-weight:700;
+    color:var(--parchment);
+    letter-spacing:.05em;
+    margin:6px 0 4px;
+  }
+  .phase-timer.warn{color:var(--danger);}
+  .phase-steps{
+    display:flex; justify-content:center; gap:8px;
+    margin:14px 0 4px;
+  }
+  .phase-step{
+    width:10px; height:10px; border-radius:50%;
+    background:var(--panel-line);
+  }
+  .phase-step.done{background:var(--brass);}
+  .phase-step.active{
+    background:var(--brass-bright);
+    box-shadow:0 0 0 3px rgba(232,195,74,.25);
+  }
+  .phase-controls{
+    display:flex; justify-content:center; gap:10px;
+    margin-top:18px; flex-wrap:wrap;
+  }
+
+  /* شاشة طريقة اللعب */
+  .howto-block{margin-bottom:22px;}
+  .howto-block:last-child{margin-bottom:0;}
+  .howto-block h3{
+    font-size:15px; color:var(--brass-bright); margin:0 0 8px;
+  }
+  .howto-block p{color:var(--text-light); font-size:14px; line-height:1.9; margin:0;}
+  .howto-block ul, .howto-block ol{
+    margin:0; padding-inline-start:20px; color:var(--text-light);
+    font-size:14px; line-height:2;
+  }
+  .howto-block li{margin-bottom:6px;}
+  .howto-link{
+    display:inline-block; color:var(--muted); font-size:12px;
+    text-decoration:underline; cursor:pointer;
+  }
+  .howto-link:hover{color:var(--brass-bright);}
 </style>
 </head>
 <body>
@@ -338,7 +497,14 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import {
+  getAuth, GoogleAuthProvider, signInWithPopup,
+  createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  signOut, onAuthStateChanged, updateProfile
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getDatabase, ref, set, get, update, remove, push, onValue
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBBHUWqxFsaIn442PSuieSlbhrpB7awwAw",
@@ -351,14 +517,33 @@ const firebaseConfig = {
 };
 const fbApp = initializeApp(firebaseConfig);
 const db = getDatabase(fbApp);
+const auth = getAuth(fbApp);
 
-/* ---------------- state ---------------- */
-const myId = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()));
-let myName = '';
+/* ---------------- auth / profile / social state ---------------- */
+let authReady = false;      // true بعد أول استجابة من onAuthStateChanged
+let authUser = null;        // كائن المستخدم من Firebase Auth
+let myId = null;            // = authUser.uid بعد تسجيل الدخول
+let profile = null;         // { name, email, photoURL, friendCode, createdAt }
+let authMode = 'login';     // 'login' | 'signup'
+let authError = '';
+let authBusy = false;
+
+let view = 'app';           // 'app' | 'profile' | 'friends'  (شاشات فرعية فوق حالة الغرفة)
+let profileMsg = '';        // رسالة نجاح مؤقتة (خضراء)
+let toastTimer = null;
+
+let friendsData = {};              // { uid: {name, since} }
+let friendRequestsIncoming = {};   // { uid: {name, at} }
+let roomInvitesIncoming = {};      // { pushId: {roomCode, fromName, fromUid, at} }
+
+let unsubProfile=null, unsubFriends=null, unsubReqs=null, unsubInvites=null;
+
+/* ---------------- game state ---------------- */
 let roomCode = null;
 let room = null;
 let errorMsg = '';
-let generating = false;
+
+
 
 const ROLES = [
   {id:'judge',       label:'القاضي',            icon:'⚖',  required:true},
@@ -368,7 +553,36 @@ const ROLES = [
   {id:'witness1',    label:'الشاهد الأول',       icon:'👁', required:false},
   {id:'witness2',    label:'الشاهد الثاني',      icon:'👁', required:false},
 ];
+
 const roleLabel = id => (ROLES.find(r=>r.id===id)||{}).label || id;
+function caseSourceLabel(src){
+  if(src==='ai-anthropic') return ' · 🤖 قضية من تأليف الذكاء الاصطناعي (Claude)';
+  if(src==='ai-gemini') return ' · 🤖 قضية من تأليف الذكاء الاصطناعي (Gemini)';
+  if(src==='ai') return ' · 🤖 قضية من تأليف الذكاء الاصطناعي';
+  return '';
+}
+
+/* ---------------- المايسترو: ترتيب مراحل الجلسة الحية وتايمر كل مرحلة ---------------- */
+const PHASES = [
+  {id:'prosecution', label:'مرافعة الادعاء', icon:'📜', seconds:180, desc:'محامي الادعاء يقدّم مرافعته الافتتاحية ويعرض أدلته على الحاضرين.', turnRoles:['prosecution']},
+  {id:'defense',     label:'مرافعة الدفاع',   icon:'🛡', seconds:180, desc:'محامي الدفاع يرد على الاتهام ويقدّم مرافعته الافتتاحية.',       turnRoles:['defense']},
+  {id:'witnesses',   label:'استجواب الشهود', icon:'👁', seconds:300, desc:'الطرفان يسألان المتهم والشهود لكشف تفاصيل القضية.',            turnRoles:['witness1','witness2','defendant','prosecution','defense']},
+  {id:'deliberation',label:'المداولة الأخيرة', icon:'💬', seconds:90,  desc:'كل الأطراف تلخص موقفها في جملة أخيرة قبل ما القاضي يقرر.',      turnRoles:['prosecution','defense']},
+];
+
+function phaseRemainingSeconds(){
+  if(!room || !room.session) return 0;
+  const idx = room.session.phaseIndex;
+  if(idx>=PHASES.length) return 0;
+  const dur = PHASES[idx].seconds;
+  const elapsed = Math.floor((Date.now() - (room.session.phaseStartedAt||Date.now()))/1000);
+  return Math.max(0, dur - elapsed);
+}
+function formatPhaseTime(sec){
+  const m = Math.floor(sec/60);
+  const s = sec % 60;
+  return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
 
 /* ---------------- database helpers (Firebase Realtime Database) ---------------- */
 const roomPath = code => `rooms/${code}`;
@@ -395,6 +609,8 @@ function normalizeRoom(r){
   r.players = r.players || {};
   r.readyPlayers = r.readyPlayers || [];
   r.score = r.score || {prosecution:0, defense:0};
+  r.playerScores = r.playerScores || {};
+  r.witnessAwards = r.witnessAwards || {};
   return r;
 }
 function genCode(){
@@ -404,7 +620,7 @@ function genCode(){
   return s;
 }
 
-/* ---------------- realtime subscription ---------------- */
+/* ---------------- realtime subscription (room) ---------------- */
 let unsubscribeFn = null;
 function subscribeRoom(code){
   unsubscribeRoomListener();
@@ -621,31 +837,401 @@ const CASES = [
   }
 ];
 
+/* ---------------- AI case generation (uses admin-configured key) ---------------- */
+function buildCasePrompt(){
+  const crimes = ["سرقة","احتيال مالي","اختلاس","تزوير مستندات","إتلاف ممتلكات عامة","اعتداء","رشوة","انتحال شخصية","تهريب بضائع","إهمال أدى إلى ضرر","خيانة أمانة","قرصنة إلكترونية","تسريب معلومات سرية","تنمر إلكتروني","تدليس عقاري","نصب عبر تطبيق"];
+  const settings = ["شركة خاصة","محل تجاري صغير","جامعة","مبنى سكني","مكتب حكومي","مطعم","مصنع","بنك","مستشفى","حي سكني هادئ","معرض فني","مزرعة","مستشفى خاص","تطبيق توصيل طلبات"];
+  const crime = crimes[Math.floor(Math.random()*crimes.length)];
+  const setting = settings[Math.floor(Math.random()*settings.length)];
+  const truthHint = Math.random()<0.5 ? 'مذنب' : 'بريء';
+
+  return `أنت كاتب سيناريوهات لقضايا محاكم ضمن لعبة تمثيل أدوار جماعية (قاضٍ، متهم، شاهدان، محامي ادعاء، محامي دفاع).
+اكتب قضية محكمة جديدة ومبتكرة، تهمتها متعلقة بـ"${crime}"، وقعت في سياق "${setting}".
+اجعل الحقيقة النهائية أن المتهم "${truthHint}" فعلاً، لكن اجعل القضية غامضة بما يكفي بحيث لا يتضح الحكم من الملخص العام وحده، ويحتاج الحاضرون لسماع الشهود وحجج المحامين ليقرروا.
+أعد الناتج بصيغة JSON صِرف فقط، بدون أي نص إضافي قبله أو بعده، وبدون علامات ماركداون، وبالمفاتيح التالية بالضبط:
+{
+"charge": "التهمة في جملة قصيرة",
+"defendant_name": "اسم المتهم",
+"truth": "guilty أو innocent (بالإنجليزية فقط بدون شرح)",
+"public_brief": "ملخص القضية العام الذي يعرفه الجميع في قاعة المحكمة، فقرة واحدة تفصيلية",
+"defendant_statement": "أقوال المتهم السرية عن نفسه وروايته لما حدث، فقرة قصيرة",
+"witness1_name": "اسم الشاهد الأول",
+"witness1_statement": "شهادة الشاهد الأول السرية، فقرة قصيرة",
+"witness2_name": "اسم الشاهد الثاني",
+"witness2_statement": "شهادة الشاهد الثاني السرية، بتفصيل مختلف عن الشاهد الأول",
+"prosecution_notes": "أهم الأدلة والحجج السرية التي يستخدمها محامي الادعاء، فقرة قصيرة",
+"defense_notes": "أهم الحجج السرية التي يستخدمها محامي الدفاع، فقرة قصيرة",
+"judge_notes": "نقاط سرية يجب أن ينتبه لها القاضي عند إصدار الحكم، فقرة قصيرة"
+}
+استخدم اللغة العربية الفصحى المبسطة في كل النصوص، وكن مبدعًا وغير تقليدي في التفاصيل والأسماء.`;
+}
+
+function parseCaseJSON(text){
+  const clean = (text||'').replace(/```json/gi,'').replace(/```/g,'').trim();
+  const obj = JSON.parse(clean);
+  if(!obj.truth || !obj.public_brief) throw new Error('استجابة ناقصة من الذكاء الاصطناعي');
+  obj.truth = obj.truth.toLowerCase().includes('guilty') ? 'guilty' : 'innocent';
+  return obj;
+}
+
+async function generateCaseWithAI(apiKey){
+  const prompt = buildCasePrompt();
+
+  const resp = await fetch("https://api.anthropic.com/v1/messages", {
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "x-api-key": apiKey,
+      "anthropic-version":"2023-06-01",
+      "anthropic-dangerous-direct-browser-access":"true"
+    },
+    body: JSON.stringify({
+      model:"claude-sonnet-5",
+      max_tokens:1024,
+      messages:[{role:"user", content:prompt}]
+    })
+  });
+  if(!resp.ok){
+    const errText = await resp.text().catch(()=> '');
+    throw new Error('API error ' + resp.status + ' ' + errText);
+  }
+  const data = await resp.json();
+  const text = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');
+  return parseCaseJSON(text);
+}
+
+async function generateCaseWithGemini(apiKey){
+  const prompt = buildCasePrompt();
+
+  const resp = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent", {
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "x-goog-api-key": apiKey
+    },
+    body: JSON.stringify({
+      contents:[{ role:"user", parts:[{ text: prompt }] }]
+    })
+  });
+  if(!resp.ok){
+    const errText = await resp.text().catch(()=> '');
+    throw new Error('Gemini API error ' + resp.status + ' ' + errText);
+  }
+  const data = await resp.json();
+  const parts = ((data.candidates||[])[0]||{}).content?.parts || [];
+  const text = parts.map(p=>p.text||'').join('\n');
+  return parseCaseJSON(text);
+}
+
+function pickFromLocalBank(){
+  const used = (room.usedIndices && room.usedIndices.length < CASES.length) ? room.usedIndices : [];
+  const available = CASES.map((_,i)=>i).filter(i=>!used.includes(i));
+  const idx = available[Math.floor(Math.random()*available.length)];
+  room.usedIndices = [...used, idx];
+  return CASES[idx];
+}
+
 function beginCaseFlow(){
   if(!room) return;
   errorMsg = '';
   room.status = 'generating';
   saveRoom(roomCode, room);
   render();
-  setTimeout(async ()=>{
-    const used = (room.usedIndices && room.usedIndices.length < CASES.length) ? room.usedIndices : [];
-    const available = CASES.map((_,i)=>i).filter(i=>!used.includes(i));
-    const idx = available[Math.floor(Math.random()*available.length)];
-    room.case = CASES[idx];
-    room.usedIndices = [...used, idx];
+  (async ()=>{
+    let caseData = null;
+    let usedSource = 'bank';
+    let anthropicKey = '', geminiKey = '';
+    try{
+      const [snapA, snapG] = await Promise.all([
+        get(ref(db, 'config/apiKey')),
+        get(ref(db, 'config/geminiKey'))
+      ]);
+      anthropicKey = snapA.exists() ? snapA.val() : '';
+      geminiKey = snapG.exists() ? snapG.val() : '';
+    }catch(e){ /* هنكمل ببنك القضايا الجاهز لو تعذّر قراءة الإعدادات */ }
+
+    if(anthropicKey){
+      try{
+        caseData = await generateCaseWithAI(anthropicKey);
+        usedSource = 'ai-anthropic';
+      }catch(e){
+        console.error('تعذّر توليد القضية بـ Anthropic، هنجرّب مصدر تاني:', e);
+      }
+    }
+    if(!caseData && geminiKey){
+      try{
+        caseData = await generateCaseWithGemini(geminiKey);
+        usedSource = 'ai-gemini';
+      }catch(e){
+        console.error('تعذّر توليد القضية بـ Gemini، هنستخدم قضية جاهزة بدلاً منها:', e);
+      }
+    }
+    if(!caseData){
+      caseData = pickFromLocalBank();
+      usedSource = 'bank';
+    }
+    room.case = caseData;
+    room.caseSource = usedSource;
     room.status = 'in_progress';
     room.readyPlayers = [];
     room.verdict = null;
+    room.session = null;
+    room.witnessAwards = {};
     await saveRoom(roomCode, room);
     render();
-  }, 650);
+  })();
 }
 
-/* ---------------- actions ---------------- */
+/* ================================================================
+   AUTH — تسجيل الدخول بجوجل أو بالبريد وكلمة السر
+   ================================================================ */
+function switchAuthMode(mode){ authMode = mode; authError=''; render(); }
+
+async function doGoogleSignIn(){
+  authError=''; authBusy=true; render();
+  try{
+    const provider = new GoogleAuthProvider();
+    await signInWithPopup(auth, provider);
+  }catch(e){
+    authError = 'تعذّر تسجيل الدخول بجوجل. ' + authErrMsg(e);
+  }
+  authBusy=false; render();
+}
+
+async function doEmailSignUp(){
+  const name = ((document.getElementById('authName')||{}).value || '').trim();
+  const email = ((document.getElementById('authEmail')||{}).value || '').trim();
+  const pass = (document.getElementById('authPass')||{}).value || '';
+  if(!name){ authError='اكتب اسمك الأول'; render(); return; }
+  if(!email || !pass){ authError='اكتب البريد الإلكتروني وكلمة السر'; render(); return; }
+  if(pass.length < 6){ authError='كلمة السر لازم تكون 6 حروف على الأقل'; render(); return; }
+  authError=''; authBusy=true; render();
+  try{
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    try{ await updateProfile(cred.user, {displayName:name}); }catch(e){}
+    await ensureUserProfile(cred.user, name);
+  }catch(e){
+    authError = authErrMsg(e);
+  }
+  authBusy=false; render();
+}
+
+async function doEmailSignIn(){
+  const email = ((document.getElementById('authEmail')||{}).value || '').trim();
+  const pass = (document.getElementById('authPass')||{}).value || '';
+  if(!email || !pass){ authError='اكتب البريد الإلكتروني وكلمة السر'; render(); return; }
+  authError=''; authBusy=true; render();
+  try{
+    await signInWithEmailAndPassword(auth, email, pass);
+  }catch(e){
+    authError = authErrMsg(e);
+  }
+  authBusy=false; render();
+}
+
+function authErrMsg(e){
+  const c = (e && e.code) || '';
+  if(c.includes('email-already-in-use')) return 'البريد الإلكتروني ده مسجل بحساب بالفعل، جرّب تسجيل الدخول بدل الإنشاء.';
+  if(c.includes('invalid-email')) return 'صيغة البريد الإلكتروني مش صحيحة.';
+  if(c.includes('wrong-password') || c.includes('invalid-credential')) return 'البريد الإلكتروني أو كلمة السر غلط.';
+  if(c.includes('user-not-found')) return 'مفيش حساب بالبريد ده.';
+  if(c.includes('weak-password')) return 'كلمة السر دي ضعيفة، جرّب واحدة أقوى.';
+  if(c.includes('popup-closed-by-user')) return 'اتقفلت نافذة الدخول قبل ما تكمل.';
+  return 'حصل خطأ غير متوقع، جرّب تاني.';
+}
+
+async function doSignOut(){
+  try{ await signOut(auth); }catch(e){}
+}
+
+/* إنشاء صف المستخدم في قاعدة البيانات أول مرة يسجّل فيها دخول */
+async function ensureUserProfile(user, forcedName){
+  const uid = user.uid;
+  const snap = await get(ref(db, `users/${uid}`));
+  if(snap.exists()) return;
+  const name = (forcedName || user.displayName || (user.email ? user.email.split('@')[0] : 'لاعب')).trim();
+  const code = await generateUniqueFriendCode();
+  const newProfile = {
+    name,
+    email: user.email || '',
+    photoURL: user.photoURL || '',
+    friendCode: code,
+    createdAt: Date.now()
+  };
+  await set(ref(db, `users/${uid}`), newProfile);
+  await set(ref(db, `friendCodes/${code}`), uid);
+}
+async function generateUniqueFriendCode(){
+  for(let i=0;i<8;i++){
+    const code = genCode();
+    const snap = await get(ref(db, `friendCodes/${code}`));
+    if(!snap.exists()) return code;
+  }
+  return genCode() + Math.floor(Math.random()*9);
+}
+
+function subscribeUserListeners(uid){
+  unsubscribeAllUserListeners();
+  unsubProfile = onValue(ref(db, `users/${uid}`), snap=>{
+    if(snap.exists()) profile = snap.val();
+    render();
+  });
+  unsubFriends = onValue(ref(db, `friends/${uid}`), snap=>{
+    friendsData = snap.exists() ? snap.val() : {};
+    render();
+  });
+  unsubReqs = onValue(ref(db, `friendRequests/${uid}`), snap=>{
+    friendRequestsIncoming = snap.exists() ? snap.val() : {};
+    render();
+  });
+  unsubInvites = onValue(ref(db, `roomInvites/${uid}`), snap=>{
+    roomInvitesIncoming = snap.exists() ? snap.val() : {};
+    render();
+  });
+}
+function unsubscribeAllUserListeners(){
+  if(unsubProfile) unsubProfile();
+  if(unsubFriends) unsubFriends();
+  if(unsubReqs) unsubReqs();
+  if(unsubInvites) unsubInvites();
+  unsubProfile = unsubFriends = unsubReqs = unsubInvites = null;
+  friendsData = {}; friendRequestsIncoming = {}; roomInvitesIncoming = {};
+}
+
+/* ---------------- session recovery (survive refresh / reopen) ---------------- */
+const LOCAL_ROOM_KEY = 'courtroom_last_room_code';
+function persistRoomCode(code){
+  try{ localStorage.setItem(LOCAL_ROOM_KEY, code); }catch(e){}
+}
+function clearPersistedRoomCode(){
+  try{ localStorage.removeItem(LOCAL_ROOM_KEY); }catch(e){}
+}
+function getPersistedRoomCode(){
+  try{ return localStorage.getItem(LOCAL_ROOM_KEY); }catch(e){ return null; }
+}
+
+/* بمجرد ما نعرف مين المستخدم، نحاول نرجّعه لنفس الغرفة اللي كان فيها قبل الريفريش/الإغلاق */
+let restoringRoom = false;
+async function restoreRoomSession(){
+  const savedCode = getPersistedRoomCode();
+  if(!savedCode) return;
+  restoringRoom = true;
+  render();
+  const found = await loadRoomOnce(savedCode);
+  if(!found){
+    // الغرفة اتقفلت أو الكود بقى قديم — امسح الحفظ وابدأ من الشاشة الرئيسية
+    clearPersistedRoomCode();
+    restoringRoom = false;
+    return;
+  }
+  roomCode = savedCode;
+  room = found;
+  subscribeRoom(savedCode);
+  restoringRoom = false;
+}
+
+onAuthStateChanged(auth, async (user)=>{
+  authReady = true;
+  if(!user){
+    authUser = null; myId = null; profile = null;
+    unsubscribeAllUserListeners();
+    unsubscribeRoomListener();
+    room = null; roomCode = null; view = 'app';
+    render();
+    return;
+  }
+  authUser = user;
+  myId = user.uid;
+  try{ await ensureUserProfile(user); }catch(e){}
+  try{
+    const snap = await get(ref(db, `users/${user.uid}`));
+    if(snap.exists()) profile = snap.val();
+  }catch(e){}
+  subscribeUserListeners(user.uid);
+  try{ await restoreRoomSession(); }catch(e){}
+  render();
+});
+
+/* ================================================================
+   الأصدقاء والدعوات
+   ================================================================ */
+function goProfile(){ view='profile'; errorMsg=''; render(); }
+function goFriends(){ view='friends'; errorMsg=''; render(); }
+function goHowTo(){ view='howto'; errorMsg=''; render(); }
+function goBackFromSub(){ view='app'; errorMsg=''; render(); }
+
+function toast(msg){
+  profileMsg = msg;
+  render();
+  if(toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>{ profileMsg=''; render(); }, 2500);
+}
+
+async function sendFriendRequestByCode(){
+  const val = ((document.getElementById('addFriendCodeInput')||{}).value || '').trim().toUpperCase();
+  if(!val){ errorMsg='اكتب كود صديقك الأول'; render(); return; }
+  errorMsg='';
+  try{
+    const snap = await get(ref(db, `friendCodes/${val}`));
+    if(!snap.exists()){ errorMsg='مفيش حد متسجل بالكود ده'; render(); return; }
+    const targetUid = snap.val();
+    if(targetUid === myId){ errorMsg='ده كودك انت 😅'; render(); return; }
+    if(friendsData[targetUid]){ errorMsg='هو صاحبك بالفعل'; render(); return; }
+    await set(ref(db, `friendRequests/${targetUid}/${myId}`), {
+      name: profile.name, at: Date.now()
+    });
+    toast('تم إرسال طلب الصداقة ✔');
+  }catch(e){
+    errorMsg='حصل خطأ أثناء إرسال الطلب، حاول تاني';
+    render();
+  }
+}
+
+async function acceptFriendRequest(fromUid){
+  const req = friendRequestsIncoming[fromUid];
+  if(!req) return;
+  await set(ref(db, `friends/${myId}/${fromUid}`), {name:req.name, since:Date.now()});
+  await set(ref(db, `friends/${fromUid}/${myId}`), {name:profile.name, since:Date.now()});
+  await remove(ref(db, `friendRequests/${myId}/${fromUid}`));
+}
+async function declineFriendRequest(fromUid){
+  await remove(ref(db, `friendRequests/${myId}/${fromUid}`));
+}
+
+async function inviteFriendToRoom(friendUid, friendName){
+  if(!room || !roomCode) return;
+  try{
+    const invRef = push(ref(db, `roomInvites/${friendUid}`));
+    await set(invRef, { roomCode, fromName: profile.name, fromUid: myId, at: Date.now() });
+    toast(`تم إرسال الدعوة لـ ${friendName}`);
+  }catch(e){
+    errorMsg='تعذّر إرسال الدعوة';
+    render();
+  }
+}
+async function acceptRoomInvite(inviteId, code){
+  await remove(ref(db, `roomInvites/${myId}/${inviteId}`));
+  await joinRoomByCode(code);
+}
+async function dismissRoomInvite(inviteId){
+  await remove(ref(db, `roomInvites/${myId}/${inviteId}`));
+}
+
+async function saveProfileName(){
+  const val = ((document.getElementById('profileNameInput')||{}).value || '').trim();
+  if(!val){ errorMsg='اكتب اسم'; render(); return; }
+  errorMsg='';
+  await update(ref(db, `users/${myId}`), {name: val});
+  toast('تم حفظ الاسم ✔');
+}
+async function copyFriendCode(){
+  try{ await navigator.clipboard.writeText(profile.friendCode); }catch(e){}
+  toast('تم نسخ الكود');
+}
+
+/* ---------------- actions (game) ---------------- */
 async function createRoom(){
-  const nameEl = document.getElementById('nameInput');
-  myName = (nameEl.value||'').trim();
-  if(!myName){ errorMsg='اكتب اسمك أولاً'; render(); return; }
+  if(!profile) return;
   errorMsg='';
   const code = genCode();
   const newRoom = {
@@ -653,37 +1239,41 @@ async function createRoom(){
     players:{}, readyPlayers:[],
     case:null, verdict:null,
     score:{prosecution:0, defense:0},
+    playerScores:{},
+    witnessAwards:{},
     createdAt: Date.now()
   };
   const ok = await saveRoom(code, newRoom);
   if(!ok) { render(); return; }
   roomCode = code;
   room = newRoom;
+  persistRoomCode(code);
   subscribeRoom(code);
   render();
 }
 
 async function joinRoomFlow(){
-  const nameEl = document.getElementById('nameInput');
   const codeEl = document.getElementById('codeInput');
-  myName = (nameEl.value||'').trim();
   const code = (codeEl.value||'').trim().toUpperCase();
-  if(!myName){ errorMsg='اكتب اسمك أولاً'; render(); return; }
   if(!code){ errorMsg='اكتب كود الغرفة'; render(); return; }
+  await joinRoomByCode(code);
+}
+async function joinRoomByCode(code){
   const found = await loadRoomOnce(code);
   if(!found){ errorMsg='لا توجد غرفة بهذا الكود'; render(); return; }
   errorMsg='';
   roomCode = code;
   room = found;
+  persistRoomCode(code);
   subscribeRoom(code);
   render();
 }
 
 async function pickRole(roleId){
-  if(!room) return;
+  if(!room || !profile) return;
   const takenBy = Object.entries(room.players).find(([pid,p])=>p.role===roleId && pid!==myId);
   if(takenBy) return;
-  room.players[myId] = {name: myName, role: roleId};
+  room.players[myId] = {name: profile.name, role: roleId};
   await saveRoom(roomCode, room);
   render();
 }
@@ -693,6 +1283,40 @@ function requiredRolesFilled(){
   const filledRoles = Object.values(room.players).map(p=>p.role);
   return ROLES.filter(r=>r.required).every(r=>filledRoles.includes(r.id));
 }
+
+async function startSession(){
+  if(!room || !roomCode || myRole()!=='judge') return;
+  room.session = { phaseIndex:0, phaseStartedAt: Date.now() };
+  await saveRoom(roomCode, room);
+}
+
+let autoAdvancing = false;
+async function advancePhase(dir){
+  if(!room || !roomCode || myRole()!=='judge') return;
+  if(autoAdvancing) return;
+  autoAdvancing = true;
+  try{
+    const current = room.session ? room.session.phaseIndex : 0;
+    let idx = current + dir;
+    idx = Math.max(0, Math.min(PHASES.length, idx));
+    room.session = { phaseIndex: idx, phaseStartedAt: Date.now() };
+    await saveRoom(roomCode, room);
+  } finally {
+    autoAdvancing = false;
+  }
+}
+
+/* تيكر كل ثانية: يحدّث العدّاد التنازلي لكل الحاضرين، وينقل القاضي تلقائيًا للمرحلة الجاية لما الوقت يخلص */
+setInterval(()=>{
+  if(!room || room.status!=='in_progress' || !room.session) return;
+  const idx = room.session.phaseIndex;
+  if(idx>=PHASES.length) return;
+  render();
+  if(phaseRemainingSeconds()<=0 && myRole()==='judge' && !autoAdvancing){
+    advancePhase(1);
+  }
+}, 1000);
+
 
 async function toggleReady(){
   const idx = room.readyPlayers.indexOf(myId);
@@ -713,6 +1337,22 @@ async function submitVerdict(choice){
   const truth = room.case.truth;
   if(truth === 'guilty') room.score.prosecution += 1;
   else room.score.defense += 1;
+  room.playerScores = room.playerScores || {};
+  if(choice === truth){
+    room.playerScores[myId] = (room.playerScores[myId]||0) + 1;
+  }
+  await saveRoom(roomCode, room);
+  render();
+}
+
+/* نقطة فردية اختيارية: القاضي يقدر يمنح شاهد نقطة "شهادة مقنعة" مرة واحدة لكل قضية — ميزة تنافسية إضافية، مش شرط لسير اللعبة */
+async function awardWitnessPoint(pid){
+  if(!room || myRole()!=='judge') return;
+  room.witnessAwards = room.witnessAwards || {};
+  if(room.witnessAwards[pid]) return;
+  room.witnessAwards[pid] = true;
+  room.playerScores = room.playerScores || {};
+  room.playerScores[pid] = (room.playerScores[pid]||0) + 1;
   await saveRoom(roomCode, room);
   render();
 }
@@ -729,6 +1369,7 @@ async function leaveRoom(){
     await saveRoom(roomCode, room);
   }
   unsubscribeRoomListener();
+  clearPersistedRoomCode();
   roomCode=null; room=null; errorMsg='';
   render();
 }
@@ -738,10 +1379,42 @@ async function copyCode(){
 }
 
 /* ---------------- render ---------------- */
-function el(html){ document.getElementById('app').innerHTML = html; }
+function initials(name){ return ((name||'?').trim().charAt(0) || '?').toUpperCase(); }
+
+function renderTopBarHtml(){
+  const reqCount = Object.keys(friendRequestsIncoming).length;
+  const invCount = Object.keys(roomInvitesIncoming).length;
+  const avatar = (profile && profile.photoURL)
+    ? `<img src="${profile.photoURL}" class="avatar-img">`
+    : `<div class="avatar-fallback">${initials(profile && profile.name)}</div>`;
+  return `
+    <div class="topbar">
+      <div class="topbar-user" onclick="goProfile()">
+        ${avatar}
+        <span>${(profile && profile.name) || '...'}</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn secondary small" onclick="goFriends()">👥 الأصدقاء${reqCount?`<span class="badge">${reqCount}</span>`:''}</button>
+        ${(!room && invCount) ? `<button class="btn secondary small" onclick="goBackFromSub()">✉ دعوات<span class="badge">${invCount}</span></button>` : ''}
+        <button class="btn secondary small" onclick="doSignOut()">خروج</button>
+      </div>
+    </div>`;
+}
+
+function el(html){
+  const bar = (authUser && profile) ? renderTopBarHtml() : '';
+  const toastHtml = profileMsg ? `<div class="toast">${profileMsg}</div>` : '';
+  document.getElementById('app').innerHTML = bar + toastHtml + html;
+}
 
 function render(){
-  if(errorMsg) window._pendingErr = errorMsg;
+  if(!authReady){ renderBootLoading(); return; }
+  if(!authUser){ renderLogin(); return; }
+  if(!profile){ renderBootLoading(); return; }
+  if(restoringRoom){ renderBootLoading('جارٍ استرجاع مكانك في الغرفة...'); return; }
+  if(view==='profile'){ renderProfile(); return; }
+  if(view==='friends'){ renderFriends(); return; }
+  if(view==='howto'){ renderHowTo(); return; }
   if(!room){ renderWelcome(); return; }
   if(room.status==='lobby') { renderLobby(); return; }
   if(room.status==='generating'){ renderGenerating(); return; }
@@ -750,16 +1423,201 @@ function render(){
   renderWelcome();
 }
 
+function renderBootLoading(msg){
+  document.getElementById('app').innerHTML = `
+    <div class="panel loader">
+      <span class="gavel">⚖</span>
+      <p>${msg || 'جارٍ التحقق من الحساب...'}</p>
+    </div>`;
+}
+
 function errBlock(){
   return errorMsg ? `<div class="msg">${errorMsg}</div>` : '';
 }
 
-function renderWelcome(){
+/* -------- auth screen -------- */
+function renderLogin(){
+  const isSignup = authMode === 'signup';
+  document.getElementById('app').innerHTML = `
+    ${errorMsg ? `<div class="msg">${errorMsg}</div>` : ''}
+    ${authError ? `<div class="msg">${authError}</div>` : ''}
+    <div class="panel">
+      <h2 style="margin-top:0; text-align:center;">${isSignup ? 'إنشاء حساب جديد' : 'تسجيل الدخول'}</h2>
+      <button class="btn block google-btn" ${authBusy?'disabled':''} onclick="doGoogleSignIn()">
+        <svg width="18" height="18" viewBox="0 0 48 48" style="flex-shrink:0;">
+          <path fill="#EA4335" d="M24 9.5c3.9 0 6.6 1.7 8.1 3.1l6-5.9C34.6 3.2 29.9 1 24 1 14.9 1 7.1 6.4 3.5 14.2l7 5.4C12.3 13.6 17.6 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-2.8-.4-4H24v7.6h12.7c-.3 2.2-1.6 5.4-4.7 7.6l7.3 5.6c4.3-4 6.8-9.9 6.8-16.8z"/>
+          <path fill="#FBBC05" d="M10.5 19.6l-7-5.4C1.9 17.6 1 20.7 1 24s.9 6.4 2.5 9.8l7.3-5.6c-.6-1.7-1-3.5-1-4.2 0-1.5.3-2.9.7-4.4z"/>
+          <path fill="#34A853" d="M24 47c5.9 0 10.9-1.9 14.5-5.3l-7.3-5.6c-2 1.4-4.6 2.3-7.2 2.3-6.4 0-11.7-4.1-13.6-9.9l-7.3 5.6C7.1 41.6 14.9 47 24 47z"/>
+        </svg>
+        الدخول بحساب جوجل
+      </button>
+      <div style="text-align:center; color:var(--muted); font-size:12px; margin:16px 0;">— أو بالبريد الإلكتروني —</div>
+      ${isSignup ? `
+        <label class="field-label">اسمك (هيظهر للاعبين التانيين)</label>
+        <input type="text" id="authName" placeholder="اكتب اسمك" style="margin-bottom:12px;">
+      ` : ''}
+      <label class="field-label">البريد الإلكتروني</label>
+      <input type="text" id="authEmail" placeholder="you@example.com" style="margin-bottom:12px;">
+      <label class="field-label">كلمة السر</label>
+      <input type="password" id="authPass" placeholder="••••••••" style="margin-bottom:18px;">
+      <button class="btn block" ${authBusy?'disabled':''} onclick="${isSignup?'doEmailSignUp()':'doEmailSignIn()'}">${isSignup?'إنشاء الحساب':'دخول'}</button>
+      <div style="text-align:center; margin-top:16px; font-size:13px; color:var(--muted);">
+        ${isSignup
+          ? `عندك حساب بالفعل؟ <a href="#" onclick="switchAuthMode('login'); return false;" style="color:var(--brass-bright);">سجّل دخولك</a>`
+          : `لسه معملتش حساب؟ <a href="#" onclick="switchAuthMode('signup'); return false;" style="color:var(--brass-bright);">أنشئ حساب جديد</a>`
+        }
+      </div>
+    </div>
+  `;
+}
+
+/* -------- profile screen -------- */
+function renderProfile(){
   el(`
     ${errBlock()}
     <div class="panel">
-      <label class="field-label">اسمك</label>
-      <input type="text" id="nameInput" placeholder="اكتب اسمك هنا" value="${myName.replace(/"/g,'')}">
+      <div class="row" style="justify-content:space-between; align-items:center; margin-bottom:18px;">
+        <h2 style="margin:0; font-size:20px;">👤 ملفي الشخصي</h2>
+        <button class="btn secondary small" onclick="goBackFromSub()">رجوع</button>
+      </div>
+
+      <label class="field-label">اسمك الظاهر للاعبين</label>
+      <div class="row" style="margin-bottom:20px; align-items:stretch;">
+        <input type="text" id="profileNameInput" value="${(profile.name||'').replace(/"/g,'')}" style="flex:1; min-width:160px;">
+        <button class="btn small" onclick="saveProfileName()">حفظ</button>
+      </div>
+
+      <label class="field-label">كود صداقتك — شاركه مع أصدقائك عشان يضيفوك</label>
+      <div class="room-code-badge" style="margin-bottom:20px;">${profile.friendCode}
+        <button class="btn small secondary" onclick="copyFriendCode()">نسخ</button>
+      </div>
+
+      <p style="color:var(--muted); font-size:13px; margin:0;">البريد الإلكتروني: ${profile.email || '—'}</p>
+
+      <div class="footer-actions">
+        <button class="btn secondary" onclick="doSignOut()">تسجيل الخروج</button>
+      </div>
+    </div>
+  `);
+}
+
+/* -------- friends screen -------- */
+function renderFriends(){
+  const friendsList = Object.entries(friendsData);
+  const requests = Object.entries(friendRequestsIncoming);
+  el(`
+    ${errBlock()}
+    <div class="panel">
+      <div class="row" style="justify-content:space-between; align-items:center; margin-bottom:18px;">
+        <h2 style="margin:0; font-size:20px;">👥 الأصدقاء</h2>
+        <button class="btn secondary small" onclick="goBackFromSub()">رجوع</button>
+      </div>
+
+      <label class="field-label">إضافة صديق بالكود</label>
+      <div class="row" style="margin-bottom:24px; align-items:stretch;">
+        <input type="text" id="addFriendCodeInput" placeholder="مثال: KX93M" style="text-transform:uppercase; flex:1; min-width:160px;">
+        <button class="btn small" onclick="sendFriendRequestByCode()">إرسال طلب</button>
+      </div>
+
+      ${requests.length ? `
+        <h3 style="font-size:15px; margin:0 0 8px; color:var(--brass-bright);">طلبات صداقة واردة</h3>
+        ${requests.map(([fid,r])=>`
+          <div class="friend-row">
+            <span>${r.name}</span>
+            <div class="row">
+              <button class="btn small" onclick="acceptFriendRequest('${fid}')">قبول</button>
+              <button class="btn secondary small" onclick="declineFriendRequest('${fid}')">رفض</button>
+            </div>
+          </div>
+        `).join('')}
+      ` : ''}
+
+      <h3 style="font-size:15px; margin:22px 0 8px; color:var(--brass-bright);">أصدقاؤك (${friendsList.length})</h3>
+      ${friendsList.length ? friendsList.map(([fid,f])=>`
+        <div class="friend-row"><span>${f.name}</span></div>
+      `).join('') : `<p style="color:var(--muted); font-size:13px;">لسه معندكش أصدقاء. شارك كود صداقتك معاهم من صفحة ملفك الشخصي!</p>`}
+    </div>
+  `);
+}
+
+/* -------- طريقة اللعب -------- */
+function renderHowTo(){
+  el(`
+    ${errBlock()}
+    <div class="panel">
+      <div class="row" style="justify-content:space-between; align-items:center; margin-bottom:18px;">
+        <h2 style="margin:0; font-size:20px;">📖 طريقة اللعب</h2>
+        <button class="btn secondary small" onclick="goBackFromSub()">رجوع</button>
+      </div>
+
+      <div class="howto-block">
+        <h3>الفكرة</h3>
+        <p>لعبة تمثيل أدوار جماعية عن قضية محكمة. كل واحد بياخد دور وورقة سرية معاها معلومات محدش غيره شايفها، وبعدين بتتعمل جلسة حية بالصوت (مكالمة أو حضور) يتقال فيها كل واحد كلامه. في الآخر القاضي بيحكم بناءً على اللي اتقال فعلاً في الجلسة، مش من ورقته.</p>
+      </div>
+
+      <div class="howto-block">
+        <h3>الأدوار</h3>
+        <ul>
+          <li><b>⚖ القاضي</b> — بيدير ترتيب الجلسة وبيصدر الحكم النهائي. مالوش أي معلومة سرية زيادة عن الملخص العام.</li>
+          <li><b>🧍 المتهم</b> — عنده روايته الخاصة لما حصل.</li>
+          <li><b>📜 محامي الادعاء</b> — عنده أدلة وحجج بتدعم إدانة المتهم.</li>
+          <li><b>🛡 محامي الدفاع</b> — عنده حجج بتدعم براءة المتهم.</li>
+          <li><b>👁 الشاهد الأول والتاني</b> (اختياريين) — كل واحد عنده شهادة مختلفة عن التاني.</li>
+        </ul>
+      </div>
+
+      <div class="howto-block">
+        <h3>خطوات اللعب</h3>
+        <ol>
+          <li>حد يعمل "إنشاء غرفة" ويشارك الكود مع الباقي، أو الكل يدخل بنفس الكود.</li>
+          <li>كل لاعب يختار دوره من شاشة الغرفة (لازم يتملى: قاضي، متهم، محامي ادعاء، محامي دفاع — والشاهدين اختياريين).</li>
+          <li>القاضي يضغط "بدء القضية" فيتولّد ملف قضية جديد (بالذكاء الاصطناعي أو من بنك قضايا جاهز).</li>
+          <li>كل لاعب يقرا ورقته السرية لوحده، ويضغط "انتهيت من مراجعة أوراقي" لما يخلص.</li>
+          <li>لما الكل يخلص، القاضي يضغط "ابدأ الجلسة الحية".</li>
+          <li>الجلسة بتتقسم 4 مراحل بترتيب ثابت وبتايمر لكل مرحلة:
+            <br>📜 مرافعة الادعاء ← 🛡 مرافعة الدفاع ← 👁 استجواب الشهود ← 💬 المداولة الأخيرة.
+            <br>كل مرحلة ليها وقت بيتعد تلقائي، وبتتقدّم للمرحلة الجاية لوحدها لما الوقت يخلص. القاضي كمان يقدر يتحكم يدوي (يرجع أو يقفز للمرحلة اللي بعدها).</li>
+          <li>وقت كل مرحلة، أصحاب الدور المطلوب (زي محامي الادعاء وقت مرافعته) بيتحدثوا بصوتهم فعليًا من غير ما يقروا ورقتهم حرفيًا — دي فرصتهم يقنعوا القاضي.</li>
+          <li>بعد آخر مرحلة، القاضي يصدر حكمه: مذنب أو غير مذنب.</li>
+          <li>الحقيقة الكاملة بتتكشف للجميع، ويظهر مين كان صح: محامي الادعاء ولا الدفاع، والنقط بتتحسب.</li>
+        </ol>
+      </div>
+
+      <div class="howto-block">
+        <h3>نصايح</h3>
+        <ul>
+          <li>ورقتك السرية بتفضل ظاهرة قدامك طول اللعبة، بس محدش غيرك بيشوفها — استخدمها في كلامك بدل ما تقراها حرفيًا.</li>
+          <li>القاضي محتاج يركّز في الجلسة الحية نفسها عشان يحكم صح، مش بس يستنى الحكم يجيله جاهز.</li>
+          <li>تقدر تدعو أصدقاءك للغرفة مباشرة من صفحة الأصدقاء أو من داخل غرفة الانتظار.</li>
+        </ul>
+      </div>
+    </div>
+  `);
+}
+
+/* -------- welcome / lobby / case / reveal -------- */
+function renderWelcome(){
+  const invites = Object.entries(roomInvitesIncoming);
+  el(`
+    ${errBlock()}
+    ${invites.length ? `
+      <div class="panel" style="margin-bottom:16px;">
+        <h3 style="margin-top:0; font-size:16px; color:var(--brass-bright);">✉ دعوات لجلسات محكمة</h3>
+        ${invites.map(([id,inv])=>`
+          <div class="friend-row">
+            <span>${inv.fromName} دعاك للانضمام — كود <b>${inv.roomCode}</b></span>
+            <div class="row">
+              <button class="btn small" onclick="acceptRoomInvite('${id}','${inv.roomCode}')">انضمام</button>
+              <button class="btn secondary small" onclick="dismissRoomInvite('${id}')">تجاهل</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    ` : ''}
+    <div class="panel">
+      <p style="color:var(--muted); font-size:14px; margin:0 0 14px;">أهلاً، <b style="color:var(--parchment);">${profile.name}</b> 👋</p>
+      <button class="btn secondary block" style="margin-bottom:18px;" onclick="goHowTo()">📖 طريقة اللعب — اقرأها قبل ما تبدأ</button>
       <div class="choice-cards">
         <div class="choice-card">
           <h3>🏛 أنشئ غرفة جديدة</h3>
@@ -795,6 +1653,7 @@ function renderLobby(){
   const iAmJudge = myRole()==='judge';
   const filled = requiredRolesFilled();
   const playerCount = Object.keys(players).length;
+  const friendEntries = Object.entries(friendsData).filter(([fid])=>!players[fid]);
 
   el(`
     ${errBlock()}
@@ -809,9 +1668,23 @@ function renderLobby(){
         <button class="btn secondary small" onclick="leaveRoom()">مغادرة</button>
       </div>
 
-      <h2 style="margin:26px 0 4px; font-size:22px;">اختر دورك في القضية</h2>
+      <div style="text-align:center; margin:16px 0 4px;">
+        <a href="#" class="howto-link" onclick="goHowTo(); return false;">📖 مش فاهم اللعبة بتشتغل إزاي؟ اقرأ طريقة اللعب</a>
+      </div>
+
+      <h2 style="margin:20px 0 4px; font-size:22px;">اختر دورك في القضية</h2>
       <p style="color:var(--muted); font-size:13px; margin:0 0 4px;">القاضي، المتهم، ومحامي الادعاء والدفاع أدوار أساسية. الشهود اختياريون.</p>
       <div class="role-grid">${rolesHtml}</div>
+
+      ${friendEntries.length ? `
+      <div style="margin-top:26px;">
+        <h3 style="font-size:14px; margin:0 0 10px; color:var(--brass-bright);">👥 ادعُ أصدقاءك للغرفة</h3>
+        <div class="row" style="gap:8px;">
+          ${friendEntries.map(([fid,f])=>`
+            <button class="btn secondary small" onclick="inviteFriendToRoom('${fid}','${(f.name||'').replace(/'/g,"")}')">+ ${f.name}</button>
+          `).join('')}
+        </div>
+      </div>` : ''}
 
       <div class="footer-actions">
         ${iAmJudge
@@ -836,7 +1709,7 @@ function renderGenerating(){
 
 function paperForRole(role, c){
   const map = {
-    judge: {title:'ملف القاضي', tag:'سري - القاضي فقط', body:[c.public_brief, '— ملاحظات: ' + c.judge_notes]},
+    judge: {title:'ملف القاضي', tag:'عام', body:[c.public_brief, '— دورك: مفيش عندك أي معلومة سرية زيادة عن اللي في الملخص ده. استمع كويس لأقوال المتهم والشهود وحجج المحامين وقت الجلسة، واحكم بناءً على اللي هتسمعه فعلاً.']},
     defendant: {title:'ملف المتهم', tag:'سري - المتهم فقط', body:[c.public_brief, '— أقوالك: ' + c.defendant_statement]},
     witness1: {title:'ملف الشاهد الأول', tag:'سري - '+ (c.witness1_name||'الشاهد الأول'), body:[c.public_brief, `— شهادتك (${c.witness1_name}): ` + c.witness1_statement]},
     witness2: {title:'ملف الشاهد الثاني', tag:'سري - '+ (c.witness2_name||'الشاهد الثاني'), body:[c.public_brief, `— شهادتك (${c.witness2_name}): ` + c.witness2_statement]},
@@ -866,23 +1739,66 @@ function renderCase(){
     return `<span class="player-chip ${r?'ready':''}">${p.name} · ${roleLabel(p.role)}${r?' ✓':''}</span>`;
   }).join('');
 
+  const session = room.session || null;
+  const sessionStarted = !!session;
+  const phaseIdx = session ? session.phaseIndex : -1;
+  const sessionDone = sessionStarted && phaseIdx >= PHASES.length;
+
   let actionBlock = '';
-  if(role==='judge' && allReady){
+
+  if(!sessionStarted){
+    /* -------- المرحلة الأولى: مراجعة الأوراق قبل ما تبدأ الجلسة الحية -------- */
+    if(role==='judge' && allReady){
+      actionBlock = `
+        <div class="center" style="margin-top:22px;">
+          <div style="color:var(--brass-bright); font-weight:700; margin-bottom:10px;">كل الأطراف انتهت من مراجعة أوراقها</div>
+          <button class="btn" onclick="startSession()">⚖ ابدأ الجلسة الحية</button>
+        </div>`;
+    } else if(role==='judge' && !allReady){
+      actionBlock = `<div class="ready-status">بانتظار انتهاء باقي الأطراف من مراجعة أوراقهم (${readyCount}/${totalNonJudge})...</div>`;
+    } else if(!ready){
+      actionBlock = `<div class="center" style="margin-top:22px;"><button class="btn" onclick="toggleReady()">✔ انتهيت من مراجعة أوراقي</button></div>`;
+    } else {
+      actionBlock = `<div class="ready-status">تم — بانتظار باقي الأطراف ثم بدء القاضي للجلسة (${readyCount}/${totalNonJudge} جاهزون)...<br>
+        <button class="btn secondary small" style="margin-top:10px;" onclick="toggleReady()">لسه عايز أراجع ورقتي — تراجع</button></div>`;
+    }
+  } else if(!sessionDone){
+    /* -------- المايسترو: مرحلة حية بتايمر -------- */
+    const phase = PHASES[phaseIdx];
+    const remaining = phaseRemainingSeconds();
+    const warn = remaining <= 15;
+    const isMyTurn = phase.turnRoles.includes(role);
+    const steps = PHASES.map((p,i)=>`<span class="phase-step ${i<phaseIdx?'done':''} ${i===phaseIdx?'active':''}"></span>`).join('');
+
     actionBlock = `
-      <div class="center" style="margin-top:22px;">
-        <div style="color:var(--brass-bright); font-weight:700; margin-bottom:6px;">كل الأطراف انتهت — اصدر حكمك</div>
-        <div class="verdict-btns">
-          <button class="btn danger" onclick="submitVerdict('guilty')">مذنب</button>
-          <button class="btn" onclick="submitVerdict('innocent')">غير مذنب</button>
-        </div>
+      <div class="phase-card">
+        <span class="phase-icon">${phase.icon}</span>
+        <div class="phase-label">${phase.label}</div>
+        <p class="phase-desc">${phase.desc}</p>
+        ${isMyTurn ? `<div class="my-turn-badge">🎤 دورك دلوقتي</div>` : ''}
+        <div class="phase-timer ${warn?'warn':''}">${formatPhaseTime(remaining)}</div>
+        <div class="phase-steps">${steps}</div>
+        ${role==='judge' ? `
+          <div class="phase-controls">
+            <button class="btn secondary small" ${phaseIdx<=0?'disabled':''} onclick="advancePhase(-1)">◀ السابقة</button>
+            <button class="btn small" onclick="advancePhase(1)">${phaseIdx===PHASES.length-1?'إنهاء الجلسة والانتقال للحكم ▶':'المرحلة التالية ▶'}</button>
+          </div>
+        ` : `<div class="ready-status" style="margin-top:14px;">القاضي هو اللي بيتحكم في الانتقال بين المراحل</div>`}
       </div>`;
-  } else if(role==='judge' && !allReady){
-    actionBlock = `<div class="ready-status">بانتظار انتهاء باقي الأطراف من مراجعة أوراقهم (${readyCount}/${totalNonJudge})...</div>`;
-  } else if(!ready){
-    actionBlock = `<div class="center" style="margin-top:22px;"><button class="btn" onclick="toggleReady()">✔ انتهيت من مراجعة أوراقي</button></div>`;
   } else {
-    actionBlock = `<div class="ready-status">تم — بانتظار القاضي (${readyCount}/${totalNonJudge} جاهزون)...<br>
-      <button class="btn secondary small" style="margin-top:10px;" onclick="toggleReady()">لسه عايز أراجع ورقتي — تراجع</button></div>`;
+    /* -------- كل المراحل خلصت — وقت الحكم -------- */
+    if(role==='judge'){
+      actionBlock = `
+        <div class="center" style="margin-top:22px;">
+          <div style="color:var(--brass-bright); font-weight:700; margin-bottom:6px;">كل مراحل الجلسة انتهت — اصدر حكمك</div>
+          <div class="verdict-btns">
+            <button class="btn danger" onclick="submitVerdict('guilty')">مذنب</button>
+            <button class="btn" onclick="submitVerdict('innocent')">غير مذنب</button>
+          </div>
+        </div>`;
+    } else {
+      actionBlock = `<div class="ready-status">كل مراحل الجلسة انتهت — القاضي بيصدر الحكم الآن...</div>`;
+    }
   }
 
   el(`
@@ -890,7 +1806,7 @@ function renderCase(){
     <div class="panel">
       <div class="case-header">
         <div class="role-pill">دورك: ${roleLabel(role)}</div>
-        <div style="color:var(--muted); font-size:12px;">التهمة: ${c.charge} — المتهم: ${c.defendant_name}</div>
+        <div style="color:var(--muted); font-size:12px;">التهمة: ${c.charge} — المتهم: ${c.defendant_name} ${caseSourceLabel(room.caseSource)}</div>
       </div>
       <div style="text-align:center; color:var(--muted); font-size:12px; margin:-6px 0 14px;">
         📖 ورقتك هتفضل ظاهرة قدامك طول الوقت لحد ما القاضي يصدر الحكم النهائي
@@ -917,6 +1833,28 @@ function renderReveal(){
   const prosecutorName = (Object.values(room.players).find(p=>p.role==='prosecution')||{}).name || 'محامي الادعاء';
   const defenderName = (Object.values(room.players).find(p=>p.role==='defense')||{}).name || 'محامي الدفاع';
 
+  const playerScores = room.playerScores || {};
+  const witnessAwards = room.witnessAwards || {};
+  const judgeEntry = Object.entries(room.players).find(([pid,p])=>p.role==='judge');
+  const witnessEntries = Object.entries(room.players).filter(([pid,p])=>p.role==='witness1'||p.role==='witness2');
+
+  const witnessScoreCards = witnessEntries.map(([pid,p])=>`
+    <div class="score-card">
+      <div class="score-role">👁 ${roleLabel(p.role)}</div>
+      <div class="score-name">${p.name}</div>
+      <div class="score-num">${playerScores[pid]||0}</div>
+    </div>`).join('');
+
+  const witnessRateBox = (iAmJudge && witnessEntries.length>0) ? `
+    <div class="witness-rate-box">
+      <div style="font-size:13px; color:var(--muted); margin-bottom:4px;">تقييم اختياري: امنح نقطة لأي شاهد قدّم شهادة مقنعة في القضية دي</div>
+      ${witnessEntries.map(([pid,p])=>`
+        <div class="witness-rate-row">
+          <span>${p.name} (${roleLabel(p.role)})</span>
+          <button class="btn small" ${witnessAwards[pid]?'disabled':''} onclick="awardWitnessPoint('${pid}')">${witnessAwards[pid]?'✔ اتقيّم':'+ نقطة شهادة مقنعة'}</button>
+        </div>`).join('')}
+    </div>` : '';
+
   el(`
     ${errBlock()}
     <div class="panel center">
@@ -940,10 +1878,27 @@ function renderReveal(){
         <p><b>حجة الدفاع:</b> ${c.defense_notes}</p>
       </div>
 
-      <table class="score-table">
-        <tr><th>محامي الادعاء<br><span style="font-weight:400; font-size:12px;">${prosecutorName}</span></th><th>محامي الدفاع<br><span style="font-weight:400; font-size:12px;">${defenderName}</span></th></tr>
-        <tr><td class="big">${room.score.prosecution}</td><td class="big">${room.score.defense}</td></tr>
-      </table>
+      <div class="score-section-title">لوحة النقاط الفردية</div>
+      <div class="score-grid">
+        <div class="score-card">
+          <div class="score-role">📜 الادعاء</div>
+          <div class="score-name">${prosecutorName}</div>
+          <div class="score-num">${room.score.prosecution}</div>
+        </div>
+        <div class="score-card">
+          <div class="score-role">🛡 الدفاع</div>
+          <div class="score-name">${defenderName}</div>
+          <div class="score-num">${room.score.defense}</div>
+        </div>
+        ${judgeEntry ? `
+        <div class="score-card">
+          <div class="score-role">⚖ القاضي</div>
+          <div class="score-name">${judgeEntry[1].name}</div>
+          <div class="score-num">${playerScores[judgeEntry[0]]||0}</div>
+        </div>` : ''}
+        ${witnessScoreCards}
+      </div>
+      ${witnessRateBox}
 
       <div class="footer-actions">
         ${iAmJudge ? `<button class="btn" onclick="newCase()">⚖ قضية جديدة</button>` : `<div class="ready-status">بانتظار أن يبدأ القاضي قضية جديدة...</div>`}
@@ -956,12 +1911,32 @@ function renderReveal(){
 render();
 
 /* expose functions used by inline onclick handlers — ES modules don't auto-attach to window */
+window.doGoogleSignIn = doGoogleSignIn;
+window.doEmailSignUp = doEmailSignUp;
+window.doEmailSignIn = doEmailSignIn;
+window.switchAuthMode = switchAuthMode;
+window.doSignOut = doSignOut;
+window.goProfile = goProfile;
+window.goFriends = goFriends;
+window.goHowTo = goHowTo;
+window.goBackFromSub = goBackFromSub;
+window.saveProfileName = saveProfileName;
+window.copyFriendCode = copyFriendCode;
+window.sendFriendRequestByCode = sendFriendRequestByCode;
+window.acceptFriendRequest = acceptFriendRequest;
+window.declineFriendRequest = declineFriendRequest;
+window.inviteFriendToRoom = inviteFriendToRoom;
+window.acceptRoomInvite = acceptRoomInvite;
+window.dismissRoomInvite = dismissRoomInvite;
 window.createRoom = createRoom;
 window.joinRoomFlow = joinRoomFlow;
 window.pickRole = pickRole;
 window.beginCaseFlow = beginCaseFlow;
 window.toggleReady = toggleReady;
+window.startSession = startSession;
+window.advancePhase = advancePhase;
 window.submitVerdict = submitVerdict;
+window.awardWitnessPoint = awardWitnessPoint;
 window.newCase = newCase;
 window.leaveRoom = leaveRoom;
 window.copyCode = copyCode;
