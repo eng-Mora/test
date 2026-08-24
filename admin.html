@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة تحكم الأدمن — قاعة المحكمة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#161d19;
+    --bg-panel:#212b25;
+    --panel-line:#3a4a3f;
+    --wood-dark:#2a1d12;
+    --brass:#c9a227;
+    --brass-bright:#e8c34a;
+    --parchment:#ece0c4;
+    --text-light:#ece6d8;
+    --muted:#93a196;
+    --danger:#c0463f;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:radial-gradient(ellipse at top, #223028 0%, var(--bg-deep) 55%, #0f1512 100%);
+    color:var(--text-light);
+    font-family:'Tajawal', sans-serif;
+    padding:24px 16px 60px;
+  }
+  h1,h2,h3{font-family:'Amiri', serif;}
+  .wrap{max-width:560px;margin:0 auto;}
+  .top{text-align:center;margin-bottom:24px;}
+  .top .eyebrow{color:var(--brass);letter-spacing:.3em;font-size:11px;font-weight:700;margin-bottom:8px;}
+  .top h1{font-size:28px;margin:0;color:var(--parchment);}
+  .panel{
+    background:var(--bg-panel);
+    border:1px solid var(--panel-line);
+    border-radius:6px;
+    padding:26px;
+  }
+  .btn{
+    font-family:'Tajawal',sans-serif;
+    font-weight:700; font-size:14px;
+    border:none; border-radius:4px;
+    padding:11px 18px; cursor:pointer;
+    color:var(--bg-deep);
+    background:linear-gradient(180deg, var(--brass-bright), var(--brass));
+    box-shadow:0 4px 0 #8a6f19;
+  }
+  .btn:active{transform:translateY(2px); box-shadow:0 1px 0 #8a6f19;}
+  .btn.secondary{background:transparent;color:var(--text-light);border:1px solid var(--panel-line);box-shadow:none;}
+  .btn.danger{background:linear-gradient(180deg,#c95b53,var(--danger));color:#fff;box-shadow:0 4px 0 #7c2b26;}
+  .btn.small{padding:8px 14px; font-size:13px;}
+  input[type=text]{
+    font-family:'Tajawal',sans-serif; width:100%;
+    padding:12px 14px; border-radius:4px;
+    border:1px solid var(--panel-line);
+    background:#182019; color:var(--text-light); font-size:14px;
+  }
+  input[type=text]:focus{outline:2px solid var(--brass); border-color:var(--brass);}
+  .field-label{display:block; font-size:12px; color:var(--muted); margin-bottom:6px;}
+  .row{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;}
+  .msg{
+    text-align:center;
+    background:rgba(140,35,48,.15);
+    border:1px solid var(--danger);
+    color:#ffc9c4;
+    padding:10px 14px; border-radius:4px;
+    font-size:13px; margin-bottom:16px;
+  }
+  .toast{
+    text-align:center;
+    background:rgba(47,92,63,.2);
+    border:1px solid var(--brass);
+    color:var(--brass-bright);
+    padding:10px 14px; border-radius:4px;
+    font-size:13px; margin-bottom:16px;
+  }
+  .section-title{font-size:15px; margin:22px 0 4px; color:var(--parchment);}
+  .hint{color:var(--muted); font-size:12px; margin:0 0 10px; line-height:1.7;}
+  .keyval{color:var(--muted); font-size:13px; margin-bottom:8px;}
+  .keyval b{color:var(--brass-bright);}
+  .warn{
+    color:var(--danger); font-size:12px; margin-top:20px; line-height:1.8;
+    border-top:1px dashed var(--panel-line); padding-top:14px;
+  }
+  hr{border:none; border-top:1px solid var(--panel-line); margin:22px 0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="eyebrow">إدارة اللعبة</div>
+    <h1>⚙ لوحة تحكم الأدمن</h1>
+  </div>
+  <div id="app"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getDatabase, ref, get, set
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+/* نفس بيانات مشروع Firebase المستخدمة في ملف اللعبة — لازم تفضل مطابقة له بالظبط */
+const firebaseConfig = {
+  apiKey: "AIzaSyBBHUWqxFsaIn442PSuieSlbhrpB7awwAw",
+  authDomain: "exam-result-system-ca200.firebaseapp.com",
+  databaseURL: "https://exam-result-system-ca200-default-rtdb.firebaseio.com",
+  projectId: "exam-result-system-ca200",
+  storageBucket: "exam-result-system-ca200.firebasestorage.app",
+  messagingSenderId: "149705342999",
+  appId: "1:149705342999:web:f62b7172af711a94531c52"
+};
+const fbApp = initializeApp(firebaseConfig);
+const db = getDatabase(fbApp);
+
+let unlocked = false;
+let currentKey = '';
+let currentGeminiKey = '';
+let errorMsg = '';
+let toastMsg = '';
+let toastTimer = null;
+
+function toast(msg){
+  toastMsg = msg;
+  render();
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>{ toastMsg=''; render(); }, 2500);
+}
+
+function el(html){ document.getElementById('app').innerHTML = html; }
+function msgBlock(){
+  if(errorMsg) return `<div class="msg">${errorMsg}</div>`;
+  if(toastMsg) return `<div class="toast">${toastMsg}</div>`;
+  return '';
+}
+
+async function checkPassword(){
+  const val = (document.getElementById('adminPass')||{}).value || '';
+  errorMsg = '';
+  let storedPassword = '';
+  try{
+    const snapP = await get(ref(db, 'config/adminPassword'));
+    storedPassword = snapP.exists() ? snapP.val() : '';
+  }catch(e){
+    errorMsg = 'تعذّر التحقق من كلمة السر، تأكد من الاتصال وحاول تاني.';
+    render();
+    return;
+  }
+  if(!storedPassword){
+    errorMsg = 'مفيش كلمة سر أدمن متسجلة في قاعدة البيانات بعد. لازم تضيفها بنفسك أول مرة مباشرة في Firebase Console تحت المسار config/adminPassword.';
+    render();
+    return;
+  }
+  if(val === storedPassword){
+    unlocked = true;
+    errorMsg = '';
+    try{
+      const [snapA, snapG] = await Promise.all([
+        get(ref(db, 'config/apiKey')),
+        get(ref(db, 'config/geminiKey'))
+      ]);
+      currentKey = snapA.exists() ? snapA.val() : '';
+      currentGeminiKey = snapG.exists() ? snapG.val() : '';
+    }catch(e){ currentKey=''; currentGeminiKey=''; }
+  } else {
+    errorMsg = 'كلمة السر غلط';
+  }
+  render();
+}
+
+function logout(){
+  unlocked = false;
+  currentKey = '';
+  currentGeminiKey = '';
+  errorMsg = '';
+  render();
+}
+
+async function saveApiKey(){
+  const val = ((document.getElementById('apiKeyInput')||{}).value || '').trim();
+  if(!val){ errorMsg = 'اكتب المفتاح الأول'; render(); return; }
+  try{
+    await set(ref(db, 'config/apiKey'), val);
+    currentKey = val;
+    errorMsg = '';
+    toast('تم حفظ مفتاح Anthropic ✔');
+  }catch(e){
+    errorMsg = 'حصل خطأ في حفظ المفتاح، جرّب تاني';
+    render();
+  }
+}
+async function clearApiKey(){
+  try{
+    await set(ref(db, 'config/apiKey'), '');
+    currentKey = '';
+    toast('تم مسح مفتاح Anthropic');
+  }catch(e){ render(); }
+}
+async function saveGeminiKey(){
+  const val = ((document.getElementById('geminiKeyInput')||{}).value || '').trim();
+  if(!val){ errorMsg = 'اكتب مفتاح Gemini'; render(); return; }
+  try{
+    await set(ref(db, 'config/geminiKey'), val);
+    currentGeminiKey = val;
+    errorMsg = '';
+    toast('تم حفظ مفتاح Gemini ✔');
+  }catch(e){
+    errorMsg = 'حصل خطأ في حفظ المفتاح، جرّب تاني';
+    render();
+  }
+}
+async function clearGeminiKey(){
+  try{
+    await set(ref(db, 'config/geminiKey'), '');
+    currentGeminiKey = '';
+    toast('تم مسح مفتاح Gemini');
+  }catch(e){ render(); }
+}
+async function changePassword(){
+  const val = ((document.getElementById('newAdminPass')||{}).value || '').trim();
+  if(!val){ errorMsg = 'اكتب كلمة السر الجديدة'; render(); return; }
+  if(val.length < 6){ errorMsg = 'كلمة السر لازم تكون 6 حروف على الأقل'; render(); return; }
+  try{
+    await set(ref(db, 'config/adminPassword'), val);
+    errorMsg = '';
+    toast('تم تغيير كلمة سر الأدمن ✔');
+    const inp = document.getElementById('newAdminPass');
+    if(inp) inp.value = '';
+  }catch(e){
+    errorMsg = 'حصل خطأ في تغيير كلمة السر، جرّب تاني';
+    render();
+  }
+}
+
+function render(){
+  if(!unlocked){
+    el(`
+      ${msgBlock()}
+      <div class="panel">
+        <h2 style="margin-top:0; font-size:19px;">دخول الأدمن</h2>
+        <label class="field-label">كلمة سر الأدمن</label>
+        <input type="text" id="adminPass" placeholder="اكتب كلمة السر">
+        <div class="row">
+          <button class="btn" onclick="checkPassword()">دخول</button>
+        </div>
+      </div>
+    `);
+    return;
+  }
+  const masked = currentKey
+    ? (currentKey.slice(0,8) + '••••••••' + currentKey.slice(-4))
+    : 'لا يوجد مفتاح محفوظ حاليًا';
+  const maskedGemini = currentGeminiKey
+    ? (currentGeminiKey.slice(0,8) + '••••••••' + currentGeminiKey.slice(-4))
+    : 'لا يوجد مفتاح محفوظ حاليًا';
+  el(`
+    ${msgBlock()}
+    <div class="panel">
+      <p class="hint">
+        اللعبة بتجرّب Anthropic أولًا، ولو مفيش مفتاح أو حصل خطأ (زي انتهاء الليميت) بتجرّب Gemini، ولو الاتنين مش متاحين بترجع تلقائيًا لبنك القضايا الجاهز من غير ما تتعطل.
+      </p>
+
+      <div class="section-title">مفتاح Anthropic (Claude)</div>
+      <p class="keyval">المفتاح الحالي: <b>${masked}</b></p>
+      <input type="text" id="apiKeyInput" placeholder="sk-ant-...">
+      <div class="row">
+        <button class="btn small" onclick="saveApiKey()">حفظ مفتاح Anthropic</button>
+        ${currentKey ? `<button class="btn danger small" onclick="clearApiKey()">مسح مفتاح Anthropic</button>` : ''}
+      </div>
+
+      <hr>
+
+      <div class="section-title">مفتاح Gemini</div>
+      <p class="keyval">المفتاح الحالي: <b>${maskedGemini}</b></p>
+      <input type="text" id="geminiKeyInput" placeholder="AIza...">
+      <div class="row">
+        <button class="btn small" onclick="saveGeminiKey()">حفظ مفتاح Gemini</button>
+        ${currentGeminiKey ? `<button class="btn danger small" onclick="clearGeminiKey()">مسح مفتاح Gemini</button>` : ''}
+      </div>
+
+      <hr>
+
+      <div class="section-title">تغيير كلمة سر الأدمن</div>
+      <p class="hint" style="margin-top:-2px;">6 حروف على الأقل.</p>
+      <input type="text" id="newAdminPass" placeholder="كلمة السر الجديدة">
+      <div class="row">
+        <button class="btn small" onclick="changePassword()">حفظ كلمة السر الجديدة</button>
+      </div>
+
+      <div class="row" style="margin-top:22px;">
+        <button class="btn secondary" onclick="logout()">تسجيل خروج</button>
+      </div>
+
+      <p class="warn">
+        ⚠ تنبيه أمان: أي مفتاح تحفظه هنا هيتشغل مباشرة من متصفح اللاعبين وقت توليد قضية، يعني أي حد يفتح أدوات المطور (Developer Tools/Network) وقتها ممكن يشوفه.
+        استخدم مفاتيح بحد إنفاق (spending limit) محدود، ومتحطش مفتاح حسابك الأساسي.
+        الصفحة دي منفصلة تمامًا عن ملف اللعبة، فشيّلها في مكان تاني ومتشاركهاش مع اللاعبين.
+      </p>
+    </div>
+  `);
+}
+
+window.checkPassword = checkPassword;
+window.logout = logout;
+window.saveApiKey = saveApiKey;
+window.clearApiKey = clearApiKey;
+window.saveGeminiKey = saveGeminiKey;
+window.clearGeminiKey = clearGeminiKey;
+window.changePassword = changePassword;
+
+render();
+</script>
+</body>
+</html>
