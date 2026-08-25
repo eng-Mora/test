@@ -100,6 +100,9 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
+  getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
   getDatabase, ref, get, set
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
@@ -117,6 +120,14 @@ const firebaseConfig = {
 
 const fbApp = initializeApp(firebaseConfig);
 const db = getDatabase(fbApp);
+const auth = getAuth(fbApp);
+const googleProvider = new GoogleAuthProvider();
+
+/* الإيميل الوحيد المسموح له بدخول لوحة التحكم */
+const ALLOWED_ADMIN_EMAIL = 'mamro8529@gmail.com';
+
+let authReady = false;
+let authUser = null;
 
 let unlocked = false;
 let currentKey = '';
@@ -139,47 +150,50 @@ function msgBlock(){
   return '';
 }
 
-async function checkPassword(){
-  const val = (document.getElementById('adminPass')||{}).value || '';
-  errorMsg = '';
-  let storedPassword = '';
+async function loadConfigKeys(){
   try{
-    const snapP = await get(ref(db, 'config/adminPassword'));
-    storedPassword = snapP.exists() ? snapP.val() : '';
-  }catch(e){
-    errorMsg = 'تعذّر التحقق من كلمة السر، تأكد من الاتصال وحاول تاني.';
-    render();
-    return;
-  }
-  if(!storedPassword){
-    errorMsg = 'مفيش كلمة سر أدمن متسجلة في قاعدة البيانات بعد. لازم تضيفها بنفسك أول مرة مباشرة في Firebase Console تحت المسار config/adminPassword.';
-    render();
-    return;
-  }
-  if(val === storedPassword){
-    unlocked = true;
-    errorMsg = '';
-    try{
-      const [snapA, snapG] = await Promise.all([
-        get(ref(db, 'config/apiKey')),
-        get(ref(db, 'config/geminiKey'))
-      ]);
-      currentKey = snapA.exists() ? snapA.val() : '';
-      currentGeminiKey = snapG.exists() ? snapG.val() : '';
-    }catch(e){ currentKey=''; currentGeminiKey=''; }
-  } else {
-    errorMsg = 'كلمة السر غلط';
-  }
-  render();
+    const [snapA, snapG] = await Promise.all([
+      get(ref(db, 'config/apiKey')),
+      get(ref(db, 'config/geminiKey'))
+    ]);
+    currentKey = snapA.exists() ? snapA.val() : '';
+    currentGeminiKey = snapG.exists() ? snapG.val() : '';
+  }catch(e){ currentKey=''; currentGeminiKey=''; }
 }
 
-function logout(){
-  unlocked = false;
-  currentKey = '';
-  currentGeminiKey = '';
+async function doGoogleLogin(){
   errorMsg = '';
-  render();
+  try{
+    await signInWithPopup(auth, googleProvider);
+    /* onAuthStateChanged هيتكفل بتحديث الحالة وعمل render */
+  }catch(e){
+    errorMsg = 'تعذّر تسجيل الدخول بجوجل، حاول تاني.';
+    render();
+  }
 }
+
+async function logout(){
+  try{ await signOut(auth); }catch(e){}
+}
+
+onAuthStateChanged(auth, async (user)=>{
+  authReady = true;
+  authUser = user;
+  if(user && user.email === ALLOWED_ADMIN_EMAIL){
+    unlocked = true;
+    errorMsg = '';
+    await loadConfigKeys();
+  } else {
+    unlocked = false;
+    currentKey = ''; currentGeminiKey = '';
+    if(user && user.email !== ALLOWED_ADMIN_EMAIL){
+      errorMsg = 'الحساب ده مش مصرّح له بدخول لوحة التحكم.';
+      try{ await signOut(auth); }catch(e){}
+      authUser = null;
+    }
+  }
+  render();
+});
 
 async function saveApiKey(){
   const val = ((document.getElementById('apiKeyInput')||{}).value || '').trim();
@@ -221,32 +235,20 @@ async function clearGeminiKey(){
     toast('تم مسح مفتاح Gemini');
   }catch(e){ render(); }
 }
-async function changePassword(){
-  const val = ((document.getElementById('newAdminPass')||{}).value || '').trim();
-  if(!val){ errorMsg = 'اكتب كلمة السر الجديدة'; render(); return; }
-  if(val.length < 6){ errorMsg = 'كلمة السر لازم تكون 6 حروف على الأقل'; render(); return; }
-  try{
-    await set(ref(db, 'config/adminPassword'), val);
-    errorMsg = '';
-    toast('تم تغيير كلمة سر الأدمن ✔');
-    const inp = document.getElementById('newAdminPass');
-    if(inp) inp.value = '';
-  }catch(e){
-    errorMsg = 'حصل خطأ في تغيير كلمة السر، جرّب تاني';
-    render();
-  }
-}
 
 function render(){
+  if(!authReady){
+    el(`<div class="panel" style="text-align:center; color:var(--muted);">جارٍ التحقق من الحساب...</div>`);
+    return;
+  }
   if(!unlocked){
     el(`
       ${msgBlock()}
-      <div class="panel">
+      <div class="panel" style="text-align:center;">
         <h2 style="margin-top:0; font-size:19px;">دخول الأدمن</h2>
-        <label class="field-label">كلمة سر الأدمن</label>
-        <input type="text" id="adminPass" placeholder="اكتب كلمة السر">
-        <div class="row">
-          <button class="btn" onclick="checkPassword()">دخول</button>
+        <p class="hint">لوحة التحكم دي متاحة بس لحساب جوجل المصرّح له.</p>
+        <div class="row" style="justify-content:center;">
+          <button class="btn" onclick="doGoogleLogin()">تسجيل الدخول بجوجل</button>
         </div>
       </div>
     `);
@@ -261,6 +263,7 @@ function render(){
   el(`
     ${msgBlock()}
     <div class="panel">
+      <p class="keyval" style="margin-bottom:18px;">مسجّل دخول باسم: <b>${authUser.email}</b></p>
       <p class="hint">
         اللعبة بتجرّب Anthropic أولًا، ولو مفيش مفتاح أو حصل خطأ (زي انتهاء الليميت) بتجرّب Gemini، ولو الاتنين مش متاحين بترجع تلقائيًا لبنك القضايا الجاهز من غير ما تتعطل.
       </p>
@@ -285,13 +288,6 @@ function render(){
 
       <hr>
 
-      <div class="section-title">تغيير كلمة سر الأدمن</div>
-      <p class="hint" style="margin-top:-2px;">6 حروف على الأقل.</p>
-      <input type="text" id="newAdminPass" placeholder="كلمة السر الجديدة">
-      <div class="row">
-        <button class="btn small" onclick="changePassword()">حفظ كلمة السر الجديدة</button>
-      </div>
-
       <div class="row" style="margin-top:22px;">
         <button class="btn secondary" onclick="logout()">تسجيل خروج</button>
       </div>
@@ -300,18 +296,19 @@ function render(){
         ⚠ تنبيه أمان: أي مفتاح تحفظه هنا هيتشغل مباشرة من متصفح اللاعبين وقت توليد قضية، يعني أي حد يفتح أدوات المطور (Developer Tools/Network) وقتها ممكن يشوفه.
         استخدم مفاتيح بحد إنفاق (spending limit) محدود، ومتحطش مفتاح حسابك الأساسي.
         الصفحة دي منفصلة تمامًا عن ملف اللعبة، فشيّلها في مكان تاني ومتشاركهاش مع اللاعبين.
+        <br><br>
+        تسجيل الدخول بجوجل بيمنع أي حد تاني من الدخول للوحة دي من الواجهة، لكن ده وحده مش كافي — لازم كمان تظبط Rules في Firebase Realtime Database بحيث القراءة/الكتابة على المسار <b>config/</b> تبقى مقصورة على حساب الأدمن (مثلاً auth.token.email === '${'mamro8529@gmail.com'}')، وإلا أي حد يعرف بنية القاعدة يقدر يوصل للمفاتيح مباشرة من غير ما يعدي على الصفحة دي أصلاً.
       </p>
     </div>
   `);
 }
 
-window.checkPassword = checkPassword;
+window.doGoogleLogin = doGoogleLogin;
 window.logout = logout;
 window.saveApiKey = saveApiKey;
 window.clearApiKey = clearApiKey;
 window.saveGeminiKey = saveGeminiKey;
 window.clearGeminiKey = clearGeminiKey;
-window.changePassword = changePassword;
 
 render();
 </script>
