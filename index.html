@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>قاعة المحكمة</title>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6571194623866166"
+     crossorigin="anonymous"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
@@ -229,6 +231,28 @@
     position:absolute; top:8px; left:8px;
     font-size:9px; color:var(--danger); font-weight:700;
   }
+  .role-card{cursor:default;}
+  .role-card:hover{border-color:var(--panel-line); transform:none;}
+  .role-card .swap-btn{margin-top:10px;}
+
+  .swap-requests-box{
+    margin-top:22px;
+    background:var(--wood-dark);
+    border:1px solid var(--brass);
+    border-radius:6px;
+    padding:16px 18px;
+  }
+  .swap-requests-box h3{
+    margin:0 0 12px; font-size:15px; color:var(--brass-bright);
+  }
+  .swap-request-row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    flex-wrap:wrap;
+    padding:8px 0;
+    border-top:1px solid rgba(201,162,39,.15);
+  }
+  .swap-request-row:first-of-type{border-top:none;}
+  .swap-request-row span{font-size:13.5px;}
 
   /* case / papers */
   .case-header{
@@ -353,6 +377,40 @@
   .footer-actions{
     display:flex; justify-content:center; gap:10px; margin-top:26px; flex-wrap:wrap;
   }
+
+  /* leaderboard */
+  .lb-row{
+    display:flex; align-items:center; gap:12px;
+    background:var(--wood-dark);
+    border:1px solid var(--panel-line);
+    border-radius:6px;
+    padding:10px 14px;
+    margin-bottom:8px;
+  }
+  .lb-row.me{border-color:var(--brass-bright); background:#2c2312; box-shadow:0 0 0 1px var(--brass-bright) inset;}
+  .lb-rank{
+    width:30px; text-align:center; font-family:'Amiri',serif; font-weight:700; font-size:17px; color:var(--muted);
+    flex-shrink:0;
+  }
+  .lb-row.top1 .lb-rank{color:#e8c34a;}
+  .lb-row.top2 .lb-rank{color:#c9c9c9;}
+  .lb-row.top3 .lb-rank{color:#c98a4a;}
+  .lb-avatar-img{width:36px; height:36px; border-radius:50%; object-fit:cover; border:1px solid var(--brass); flex-shrink:0;}
+  .lb-avatar-fallback{
+    width:36px; height:36px; border-radius:50%;
+    background:var(--wood); color:var(--brass-bright);
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:14px; border:1px solid var(--brass); flex-shrink:0;
+  }
+  .lb-info{flex:1; min-width:0;}
+  .lb-name{font-weight:700; font-size:14px; color:var(--parchment); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .lb-sub{font-size:11px; color:var(--muted); margin-top:2px;}
+  .lb-points{
+    font-family:'Amiri',serif; font-weight:700; font-size:20px; color:var(--brass-bright);
+    flex-shrink:0; text-align:center; min-width:44px;
+  }
+  .lb-points .lb-points-label{display:block; font-family:'Tajawal',sans-serif; font-weight:400; font-size:10px; color:var(--muted);}
+  .lb-empty{text-align:center; color:var(--muted); padding:30px 10px; font-size:14px;}
 
   @media (prefers-reduced-motion: reduce){
     .stamp, .gavel{animation:none !important;}
@@ -503,18 +561,21 @@ import {
   signOut, onAuthStateChanged, updateProfile
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  getDatabase, ref, set, get, update, remove, push, onValue
+  getDatabase, ref, set, get, update, remove, push, onValue,
+  increment, query, orderByChild, limitToLast
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBBHUWqxFsaIn442PSuieSlbhrpB7awwAw",
-  authDomain: "exam-result-system-ca200.firebaseapp.com",
-  databaseURL: "https://exam-result-system-ca200-default-rtdb.firebaseio.com",
-  projectId: "exam-result-system-ca200",
-  storageBucket: "exam-result-system-ca200.firebasestorage.app",
-  messagingSenderId: "149705342999",
-  appId: "1:149705342999:web:f62b7172af711a94531c52"
-};
+    const firebaseConfig = {
+        apiKey: "AIzaSyD0d5_Xhq6RulHn1QtYsV6RDmeSe1wg100",
+        authDomain: "courtroom-game-18f21.firebaseapp.com",
+        databaseURL: "https://courtroom-game-18f21-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "courtroom-game-18f21",
+        storageBucket: "courtroom-game-18f21.firebasestorage.app",
+        messagingSenderId: "995762969667",
+        appId: "1:995762969667:web:d6275b12a6eecab1cd08f6",
+        measurementId: "G-H7FHRSDTNW"
+    };
+
 const fbApp = initializeApp(firebaseConfig);
 const db = getDatabase(fbApp);
 const auth = getAuth(fbApp);
@@ -528,9 +589,13 @@ let authMode = 'login';     // 'login' | 'signup'
 let authError = '';
 let authBusy = false;
 
-let view = 'app';           // 'app' | 'profile' | 'friends'  (شاشات فرعية فوق حالة الغرفة)
+let view = 'app';           // 'app' | 'profile' | 'friends' | 'leaderboard'  (شاشات فرعية فوق حالة الغرفة)
 let profileMsg = '';        // رسالة نجاح مؤقتة (خضراء)
 let toastTimer = null;
+
+let leaderboardData = [];   // [{uid,name,photoURL,totalPoints,gamesPlayed,correctVerdicts,witnessAwards}] مرتبة تنازليًا
+let leaderboardLoading = false;
+let leaderboardError = '';
 
 let friendsData = {};              // { uid: {name, since} }
 let friendRequestsIncoming = {};   // { uid: {name, at} }
@@ -584,6 +649,109 @@ function formatPhaseTime(sec){
   return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
 }
 
+/* ---------------- نظام المؤثرات الصوتية (جو المحكمة) — مطرقة القاضي + نغمة تنبيه عند تغيّر المرحلة ---------------- */
+let sfxEnabled = true;
+try{ sfxEnabled = localStorage.getItem('courtroom_sfx') !== 'off'; }catch(e){}
+let audioCtx = null;
+function getAudioCtx(){
+  if(!audioCtx){
+    try{ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch(e){ return null; }
+  }
+  if(audioCtx.state === 'suspended'){ audioCtx.resume().catch(()=>{}); }
+  return audioCtx;
+}
+/* المتصفحات بتمنع تشغيل صوت من غير تفاعل مباشر من المستخدم، فبنفتح الـ AudioContext مع أول ضغطة في الصفحة */
+document.addEventListener('click', getAudioCtx, { once:true, capture:true });
+
+function toggleSfx(){
+  sfxEnabled = !sfxEnabled;
+  try{ localStorage.setItem('courtroom_sfx', sfxEnabled ? 'on' : 'off'); }catch(e){}
+  render();
+}
+
+function playNoiseThud(vol, dur, freq){
+  const ctx = getAudioCtx();
+  if(!ctx) return;
+  const now = ctx.currentTime;
+  const size = Math.max(1, Math.floor(ctx.sampleRate * dur));
+  const buffer = ctx.createBuffer(1, size, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for(let i=0;i<size;i++){ data[i] = (Math.random()*2-1) * Math.pow(1 - i/size, 3); }
+  const noise = ctx.createBufferSource();
+  noise.buffer = buffer;
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'bandpass';
+  filter.frequency.value = freq;
+  filter.Q.value = 0.7;
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(vol, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+  noise.connect(filter).connect(gain).connect(ctx.destination);
+  noise.start(now);
+  noise.stop(now + dur);
+}
+
+const SFX = {
+  /* دقة مطرقة القاضي: نقرة خشبية + طبلة تردد منخفض ترتد مرتين، بتتشغل عند بداية الجلسة وعند إعلان الحكم */
+  gavel(){
+    if(!sfxEnabled) return;
+    const ctx = getAudioCtx();
+    if(!ctx) return;
+    const now = ctx.currentTime;
+    playNoiseThud(0.5, 0.12, 900);
+    const osc = ctx.createOscillator();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(160, now);
+    osc.frequency.exponentialRampToValueAtTime(60, now + 0.15);
+    const oscGain = ctx.createGain();
+    oscGain.gain.setValueAtTime(0.45, now);
+    oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+    osc.connect(oscGain).connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.25);
+    setTimeout(()=>{ playNoiseThud(0.22, 0.06, 1100); }, 140);
+  },
+  /* نغمة هادئة قصيرة عند انتقال المحكمة لمرحلة جديدة */
+  chime(){
+    if(!sfxEnabled) return;
+    const ctx = getAudioCtx();
+    if(!ctx) return;
+    const now = ctx.currentTime;
+    [660, 880].forEach((freq, i)=>{
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      const gain = ctx.createGain();
+      const start = now + i*0.09;
+      gain.gain.setValueAtTime(0, start);
+      gain.gain.linearRampToValueAtTime(0.2, start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.5);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(start);
+      osc.stop(start + 0.55);
+    });
+  }
+};
+
+/* بيقارن حالة الغرفة القديمة بالجديدة عشان يحدد امتى يشغّل الصوت المناسب، لأي حد في الغرفة مش بس اللي بيضغط الزرار */
+let prevRoomSnapshot = null;
+function detectSoundTriggers(newRoom){
+  if(!newRoom){ prevRoomSnapshot = null; return; }
+  const newStatus = newRoom.status;
+  const newPhaseIndex = newRoom.session ? newRoom.session.phaseIndex : null;
+  if(prevRoomSnapshot){
+    if(newStatus==='in_progress' && prevRoomSnapshot.status!=='in_progress'){
+      SFX.gavel();
+    } else if(newStatus==='in_progress' && newPhaseIndex!=null && newPhaseIndex!==prevRoomSnapshot.phaseIndex){
+      SFX.chime();
+    } else if(newStatus==='revealed' && prevRoomSnapshot.status!=='revealed'){
+      SFX.gavel();
+    }
+  }
+  prevRoomSnapshot = { status:newStatus, phaseIndex:newPhaseIndex };
+}
+
 /* ---------------- database helpers (Firebase Realtime Database) ---------------- */
 const roomPath = code => `rooms/${code}`;
 
@@ -611,6 +779,7 @@ function normalizeRoom(r){
   r.score = r.score || {prosecution:0, defense:0};
   r.playerScores = r.playerScores || {};
   r.witnessAwards = r.witnessAwards || {};
+  r.swapRequests = r.swapRequests || {};
   return r;
 }
 function genCode(){
@@ -626,6 +795,7 @@ function subscribeRoom(code){
   unsubscribeRoomListener();
   unsubscribeFn = onValue(ref(db, roomPath(code)), (snapshot)=>{
     room = snapshot.exists() ? normalizeRoom(snapshot.val()) : null;
+    detectSoundTriggers(room);
     render();
   });
 }
@@ -1061,6 +1231,15 @@ async function ensureUserProfile(user, forcedName){
   await set(ref(db, `users/${uid}`), newProfile);
   await set(ref(db, `friendCodes/${code}`), uid);
 }
+
+/* تحديث ذري لإحصائيات لاعب على مستوى كل الجلسات (لوحة الصدارة العامة) */
+async function bumpUserStats(uid, deltas){
+  if(!uid) return;
+  const patch = {};
+  Object.entries(deltas).forEach(([k,v])=>{ patch[`users/${uid}/stats/${k}`] = increment(v); });
+  try{ await update(ref(db), patch); }
+  catch(e){ console.error('تعذّر تحديث إحصائيات اللاعب:', e); }
+}
 async function generateUniqueFriendCode(){
   for(let i=0;i<8;i++){
     const code = genCode();
@@ -1158,7 +1337,40 @@ onAuthStateChanged(auth, async (user)=>{
 function goProfile(){ view='profile'; errorMsg=''; render(); }
 function goFriends(){ view='friends'; errorMsg=''; render(); }
 function goHowTo(){ view='howto'; errorMsg=''; render(); }
+function goLeaderboard(){ view='leaderboard'; errorMsg=''; loadLeaderboard(); render(); }
 function goBackFromSub(){ view='app'; errorMsg=''; render(); }
+
+/* جلب أعلى 50 لاعب حسب النقاط الإجمالية عبر كل الجلسات */
+async function loadLeaderboard(){
+  leaderboardLoading = true; leaderboardError=''; render();
+  try{
+    const q = query(ref(db, 'users'), orderByChild('stats/totalPoints'), limitToLast(50));
+    const snap = await get(q);
+    const rows = [];
+    snap.forEach(child=>{
+      const v = child.val() || {};
+      const stats = v.stats || {};
+      if((stats.totalPoints||0) > 0){
+        rows.push({
+          uid: child.key,
+          name: v.name || 'لاعب',
+          photoURL: v.photoURL || '',
+          totalPoints: stats.totalPoints || 0,
+          gamesPlayed: stats.gamesPlayed || 0,
+          correctVerdicts: stats.correctVerdicts || 0,
+          witnessAwards: stats.witnessAwards || 0,
+          lawyerWins: stats.lawyerWins || 0,
+        });
+      }
+    });
+    rows.sort((a,b)=> b.totalPoints - a.totalPoints);
+    leaderboardData = rows;
+  }catch(e){
+    leaderboardError = 'تعذّر تحميل لوحة الصدارة، حاول تاني.';
+  }
+  leaderboardLoading = false;
+  render();
+}
 
 function toast(msg){
   profileMsg = msg;
@@ -1269,11 +1481,54 @@ async function joinRoomByCode(code){
   render();
 }
 
-async function pickRole(roleId){
-  if(!room || !profile) return;
-  const takenBy = Object.entries(room.players).find(([pid,p])=>p.role===roleId && pid!==myId);
-  if(takenBy) return;
-  room.players[myId] = {name: profile.name, role: roleId};
+/* دور كل لاعب بيتحدد عشوائيًا لحظة ما يدخل الغرفة. لو عايز يغيّر دوره، لازم يطلب تبديل مع لاعب تاني وياخد موافقته. */
+let autoAssigning = false;
+async function autoAssignRole(){
+  if(autoAssigning) return;
+  if(!room || !roomCode || !profile || !myId) return;
+  if(room.players[myId]) return; // عنده دور بالفعل
+  const takenRoles = new Set(Object.values(room.players).map(p=>p.role));
+  const available = ROLES.filter(r=>!takenRoles.has(r.id));
+  if(available.length===0) return; // كل الأدوار محجوزة
+  autoAssigning = true;
+  try{
+    const chosen = available[Math.floor(Math.random()*available.length)];
+    room.players[myId] = {name: profile.name, role: chosen.id};
+    await saveRoom(roomCode, room);
+    render();
+  } finally {
+    autoAssigning = false;
+  }
+}
+
+async function requestSwap(targetId){
+  if(!room || !roomCode || !myId || targetId===myId) return;
+  if(!room.players[myId] || !room.players[targetId]) return;
+  room.swapRequests = room.swapRequests || {};
+  // ملغيش أي طلب سابق مني، وابعت طلب واحد بس في المرة
+  room.swapRequests[myId] = {toId: targetId, createdAt: Date.now()};
+  await saveRoom(roomCode, room);
+  render();
+}
+
+async function cancelSwapRequest(){
+  if(!room || !roomCode) return;
+  if(room.swapRequests) delete room.swapRequests[myId];
+  await saveRoom(roomCode, room);
+  render();
+}
+
+async function respondSwap(fromId, accept){
+  if(!room || !roomCode || !room.swapRequests) return;
+  const req = room.swapRequests[fromId];
+  if(!req || req.toId!==myId) return;
+  if(accept && room.players[fromId] && room.players[myId]){
+    const fromRole = room.players[fromId].role;
+    const myRoleVal = room.players[myId].role;
+    room.players[fromId].role = myRoleVal;
+    room.players[myId].role = fromRole;
+  }
+  delete room.swapRequests[fromId];
   await saveRoom(roomCode, room);
   render();
 }
@@ -1332,16 +1587,31 @@ function myRole(){
 }
 
 async function submitVerdict(choice){
+  if(myRole()!=='judge') return;
   room.verdict = choice;
   room.status = 'revealed';
   const truth = room.case.truth;
-  if(truth === 'guilty') room.score.prosecution += 1;
+  const correct = choice === truth;
+  /* المحامي اللي حكم القاضي جاله لصالحه ياخد نقطة دايمًا — الادعاء لو "مذنب"، الدفاع لو "غير مذنب" — بغض النظر عن الحقيقة الفعلية للقضية */
+  const winningRole = choice === 'guilty' ? 'prosecution' : 'defense';
+  if(winningRole === 'prosecution') room.score.prosecution += 1;
   else room.score.defense += 1;
+
   room.playerScores = room.playerScores || {};
-  if(choice === truth){
+  const winnerEntry = Object.entries(room.players).find(([pid,p])=>p.role===winningRole);
+  const winnerId = winnerEntry ? winnerEntry[0] : null;
+  if(winnerId){
+    room.playerScores[winnerId] = (room.playerScores[winnerId]||0) + 1;
+  }
+  if(correct){
     room.playerScores[myId] = (room.playerScores[myId]||0) + 1;
   }
   await saveRoom(roomCode, room);
+  /* إحصائيات عالمية: كل اللاعبين في الجلسة يسجلوا قضية ملعوبة، والقاضي ياخد نقطة ودقة لو حكمه صح، والمحامي الفايز ياخد نقطة قضية مكسوبة */
+  const allIds = Object.keys(room.players || {});
+  allIds.forEach(pid => bumpUserStats(pid, {gamesPlayed:1}));
+  if(winnerId) bumpUserStats(winnerId, {totalPoints:1, lawyerWins:1});
+  bumpUserStats(myId, correct ? {totalPoints:1, correctVerdicts:1} : {});
   render();
 }
 
@@ -1354,6 +1624,7 @@ async function awardWitnessPoint(pid){
   room.playerScores = room.playerScores || {};
   room.playerScores[pid] = (room.playerScores[pid]||0) + 1;
   await saveRoom(roomCode, room);
+  bumpUserStats(pid, {totalPoints:1, witnessAwards:1});
   render();
 }
 
@@ -1371,6 +1642,7 @@ async function leaveRoom(){
   unsubscribeRoomListener();
   clearPersistedRoomCode();
   roomCode=null; room=null; errorMsg='';
+  prevRoomSnapshot = null;
   render();
 }
 
@@ -1400,6 +1672,8 @@ function renderTopBarHtml(){
         <span>${(profile && profile.name) || '...'}</span>
       </div>
       <div class="topbar-actions">
+        <button class="btn secondary small" onclick="toggleSfx()" title="${sfxEnabled ? 'كتم صوت المحكمة' : 'تشغيل صوت المحكمة'}">${sfxEnabled ? '🔊' : '🔇'}</button>
+        <button class="btn secondary small" onclick="goLeaderboard()">🏆 الصدارة</button>
         <button class="btn secondary small" onclick="goFriends()">👥 الأصدقاء${reqCount?`<span class="badge">${reqCount}</span>`:''}</button>
         ${(!room && invCount) ? `<button class="btn secondary small" onclick="goBackFromSub()">✉ دعوات<span class="badge">${invCount}</span></button>` : ''}
         <button class="btn secondary small" onclick="doSignOut()">خروج</button>
@@ -1421,6 +1695,7 @@ function render(){
   if(view==='profile'){ renderProfile(); return; }
   if(view==='friends'){ renderFriends(); return; }
   if(view==='howto'){ renderHowTo(); return; }
+  if(view==='leaderboard'){ renderLeaderboard(); return; }
   if(!room){ renderWelcome(); return; }
   if(room.status==='lobby') { renderLobby(); return; }
   if(room.status==='generating'){ renderGenerating(); return; }
@@ -1547,6 +1822,49 @@ function renderFriends(){
   `);
 }
 
+/* -------- leaderboard screen (لوحة الصدارة العامة عبر كل الجلسات) -------- */
+function renderLeaderboard(){
+  let body;
+  if(leaderboardLoading){
+    body = `<div class="lb-empty">جارٍ تحميل لوحة الصدارة...</div>`;
+  } else if(leaderboardError){
+    body = `<div class="lb-empty">${leaderboardError}</div>`;
+  } else if(!leaderboardData.length){
+    body = `<div class="lb-empty">لسه محدش سجّل نقاط. العب قضية وحاول تكون الأول في الصدارة! 🏆</div>`;
+  } else {
+    body = leaderboardData.map((row,i)=>{
+      const rank = i+1;
+      const topClass = rank===1?'top1':rank===2?'top2':rank===3?'top3':'';
+      const meClass = row.uid===myId ? 'me' : '';
+      const avatar = row.photoURL
+        ? `<img src="${row.photoURL}" class="lb-avatar-img">`
+        : `<div class="lb-avatar-fallback">${initials(row.name)}</div>`;
+      const medal = rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':rank;
+      return `
+        <div class="lb-row ${topClass} ${meClass}">
+          <div class="lb-rank">${medal}</div>
+          ${avatar}
+          <div class="lb-info">
+            <div class="lb-name">${row.name}${row.uid===myId?' (انت)':''}</div>
+            <div class="lb-sub">⚖ ${row.correctVerdicts} حكم صحيح · 🎯 ${row.lawyerWins} قضية مكسوبة · 👁 ${row.witnessAwards} شهادة مقنعة · 🗂 ${row.gamesPlayed} قضية</div>
+          </div>
+          <div class="lb-points">${row.totalPoints}<span class="lb-points-label">نقطة</span></div>
+        </div>`;
+    }).join('');
+  }
+  el(`
+    ${errBlock()}
+    <div class="panel">
+      <div class="row" style="justify-content:space-between; align-items:center; margin-bottom:18px;">
+        <h2 style="margin:0; font-size:20px;">🏆 لوحة الصدارة</h2>
+        <button class="btn secondary small" onclick="goBackFromSub()">رجوع</button>
+      </div>
+      <p style="color:var(--muted); font-size:12px; margin:-8px 0 16px;">أفضل اللاعبين عبر كل الجلسات — نقاط من دقة أحكام القاضي وتقييمات الشهود</p>
+      ${body}
+    </div>
+  `);
+}
+
 /* -------- طريقة اللعب -------- */
 function renderHowTo(){
   el(`
@@ -1577,7 +1895,7 @@ function renderHowTo(){
         <h3>خطوات اللعب</h3>
         <ol>
           <li>حد يعمل "إنشاء غرفة" ويشارك الكود مع الباقي، أو الكل يدخل بنفس الكود.</li>
-          <li>كل لاعب يختار دوره من شاشة الغرفة (لازم يتملى: قاضي، متهم، محامي ادعاء، محامي دفاع — والشاهدين اختياريين).</li>
+          <li>كل لاعب بياخد دوره عشوائيًا أوتوماتيك لحظة ما يدخل الغرفة (لازم يتملى: قاضي، متهم، محامي ادعاء، محامي دفاع — والشاهدين اختياريين). لو حد عايز يغيّر دوره مع لاعب تاني، يضغط "اطلب تبديل الدور" على كارت دور اللاعب اللي عايز يبدّل معاه، والتبديل بيتم بس لو اللاعب التاني وافق.</li>
           <li>القاضي يضغط "بدء القضية" فيتولّد ملف قضية جديد (بالذكاء الاصطناعي أو من بنك قضايا جاهز).</li>
           <li>كل لاعب يقرا ورقته السرية لوحده، ويضغط "انتهيت من مراجعة أوراقي" لما يخلص.</li>
           <li>لما الكل يخلص، القاضي يضغط "ابدأ الجلسة الحية".</li>
@@ -1644,17 +1962,67 @@ function renderWelcome(){
 
 function renderLobby(){
   const players = room.players;
+
+  /* أول ما اللاعب يدخل الغرفة، بناخدله دور عشوائي أوتوماتيك من الأدوار المتاحة */
+  if(!players[myId]){
+    if(!autoAssigning) autoAssignRole();
+    el(`
+      ${errBlock()}
+      <div class="panel loader">
+        <span class="gavel">🎲</span>
+        <h2 style="margin:14px 0 0;">جارٍ توزيع الأدوار عشوائيًا...</h2>
+        <p>هيتحدد دورك في القضية عشوائيًا خلال لحظات</p>
+      </div>
+    `);
+    return;
+  }
+
+  const swapRequests = room.swapRequests || {};
+  const myOutgoingReq = swapRequests[myId] || null;
+  const incomingReqs = Object.entries(swapRequests).filter(([fid,r])=>r.toId===myId && players[fid]);
+
   const rolesHtml = ROLES.map(r=>{
     const occ = Object.entries(players).find(([pid,p])=>p.role===r.id);
     const mine = occ && occ[0]===myId;
     const taken = occ && !mine;
+
+    let actionHtml;
+    if(mine){
+      actionHtml = `<div class="occupant">${occ[1].name} (أنت)</div>`;
+    } else if(taken){
+      const pendingToThem = myOutgoingReq && myOutgoingReq.toId===occ[0];
+      actionHtml = `<div class="occupant">${occ[1].name}</div>` + (
+        pendingToThem
+          ? `<button class="btn secondary small swap-btn" onclick="cancelSwapRequest()">إلغاء طلب التبديل</button>`
+          : myOutgoingReq
+            ? ``
+            : `<button class="btn small swap-btn" onclick="requestSwap('${occ[0]}')">🔁 اطلب تبديل الدور</button>`
+      );
+    } else {
+      actionHtml = `<div class="empty">— لسه محدش هنا —</div>`;
+    }
+
     return `
-      <div class="role-card ${mine?'mine':''} ${taken?'taken':''} ${r.required?'required':''}" ${taken?'':`onclick="pickRole('${r.id}')"`}>
+      <div class="role-card ${mine?'mine':''} ${taken?'taken':''} ${r.required?'required':''}">
         <span class="icon">${r.icon}</span>
         <div class="rname">${r.label}</div>
-        ${occ ? `<div class="occupant">${occ[1].name}${mine?' (أنت)':''}</div>` : `<div class="empty">اضغط للاختيار</div>`}
+        ${actionHtml}
       </div>`;
   }).join('');
+
+  const swapRequestsHtml = incomingReqs.length ? `
+    <div class="swap-requests-box">
+      <h3>🔁 طلبات تبديل وصلتلك</h3>
+      ${incomingReqs.map(([fid,r])=>`
+        <div class="swap-request-row">
+          <span>${players[fid].name} (${roleLabel(players[fid].role)}) عايز يبدّل دوره مع دورك (${roleLabel(players[myId].role)})</span>
+          <div class="row" style="gap:8px;">
+            <button class="btn small" onclick="respondSwap('${fid}', true)">✔ موافق</button>
+            <button class="btn secondary small" onclick="respondSwap('${fid}', false)">✘ رفض</button>
+          </div>
+        </div>
+      `).join('')}
+    </div>` : '';
 
   const iAmJudge = myRole()==='judge';
   const filled = requiredRolesFilled();
@@ -1678,9 +2046,10 @@ function renderLobby(){
         <a href="#" class="howto-link" onclick="goHowTo(); return false;">📖 مش فاهم اللعبة بتشتغل إزاي؟ اقرأ طريقة اللعب</a>
       </div>
 
-      <h2 style="margin:20px 0 4px; font-size:22px;">اختر دورك في القضية</h2>
-      <p style="color:var(--muted); font-size:13px; margin:0 0 4px;">القاضي، المتهم، ومحامي الادعاء والدفاع أدوار أساسية. الشهود اختياريون.</p>
+      <h2 style="margin:20px 0 4px; font-size:22px;">أدوار القضية</h2>
+      <p style="color:var(--muted); font-size:13px; margin:0 0 4px;">اتحدد دور كل لاعب عشوائيًا لحظة ما دخل الغرفة. لو عايز تغيّر دورك، اطلب تبديل من لاعب تاني ولازم يوافق هو الأول.</p>
       <div class="role-grid">${rolesHtml}</div>
+      ${swapRequestsHtml}
 
       ${friendEntries.length ? `
       <div style="margin-top:26px;">
@@ -1926,6 +2295,7 @@ window.doSignOut = doSignOut;
 window.goProfile = goProfile;
 window.goFriends = goFriends;
 window.goHowTo = goHowTo;
+window.goLeaderboard = goLeaderboard;
 window.goBackFromSub = goBackFromSub;
 window.saveProfileName = saveProfileName;
 window.copyFriendCode = copyFriendCode;
@@ -1937,7 +2307,9 @@ window.acceptRoomInvite = acceptRoomInvite;
 window.dismissRoomInvite = dismissRoomInvite;
 window.createRoom = createRoom;
 window.joinRoomFlow = joinRoomFlow;
-window.pickRole = pickRole;
+window.requestSwap = requestSwap;
+window.cancelSwapRequest = cancelSwapRequest;
+window.respondSwap = respondSwap;
 window.beginCaseFlow = beginCaseFlow;
 window.toggleReady = toggleReady;
 window.startSession = startSession;
@@ -1948,6 +2320,7 @@ window.newCase = newCase;
 window.leaveRoom = leaveRoom;
 window.confirmLeaveMidSession = confirmLeaveMidSession;
 window.copyCode = copyCode;
+window.toggleSfx = toggleSfx;
 </script>
 </body>
 </html>
