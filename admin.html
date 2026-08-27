@@ -86,6 +86,39 @@
     border-top:1px dashed var(--panel-line); padding-top:14px;
   }
   hr{border:none; border-top:1px solid var(--panel-line); margin:22px 0;}
+
+  /* toggle switch لتفعيل/تعطيل بانر التحديث */
+  .toggle-row{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:12px; margin-bottom:14px;
+  }
+  .toggle-row .toggle-label{font-size:14px; color:var(--text-light);}
+  .toggle-row .toggle-sub{font-size:12px; color:var(--muted); margin-top:2px;}
+  .switch{
+    position:relative; display:inline-block;
+    width:46px; height:26px; flex-shrink:0; cursor:pointer;
+  }
+  .switch input{opacity:0; width:0; height:0;}
+  .switch .slider{
+    position:absolute; inset:0; cursor:pointer;
+    background:#182019; border:1px solid var(--panel-line);
+    border-radius:26px; transition:.15s;
+  }
+  .switch .slider::before{
+    content:""; position:absolute;
+    height:18px; width:18px; left:3px; bottom:3px;
+    background:var(--muted); border-radius:50%; transition:.15s;
+  }
+  .switch input:checked + .slider{background:rgba(47,92,63,.5); border-color:var(--brass);}
+  .switch input:checked + .slider::before{
+    transform:translateX(-20px); background:var(--brass-bright);
+  }
+  .status-badge{
+    display:inline-block; font-size:11px; font-weight:700;
+    padding:3px 10px; border-radius:20px; margin-bottom:10px;
+  }
+  .status-badge.on{background:rgba(47,92,63,.25); color:var(--brass-bright); border:1px solid var(--brass);}
+  .status-badge.off{background:rgba(147,161,150,.12); color:var(--muted); border:1px solid var(--panel-line);}
 </style>
 </head>
 <body>
@@ -132,6 +165,9 @@ let authUser = null;
 let unlocked = false;
 let currentKey = '';
 let currentGeminiKey = '';
+let updateEnabled = false;
+let updateMessage = '';
+let updateLink = '';
 let errorMsg = '';
 let toastMsg = '';
 let toastTimer = null;
@@ -152,13 +188,18 @@ function msgBlock(){
 
 async function loadConfigKeys(){
   try{
-    const [snapA, snapG] = await Promise.all([
+    const [snapA, snapG, snapU] = await Promise.all([
       get(ref(db, 'config/apiKey')),
-      get(ref(db, 'config/geminiKey'))
+      get(ref(db, 'config/geminiKey')),
+      get(ref(db, 'config/update'))
     ]);
     currentKey = snapA.exists() ? snapA.val() : '';
     currentGeminiKey = snapG.exists() ? snapG.val() : '';
-  }catch(e){ currentKey=''; currentGeminiKey=''; }
+    const u = snapU.exists() ? (snapU.val()||{}) : {};
+    updateEnabled = !!u.enabled;
+    updateMessage = u.message || '';
+    updateLink = u.link || '';
+  }catch(e){ currentKey=''; currentGeminiKey=''; updateEnabled=false; updateMessage=''; updateLink=''; }
 }
 
 async function doGoogleLogin(){
@@ -236,6 +277,52 @@ async function clearGeminiKey(){
   }catch(e){ render(); }
 }
 
+/* بانر تحديث اختياري: بيظهر للاعبين رسالة + رابط تحميل النسخة الجديدة (فلاتر)،
+   واللاعب حر يتجاهله ويكمل يلعب بالنسخة الحالية */
+async function toggleUpdateBanner(checked){
+  updateEnabled = checked;
+  if(checked && !updateLink){
+    errorMsg = 'محتاج تكتب رابط التحميل الأول قبل ما تفعّل البانر';
+    updateEnabled = false;
+    render();
+    return;
+  }
+  try{
+    await set(ref(db, 'config/update'), {
+      enabled: updateEnabled,
+      message: updateMessage,
+      link: updateLink
+    });
+    errorMsg = '';
+    toast(updateEnabled ? 'تم تفعيل بانر التحديث ✔' : 'تم تعطيل بانر التحديث');
+    render();
+  }catch(e){
+    errorMsg = 'حصل خطأ، جرّب تاني';
+    updateEnabled = !checked;
+    render();
+  }
+}
+
+async function saveUpdateBanner(){
+  const link = ((document.getElementById('updateLinkInput')||{}).value || '').trim();
+  const message = ((document.getElementById('updateMsgInput')||{}).value || '').trim();
+  if(!link){ errorMsg = 'اكتب رابط التحميل'; render(); return; }
+  updateLink = link;
+  updateMessage = message;
+  try{
+    await set(ref(db, 'config/update'), {
+      enabled: updateEnabled,
+      message: updateMessage,
+      link: updateLink
+    });
+    errorMsg = '';
+    toast('تم حفظ بيانات التحديث ✔');
+  }catch(e){
+    errorMsg = 'حصل خطأ في الحفظ، جرّب تاني';
+    render();
+  }
+}
+
 function render(){
   if(!authReady){
     el(`<div class="panel" style="text-align:center; color:var(--muted);">جارٍ التحقق من الحساب...</div>`);
@@ -288,6 +375,35 @@ function render(){
 
       <hr>
 
+      <div class="section-title">تحديث اللعبة (النسخة الجديدة / فلاتر)</div>
+      <p class="hint">
+        لما تفعّل البانر، هيظهر للاعبين إشعار فيه الرسالة اللي هتكتبها + رابط تحميل النسخة الجديدة. البانر اختياري — اللاعب يقدر يتجاهله ويكمل يلعب بالنسخة الحالية.
+      </p>
+      <span class="status-badge ${updateEnabled?'on':'off'}">${updateEnabled?'● البانر مفعّل دلوقتي':'○ البانر متعطّل'}</span>
+
+      <div class="toggle-row" style="margin-top:8px;">
+        <div>
+          <div class="toggle-label">إظهار بانر التحديث للاعبين</div>
+          <div class="toggle-sub">لازم تحفظ رابط التحميل الأول قبل ما تقدر تفعّله</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="updateEnabledToggle" ${updateEnabled?'checked':''} onchange="toggleUpdateBanner(this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <label class="field-label">رابط تحميل النسخة الجديدة</label>
+      <input type="text" id="updateLinkInput" placeholder="https://..." value="${updateLink.replace(/"/g,'&quot;')}">
+
+      <label class="field-label" style="margin-top:12px;">رسالة تظهر للاعبين (اختياري)</label>
+      <input type="text" id="updateMsgInput" placeholder="مثال: فيه نسخة جديدة للعبة، حمّلها من هنا" value="${updateMessage.replace(/"/g,'&quot;')}">
+
+      <div class="row">
+        <button class="btn small" onclick="saveUpdateBanner()">حفظ بيانات التحديث</button>
+      </div>
+
+      <hr>
+
       <div class="row" style="margin-top:22px;">
         <button class="btn secondary" onclick="logout()">تسجيل خروج</button>
       </div>
@@ -309,6 +425,8 @@ window.saveApiKey = saveApiKey;
 window.clearApiKey = clearApiKey;
 window.saveGeminiKey = saveGeminiKey;
 window.clearGeminiKey = clearGeminiKey;
+window.toggleUpdateBanner = toggleUpdateBanner;
+window.saveUpdateBanner = saveUpdateBanner;
 
 render();
 </script>
