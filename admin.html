@@ -208,9 +208,20 @@ async function doGoogleLogin(){
     await signInWithPopup(auth, googleProvider);
     /* onAuthStateChanged هيتكفل بتحديث الحالة وعمل render */
   }catch(e){
-    errorMsg = 'تعذّر تسجيل الدخول بجوجل، حاول تاني.';
+    console.error('Google sign-in error:', e);
+    errorMsg = googleLoginErrorMessage(e);
     render();
   }
+}
+
+function googleLoginErrorMessage(e){
+  const code = (e && e.code) || '';
+  if(code.includes('unauthorized-domain')) return 'الدومين اللي فاتح منه الصفحة دي مش مضاف في Authorized domains على Firebase (Authentication → Settings).';
+  if(code.includes('operation-not-allowed')) return 'خاصية الدخول بجوجل مش مفعّلة على المشروع (Authentication → Sign-in method → فعّل Google).';
+  if(code.includes('popup-blocked')) return 'المتصفح قفل نافذة الدخول (Popup). فعّل الـ popups لموقع الصفحة دي وجرّب تاني.';
+  if(code.includes('popup-closed-by-user') || code.includes('cancelled-popup-request')) return 'اتقفلت نافذة الدخول قبل ما تكمل، جرّب تاني.';
+  if(code.includes('network-request-failed')) return 'فيه مشكلة في الاتصال بالإنترنت، جرّب تاني.';
+  return `تعذّر تسجيل الدخول بجوجل (${code || 'خطأ غير معروف'}). افتح Console في أدوات المطوّر عشان تشوف التفاصيل.`;
 }
 
 async function logout(){
