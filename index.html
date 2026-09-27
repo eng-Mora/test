@@ -27,6 +27,11 @@
 =================================================================== -->
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 
+<!-- ===================================================================
+     jsPDF (CDN) — used for the "Download PDF Report" button in Reports
+=================================================================== -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <style>
 /* =====================================================================
    DESIGN TOKENS
@@ -239,6 +244,8 @@ input,select,textarea{font-family:var(--font-body);}
   margin-left:auto;background:var(--danger);color:#fff;font-size:11px;font-weight:700;
   padding:1px 7px;border-radius:20px;
 }
+.nav-item .badge.pulse, #notifDot.pulse{ animation:pulseAlert 1.4s ease-in-out infinite; }
+@keyframes pulseAlert{ 0%,100%{ box-shadow:0 0 0 0 rgba(192,86,75,.55); } 50%{ box-shadow:0 0 0 5px rgba(192,86,75,0); } }
 .nav-section-label{
   font-size:10.5px;letter-spacing:.09em;color:#66708a;text-transform:uppercase;
   margin:16px 12px 6px;font-weight:700;
@@ -483,6 +490,43 @@ tbody tr:last-child td{border-bottom:none;}
 .chat-input-row textarea{flex:1;resize:none;min-height:42px;max-height:110px;}
 
 /* =====================================================================
+   NEW FEATURE STYLES — alerts, quick actions, score, inventory/team lists
+===================================================================== */
+.alert-banner{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  background:var(--warning-soft);color:#7A5A1E;border:1px solid #EED9AE;
+  border-radius:var(--radius-md);padding:13px 16px;margin-bottom:18px;font-size:13.5px;font-weight:600;
+}
+.alert-banner svg{width:18px;height:18px;flex-shrink:0;}
+.alert-banner .grow{flex:1;}
+.alert-banner button{flex-shrink:0;}
+
+.row-actions{display:flex;gap:6px;justify-content:flex-end;}
+.row-icon-btn{
+  width:30px;height:30px;border-radius:8px;border:1.5px solid var(--gray-200);background:#fff;
+  display:inline-flex;align-items:center;justify-content:center;color:var(--gray-600);cursor:pointer;flex-shrink:0;
+}
+.row-icon-btn:hover{background:var(--gray-50);}
+.row-icon-btn.wa:hover{color:#2E9E5B;border-color:#bfe6cf;}
+.row-icon-btn.call:hover{color:var(--blue-accent-dark);border-color:var(--blue-accent-soft);}
+@media (max-width:760px){ .row-actions{justify-content:flex-end;} }
+
+.score-pill{
+  display:inline-flex;align-items:center;gap:5px;font-weight:800;font-size:12px;padding:3px 9px;border-radius:20px;
+  background:var(--gray-100);color:var(--gray-600);
+}
+.score-pill.hot{background:var(--success-soft);color:var(--success);}
+.score-pill.warm{background:var(--warning-soft);color:var(--warning);}
+
+.manage-list{border:1px solid var(--gray-200);border-radius:var(--radius-md);overflow:hidden;margin-top:10px;}
+.manage-list-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--gray-100);font-size:13.5px;}
+.manage-list-row:last-child{border-bottom:none;}
+.manage-list-row button{background:transparent;border:none;color:var(--gray-400);cursor:pointer;padding:4px;}
+.manage-list-row button:hover{color:var(--danger);}
+.manage-add-row{display:flex;gap:8px;margin-top:10px;}
+.manage-add-row input{flex:1;}
+
+/* =====================================================================
    RESPONSIVE
 ===================================================================== */
 @media (max-width:980px){
@@ -615,6 +659,7 @@ const firebaseConfig = {
   appId: "1:159095175556:web:5f44fdd616d4f9c58105d1",
   measurementId: "G-PK3KEBPFK0"
 };
+
 /* =====================================================================
    FIREBASE REALTIME DATABASE SECURITY RULES (GUIDANCE)
    -----------------------------------------------------------------
@@ -701,6 +746,28 @@ const PRIORITIES = ['High','Medium','Low'];
 const SOURCES = ['Walk-in','Phone Inquiry','Website','Facebook','Instagram','WhatsApp','Referral','Showroom Event','Other'];
 const statusClass = s => (STATUSES.find(x=>x.v===s)||{}).c || 'status-new';
 
+/* Car inventory & branches fall back to these defaults until settings/carModels
+   and settings/branches are populated in the database (editable from Settings /
+   Car Inventory page — Admin & Manager). Each model now carries a showroom price
+   so Call Center never has to type the model/price by hand. */
+const DEFAULT_CAR_MODELS = [
+  {model:'Toyota Corolla', price:950000}, {model:'Toyota Camry', price:1450000}, {model:'Toyota Yaris', price:780000},
+  {model:'Hyundai Elantra', price:990000}, {model:'Hyundai Tucson', price:1650000},
+  {model:'Kia Sportage', price:1550000}, {model:'Kia Cerato', price:900000},
+  {model:'Nissan Sunny', price:750000}, {model:'Nissan Qashqai', price:1600000},
+  {model:'Chevrolet Optra', price:820000}, {model:'MG5', price:870000}, {model:'BYD Song Plus', price:1750000}
+];
+const DEFAULT_BRANCHES = ['Cairo - Main Showroom'];
+
+/* SLA: how long a "New" lead can sit untouched before the Manager is auto-notified. */
+const SLA_NEW_LEAD_HOURS = 24;
+
+/* In-app team member creation (Admin only, Settings > Team) uses a secondary
+   Firebase App instance with the SAME config above, so creating a user does not
+   sign the admin out and does NOT require deploying a separate Cloud Function.
+   Realtime Database rules still gate who may write role/active on users/, so
+   this is safe as long as the security rules documented above are deployed. */
+
 /* =====================================================================
    APP STATE
 ===================================================================== */
@@ -713,8 +780,10 @@ const state = {
   route: 'dashboard',
   activeCustomerId: null,
   search: '',
-  filters: {status:'', sales:'', manager:'', callcenter:'', priority:'', source:'', car:''},
-  listenersAttached: false
+  filters: {status:'', sales:'', manager:'', callcenter:'', priority:'', source:'', car:'', branch:''},
+  listenersAttached: false,
+  carModels: DEFAULT_CAR_MODELS,
+  branches: DEFAULT_BRANCHES
 };
 
 /* =====================================================================
@@ -813,13 +882,144 @@ function validatePhone(v){ return /^[+]?[\d\s-]{7,16}$/.test((v||'').trim()); }
 function usersByRole(role){ return Object.entries(state.users).filter(([,u])=>u.role===role && u.active!==false).map(([uid,u])=>({uid,...u})); }
 function currentRole(){ return state.user ? state.user.role : null; }
 
+/* =====================================================================
+   QUICK ACTIONS — WhatsApp / Call
+===================================================================== */
+function cleanPhoneForWa(phone){ return (phone||'').replace(/[^\d+]/g,'').replace(/^00/,'').replace(/^\+/,''); }
+function waLink(phone, message){
+  const num = cleanPhoneForWa(phone);
+  return `https://wa.me/${num}${message ? '?text='+encodeURIComponent(message) : ''}`;
+}
+function telLink(phone){ return `tel:${(phone||'').replace(/\s+/g,'')}`; }
+function quickActionsHtml(c){
+  if(!c.phone) return '';
+  return `<div class="row-actions">
+    <a class="row-icon-btn wa" href="${waLink(c.phone)}" target="_blank" rel="noopener" title="WhatsApp" onclick="event.stopPropagation()">${iconSvg('headset',14)}</a>
+    <a class="row-icon-btn call" href="${telLink(c.phone)}" title="Call" onclick="event.stopPropagation()">${iconSvg('bell',14)}</a>
+  </div>`;
+}
+
+/* =====================================================================
+   CSV EXPORT
+===================================================================== */
+function csvEscape(v){ v = v==null?'':String(v); if(/[",\n]/.test(v)) v = '"'+v.replace(/"/g,'""')+'"'; return v; }
+function exportCustomersCSV(list){
+  if(!list.length){ toast('Nothing to export for the current filters.','info'); return; }
+  const headers = ['Name','Phone','WhatsApp','Location','Branch','Interested Car','Budget','Source','Priority','Status','Sales Rep','Manager','Created By','Created At','Next Follow-up','Lead Score'];
+  const rows = list.map(c=>[c.name,c.phone,c.whatsapp,c.location,c.branch,c.interestedCar,c.budget,c.source,c.priority,c.status,c.salesName,c.managerName,c.createdByName,fmtDate(c.createdAt),fmtDate(c.nextFollowUp),computeLeadScore(c)]);
+  const csv = [headers, ...rows].map(r=>r.map(csvEscape).join(',')).join('\r\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download = `abuzeid-customers-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  toast('CSV exported.','success');
+}
+
+/* =====================================================================
+   LEAD SCORING (0-100, heuristic: budget + priority + engagement + stage)
+===================================================================== */
+function computeLeadScore(c){
+  let score = 0;
+  const budget = Number(c.budget)||0;
+  score += Math.min(30, Math.round(budget/50000));
+  score += {High:25, Medium:15, Low:5}[c.priority] || 10;
+  score += Math.min(20, (c.callsCount||0)*4);
+  const statusPts = {New:5,Contacted:10,'No Answer':5,'Follow Up':15,Interested:25,'Visit Scheduled':30,'Visited Showroom':32,Negotiation:35,Sold:40,'Not Interested':0,Lost:0};
+  score += statusPts[c.status] || 0;
+  return Math.max(0, Math.min(100, score));
+}
+function scoreBadge(score){
+  const tone = score>=65 ? 'hot' : score>=35 ? 'warm' : '';
+  return `<span class="score-pill ${tone}">${score}</span>`;
+}
+
+/* =====================================================================
+   CALENDAR INVITES (.ics) — for scheduled showroom visits / test drives
+===================================================================== */
+function icsContent({title, description, start, end}){
+  const fmt = d => d.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
+  return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Abu Zeid CRM//EN','BEGIN:VEVENT',
+    'UID:'+Date.now()+'@abuzeid.com','DTSTAMP:'+fmt(new Date()),'DTSTART:'+fmt(start),'DTEND:'+fmt(end),
+    'SUMMARY:'+(title||'').replace(/\n/g,' '),'DESCRIPTION:'+(description||'').replace(/\n/g,'\\n'),
+    'END:VEVENT','END:VCALENDAR'].join('\r\n');
+}
+function downloadICS(filename, content){
+  const blob = new Blob([content], {type:'text/calendar;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=filename;
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+}
+
+/* =====================================================================
+   SLA AUTO-ESCALATION
+   Runs client-side whenever the customer list refreshes for a Manager/Admin
+   session. A production setup should mirror this with a scheduled Cloud
+   Function (Cloud Scheduler + Functions) so it fires even with nobody
+   logged in — see the note in functions-create-user.js.
+===================================================================== */
+let slaCheckedOnce = false;
+function checkSlaEscalations(){
+  const role = currentRole();
+  if(role!=='manager' && role!=='admin') return;
+  const thresholdMs = SLA_NEW_LEAD_HOURS*3600*1000;
+  Object.entries(state.customers).forEach(([id,c])=>{
+    if(c.status==='New' && !c.slaEscalated && c.createdAt && (Date.now()-c.createdAt)>thresholdMs){
+      db.ref('customers/'+id+'/slaEscalated').set(true);
+      const targetManager = c.managerId || state.user.uid;
+      notifyUser(targetManager, 'Lead needs attention', `${c.name} has been "New" for over ${SLA_NEW_LEAD_HOURS}h with no update.`, id);
+    }
+  });
+}
+
+/* =====================================================================
+   TODAY'S FOLLOW-UP ALERT (visual pulse + one-time sound per login session)
+===================================================================== */
+function todaysFollowUpsCount(){
+  if(!state.user) return 0;
+  return visibleCustomers().filter(c=>c.nextFollowUp && isSameDay(c.nextFollowUp) && !['Sold','Lost'].includes(c.status)).length;
+}
+function playAlertSound(){
+  try{
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    const ctx = new Ctx();
+    [0, .16].forEach((delay,i)=>{
+      const osc = ctx.createOscillator(); const gain = ctx.createGain();
+      osc.type = 'sine'; osc.frequency.value = i===0 ? 880 : 1046.5;
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime+delay);
+      gain.gain.exponentialRampToValueAtTime(0.18, ctx.currentTime+delay+0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+delay+0.28);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(ctx.currentTime+delay); osc.stop(ctx.currentTime+delay+0.3);
+    });
+  }catch(e){ /* Web Audio unavailable — the visual pulse still shows. */ }
+}
+let followUpAlertShownFor = null;
+function checkTodayFollowUps(){
+  if(!state.user) return;
+  const role = currentRole();
+  if(role!=='sales' && role!=='manager' && role!=='admin') return;
+  const todayKey = new Date().toDateString()+'|'+state.user.uid;
+  const count = todaysFollowUpsCount();
+  if(count>0 && followUpAlertShownFor!==todayKey){
+    followUpAlertShownFor = todayKey;
+    playAlertSound();
+    toast(`You have ${count} follow-up${count>1?'s':''} due today.`, 'info');
+  }
+}
+
 /* Visible customers per role (client-side shaping; see security-rules comment above) */
 function visibleCustomers(){
   const role = currentRole();
   const all = Object.entries(state.customers).map(([id,c])=>({id,...c}));
-  if(role==='admin' || role==='manager') return all;
-  if(role==='callcenter') return all.filter(c=>c.createdBy===state.user.uid);
-  if(role==='sales') return all.filter(c=>c.salesId===state.user.uid);
+  /* Multi-branch: a Manager/Call Center/Sales account scoped to a branch
+     (set in Settings > Team) only ever sees that branch's leads. Admins,
+     and any account left with no branch, see everything. */
+  const myBranch = state.user && state.user.branch;
+  const branchScoped = myBranch ? all.filter(c=>(c.branch||'')===myBranch) : all;
+  if(role==='admin') return all;
+  if(role==='manager') return branchScoped;
+  if(role==='callcenter') return branchScoped.filter(c=>c.createdBy===state.user.uid);
+  if(role==='sales') return branchScoped.filter(c=>c.salesId===state.user.uid);
   return [];
 }
 function applySearchFilter(list){
@@ -836,6 +1036,7 @@ function applySearchFilter(list){
   if(f.priority) out = out.filter(c=>c.priority===f.priority);
   if(f.source) out = out.filter(c=>c.source===f.source);
   if(f.car) out = out.filter(c=>(c.interestedCar||'')===f.car);
+  if(f.branch) out = out.filter(c=>(c.branch||'')===f.branch);
   return out.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
 }
 
@@ -939,6 +1140,21 @@ function setFollowUp(customerId, dateStr){
     addTimelineEvent(customerId, 'Follow-up scheduled', `Next follow-up set for ${fmtDate(new Date(dateStr).getTime())}.`);
   });
 }
+function scheduleVisit(customerId, visitAt, location){
+  return db.ref('customers/'+customerId).update({visitAt, visitLocation: location||'', status: 'Visit Scheduled', updatedAt: SERVER_TS}).then(()=>{
+    addTimelineEvent(customerId, 'Visit scheduled', `Showroom visit / test drive set for ${fmtDateTime(visitAt)}${location?' at '+location:''}.`);
+    const c = state.customers[customerId];
+    if(c && c.managerId) notifyUser(c.managerId, 'Visit / test drive scheduled', `${state.user.name} scheduled a visit with ${c.name}.`, customerId);
+  });
+}
+/* Google Calendar "add event" link — no OAuth needed, opens their own calendar in a new tab. */
+function googleCalendarLink({title, description, start, end}){
+  const fmt = d => d.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
+  const params = new URLSearchParams({
+    action:'TEMPLATE', text:title||'', dates:`${fmt(start)}/${fmt(end)}`, details:description||''
+  });
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
 
 /* =====================================================================
    REALTIME LISTENERS
@@ -955,7 +1171,19 @@ function attachListeners(){
 
   db.ref('customers').on('value', snap=>{
     state.customers = snap.val() || {};
+    checkSlaEscalations();
+    checkTodayFollowUps();
     route(state.route, true);
+  });
+
+  db.ref('settings/carModels').on('value', snap=>{
+    state.carModels = snap.val() || DEFAULT_CAR_MODELS;
+    if(state.route==='addcustomer' || state.route==='settings') route(state.route, true);
+  });
+
+  db.ref('settings/branches').on('value', snap=>{
+    state.branches = snap.val() || DEFAULT_BRANCHES;
+    if(state.route==='addcustomer' || state.route==='settings') route(state.route, true);
   });
 
   db.ref('customerTimeline').on('value', snap=>{
@@ -1032,7 +1260,7 @@ auth.onAuthStateChanged(fbUser=>{
         auth.signOut();
         return;
       }
-      state.user = {uid: fbUser.uid, email: fbUser.email, name: profile.name || fbUser.email, role: profile.role, active: profile.active};
+      state.user = {uid: fbUser.uid, email: fbUser.email, name: profile.name || fbUser.email, role: profile.role, active: profile.active, branch: profile.branch || null};
       showApp();
       attachListeners();
     }).catch(()=>{
@@ -1065,6 +1293,7 @@ const NAV = {
     {id:'salesteam', label:'Sales Team', icon:'target'},
     {id:'callcenter', label:'Call Center', icon:'headset'},
     {id:'followups', label:'Follow-ups', icon:'clock'},
+    {id:'inventory', label:'Car Inventory', icon:'car'},
     {id:'notifications', label:'Notifications', icon:'bell'},
     {id:'reports', label:'Reports', icon:'chart'},
     {id:'settings', label:'Settings', icon:'settings'}
@@ -1093,7 +1322,8 @@ const NAV_ICONS = {
   bell:'<path d="M6 8a6 6 0 0112 0c0 5 2 6 2 6H4s2-1 2-6z"/><path d="M9 21a3 3 0 006 0"/>',
   chart:'<path d="M4 20V10M11 20V4M18 20v-7"/>',
   settings:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.34 1.87l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.7 1.7 0 00-1.87-.34 1.7 1.7 0 00-1 1.55V21a2 2 0 01-4 0v-.09a1.7 1.7 0 00-1-1.55 1.7 1.7 0 00-1.87.34l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.7 1.7 0 00.34-1.87 1.7 1.7 0 00-1.55-1H3a2 2 0 010-4h.09a1.7 1.7 0 001.55-1 1.7 1.7 0 00-.34-1.87l-.06-.06a2 2 0 112.83-2.83l.06.06a1.7 1.7 0 001.87.34H9a1.7 1.7 0 001-1.55V3a2 2 0 014 0v.09a1.7 1.7 0 001 1.55 1.7 1.7 0 001.87-.34l.06-.06a2 2 0 112.83 2.83l-.06.06a1.7 1.7 0 00-.34 1.87V9a1.7 1.7 0 001.55 1H21a2 2 0 010 4h-.09a1.7 1.7 0 00-1.55 1z"/>',
-  plus:'<path d="M12 5v14M5 12h14"/>'
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  car:'<path d="M5 17h14M5 17a2 2 0 104 0M15 17a2 2 0 104 0M3 17v-4.5L5 8h11l3 4.5V17"/><path d="M5 12h14"/>'
 };
 function iconSvg(name, w=17){ return `<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${NAV_ICONS[name]||''}</svg>`; }
 
@@ -1101,10 +1331,12 @@ function renderSidebarNav(){
   const role = currentRole();
   const items = NAV[role] || NAV.sales;
   const unread = Object.values(state.notifications||{}).filter(n=>!n.read).length;
+  const dueToday = todaysFollowUpsCount();
   document.getElementById('sidebarNav').innerHTML = items.map(it=>`
     <div class="nav-item ${state.route===it.id?'active':''}" data-route="${it.id}">
       ${iconSvg(it.icon)}<span>${it.label}</span>
       ${it.id==='notifications' && unread>0 ? `<span class="badge-count badge">${unread}</span>`:''}
+      ${it.id==='followups' && dueToday>0 ? `<span class="badge-count badge pulse" title="Due today">${dueToday}</span>`:''}
     </div>`).join('');
   document.querySelectorAll('#sidebarNav .nav-item').forEach(el=>{
     el.addEventListener('click', ()=>{ route(el.dataset.route); closeSidebarMobile(); });
@@ -1134,7 +1366,7 @@ function closeSidebarMobile(){
 }
 
 const TITLES = {dashboard:'Dashboard', customers:'Customers', salesteam:'Sales Team', callcenter:'Call Center',
-  followups:'Follow-ups', notifications:'Notifications', reports:'Reports', settings:'Settings', addcustomer:'Add Customer'};
+  followups:'Follow-ups', inventory:'Car Inventory', notifications:'Notifications', reports:'Reports', settings:'Settings', addcustomer:'Add Customer'};
 
 let searchDebounce;
 document.getElementById('globalSearch').addEventListener('input', e=>{
@@ -1153,7 +1385,7 @@ function route(routeId, silent){
   const main = document.getElementById('mainView');
   const renderers = {
     dashboard: renderDashboard, customers: renderCustomers, salesteam: renderSalesTeam,
-    callcenter: renderCallCenterOverview, followups: renderFollowups, notifications: renderNotifications,
+    callcenter: renderCallCenterOverview, followups: renderFollowups, inventory: renderInventory, notifications: renderNotifications,
     reports: renderReports, settings: renderSettings, addcustomer: renderAddCustomerPage
   };
   (renderers[routeId]||renderDashboard)(main);
@@ -1348,9 +1580,9 @@ function customersTableHtml(list, opts={}){
   return `<div class="table-card"><div style="overflow-x:auto;">
     <table>
       <thead><tr>
-        <th>Customer</th><th>Car / Budget</th><th>Status</th><th>Priority</th>
+        <th>Customer</th><th>Car / Budget</th><th>Status</th><th>Priority</th><th>Score</th>
         ${!opts.compact?'<th>Sales</th><th>Source</th>':''}
-        <th>Created</th>
+        <th>Created</th><th></th>
       </tr></thead>
       <tbody>
         ${list.map(c=>`
@@ -1359,8 +1591,10 @@ function customersTableHtml(list, opts={}){
           <td data-label="Interest"><div>${escapeHtml(c.interestedCar||'—')}</div><div class="cell-sub">${c.budget?('EGP '+Number(c.budget).toLocaleString()):''}</div></td>
           <td data-label="Status"><span class="badge ${statusClass(c.status)}"><span class="dot"></span>${escapeHtml(c.status||'New')}</span></td>
           <td data-label="Priority"><span class="badge priority-${(c.priority||'Medium').toLowerCase()}">${escapeHtml(c.priority||'Medium')}</span></td>
+          <td data-label="Score">${scoreBadge(computeLeadScore(c))}</td>
           ${!opts.compact?`<td data-label="Sales">${escapeHtml(c.salesName||'Unassigned')}</td><td data-label="Source">${escapeHtml(c.source||'—')}</td>`:''}
           <td data-label="Created">${fmtDate(c.createdAt)}</td>
+          <td data-label="">${quickActionsHtml(c)}</td>
         </tr>`).join('')}
       </tbody>
     </table>
@@ -1389,17 +1623,20 @@ function filterBar(){
     `:''}
     <select class="filter-select" id="fSource"><option value="">All sources</option>${SOURCES.map(s=>`<option value="${s}" ${state.filters.source===s?'selected':''}>${s}</option>`).join('')}</select>
     <select class="filter-select" id="fCar"><option value="">All cars</option>${cars.map(c=>`<option value="${escapeHtml(c)}" ${state.filters.car===c?'selected':''}>${escapeHtml(c)}</option>`).join('')}</select>
+    ${(role==='manager'||role==='admin') && state.branches.length>1 ? `
+    <select class="filter-select" id="fBranch"><option value="">All branches</option>${state.branches.map(b=>`<option value="${escapeHtml(b)}" ${state.filters.branch===b?'selected':''}>${escapeHtml(b)}</option>`).join('')}</select>
+    `:''}
     <button class="btn btn-ghost btn-sm" id="fClear">Clear filters</button>
   </div>`;
 }
 function bindFilterBar(root, onChange){
-  ['fStatus','fPriority','fSales','fManager','fCallcenter','fSource','fCar'].forEach(id=>{
+  ['fStatus','fPriority','fSales','fManager','fCallcenter','fSource','fCar','fBranch'].forEach(id=>{
     const el = root.querySelector('#'+id); if(!el) return;
     const key = id.replace('f','').replace(/^./,c=>c.toLowerCase());
     el.addEventListener('change', ()=>{ state.filters[key] = el.value; onChange(); });
   });
   const clr = root.querySelector('#fClear');
-  if(clr) clr.addEventListener('click', ()=>{ state.filters = {status:'',sales:'',manager:'',callcenter:'',priority:'',source:'',car:''}; state.search=''; onChange(); });
+  if(clr) clr.addEventListener('click', ()=>{ state.filters = {status:'',sales:'',manager:'',callcenter:'',priority:'',source:'',car:'',branch:''}; state.search=''; onChange(); });
 }
 
 function renderCustomers(main){
@@ -1408,7 +1645,10 @@ function renderCustomers(main){
   main.innerHTML = `
     <div class="view-head">
       <div><h1>${role==='sales'?'My Customers': role==='callcenter'?'My Leads':'Customers'}</h1><div class="desc">${list.length} result${list.length!==1?'s':''} ${state.search?`for "${escapeHtml(state.search)}"`:''}</div></div>
-      ${role==='callcenter' ? `<button class="add-cta" id="listAddBtn">${iconSvg('plus',18)} Add New Customer</button>`:''}
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-outline" id="exportCsvBtn">${iconSvg('chart',16)} Export CSV</button>
+        ${role==='callcenter' ? `<button class="add-cta" id="listAddBtn">${iconSvg('plus',18)} Add New Customer</button>`:''}
+      </div>
     </div>
     ${filterBar()}
     <div style="height:14px;"></div>
@@ -1418,6 +1658,7 @@ function renderCustomers(main){
   bindCustomerRowClicks(main);
   const addBtn = document.getElementById('listAddBtn');
   if(addBtn) addBtn.addEventListener('click', ()=>route('addcustomer'));
+  document.getElementById('exportCsvBtn').addEventListener('click', ()=>exportCustomersCSV(list));
 }
 
 /* =====================================================================
@@ -1425,6 +1666,7 @@ function renderCustomers(main){
 ===================================================================== */
 function renderAddCustomerPage(main){
   const managers = usersByRole('manager');
+  const showBranch = state.branches.length>1;
   main.innerHTML = `
     <div class="view-head"><div><h1>Add New Customer</h1><div class="desc">Capture a new lead for Abu Zeid Showroom.</div></div></div>
     <div class="card" style="max-width:760px;padding:24px 26px;">
@@ -1433,7 +1675,11 @@ function renderAddCustomerPage(main){
           <div class="field span2" id="f_name"><label>Full Name <span class="req">*</span></label><input id="in_name" placeholder="e.g. Ahmed Youssef"/><div class="err">Please enter the customer's name.</div></div>
           <div class="field" id="f_phone"><label>Phone <span class="req">*</span></label><input id="in_phone" placeholder="+20 10 1234 5678"/><div class="err">Enter a valid phone number.</div></div>
           <div class="field" id="f_whatsapp"><label>WhatsApp</label><input id="in_whatsapp" placeholder="Optional, if different"/></div>
-          <div class="field" id="f_car"><label>Interested Car / Model <span class="req">*</span></label><input id="in_car" placeholder="e.g. Toyota Corolla 2026"/><div class="err">Please enter the car of interest.</div></div>
+          <div class="field" id="f_car"><label>Interested Car / Model <span class="req">*</span></label>
+            <select id="in_car_select">${state.carModels.map(m=>`<option value="${escapeHtml(m.model)}" data-price="${m.price||''}">${escapeHtml(m.model)}${m.price?' — EGP '+Number(m.price).toLocaleString():''}</option>`).join('')}<option value="__other__">Other (type manually)…</option></select>
+            <input id="in_car_other" placeholder="Type the car model" style="margin-top:8px;display:none;"/>
+            <div class="err">Please choose or enter the car of interest.</div>
+          </div>
           <div class="field" id="f_budget"><label>Budget (EGP)</label><input id="in_budget" type="number" min="0" placeholder="e.g. 900000"/></div>
           <div class="field" id="f_location"><label>Location</label><input id="in_location" placeholder="e.g. Nasr City, Cairo"/></div>
           <div class="field" id="f_source"><label>Source of Lead</label>
@@ -1442,7 +1688,10 @@ function renderAddCustomerPage(main){
           <div class="field" id="f_priority"><label>Priority</label>
             <select id="in_priority">${PRIORITIES.map(p=>`<option ${p==='Medium'?'selected':''}>${p}</option>`).join('')}</select>
           </div>
-          <div class="field" id="f_manager"><label>Assign to Manager <span class="req">*</span></label>
+          ${showBranch?`<div class="field" id="f_branch"><label>Branch</label>
+            <select id="in_branch">${state.branches.map(b=>`<option>${escapeHtml(b)}</option>`).join('')}</select>
+          </div>`:''}
+          <div class="field ${showBranch?'':'span2'}" id="f_manager"><label>Assign to Manager <span class="req">*</span></label>
             <select id="in_manager"><option value="">Select manager</option>${managers.map(m=>`<option value="${m.uid}">${escapeHtml(m.name)}</option>`).join('')}</select>
             <div class="err">Please assign this lead to a manager.</div>
           </div>
@@ -1456,11 +1705,20 @@ function renderAddCustomerPage(main){
     </div>
   `;
   document.getElementById('addCustCancel').addEventListener('click', ()=>route('customers'));
+  const carSelect = document.getElementById('in_car_select');
+  const carOther = document.getElementById('in_car_other');
+  carSelect.addEventListener('change', ()=>{
+    carOther.style.display = carSelect.value==='__other__' ? 'block':'none';
+    const price = carSelect.selectedOptions[0] && carSelect.selectedOptions[0].dataset.price;
+    const budgetInput = document.getElementById('in_budget');
+    if(price && budgetInput && !budgetInput.value) budgetInput.value = price;
+  });
+
   document.getElementById('addCustForm').addEventListener('submit', e=>{
     e.preventDefault();
     const name = document.getElementById('in_name').value.trim();
     const phone = document.getElementById('in_phone').value.trim();
-    const car = document.getElementById('in_car').value.trim();
+    const car = carSelect.value==='__other__' ? carOther.value.trim() : carSelect.value;
     const managerId = document.getElementById('in_manager').value;
     let valid = true;
     toggleInvalid('f_name', !name); if(!name) valid=false;
@@ -1468,25 +1726,42 @@ function renderAddCustomerPage(main){
     toggleInvalid('f_car', !car); if(!car) valid=false;
     toggleInvalid('f_manager', !managerId); if(!managerId) valid=false;
     if(!valid) return;
-    const btn = document.getElementById('addCustSubmit');
-    btn.classList.add('loading'); btn.disabled = true;
-    createCustomer({
+
+    const payload = {
       name, phone,
       whatsapp: document.getElementById('in_whatsapp').value.trim() || phone,
       interestedCar: car,
       budget: document.getElementById('in_budget').value || null,
       location: document.getElementById('in_location').value.trim(),
+      branch: showBranch ? document.getElementById('in_branch').value : (state.branches[0]||DEFAULT_BRANCHES[0]),
       source: document.getElementById('in_source').value,
       priority: document.getElementById('in_priority').value,
       managerId,
       notes: document.getElementById('in_notes').value.trim()
-    }).then(()=>{
-      toast('Customer added successfully.','success');
-      route('customers');
-    }).catch(err=>{
-      toast('Could not save customer: '+err.message,'error');
-    }).finally(()=>{ btn.classList.remove('loading'); btn.disabled=false; });
+    };
+
+    const dup = Object.values(state.customers).find(c=>c.phone && c.phone.replace(/\D/g,'')===phone.replace(/\D/g,''));
+    if(dup){
+      confirmDialog({
+        title:'Possible duplicate customer',
+        desc:`"${dup.name}" already has this phone number in the system (status: ${dup.status||'New'}). Do you still want to add a new lead?`,
+        confirmLabel:'Add Anyway', danger:false,
+        onConfirm: ()=>submitNewCustomer(payload)
+      });
+    } else {
+      submitNewCustomer(payload);
+    }
   });
+}
+function submitNewCustomer(payload){
+  const btn = document.getElementById('addCustSubmit');
+  btn.classList.add('loading'); btn.disabled = true;
+  createCustomer(payload).then(()=>{
+    toast('Customer added successfully.','success');
+    route('customers');
+  }).catch(err=>{
+    toast('Could not save customer: '+err.message,'error');
+  }).finally(()=>{ if(btn){ btn.classList.remove('loading'); btn.disabled=false; } });
 }
 function toggleInvalid(fieldId, isInvalid){
   const el = document.getElementById(fieldId);
@@ -1616,7 +1891,9 @@ function renderReports(main){
   const sourceCounts = SOURCES.map(s=>({s, n:all.filter(c=>c.source===s).length})).filter(x=>x.n>0);
   const conversion = Math.round((all.filter(c=>c.status==='Sold').length/total)*100);
   main.innerHTML = `
-    <div class="view-head"><div><h1>Reports</h1><div class="desc">Pipeline health at a glance.</div></div></div>
+    <div class="view-head"><div><h1>Reports</h1><div class="desc">Pipeline health at a glance.</div></div>
+      <button class="btn btn-outline" id="downloadPdfBtn">${iconSvg('chart',16)} Download PDF Report</button>
+    </div>
     <div class="stat-grid">
       ${statCard('chart', conversion+'%', 'Overall Conversion Rate','success')}
       ${statCard('users', all.length, 'Total Leads')}
@@ -1648,26 +1925,224 @@ function renderReports(main){
       </div>
     </div>
   `;
+  main.querySelector('#downloadPdfBtn').addEventListener('click', ()=>downloadPdfReport({all, total, statusCounts, sourceCounts, conversion}));
+}
+
+/* On-demand PDF export via jsPDF (already loaded from CDN). A recurring
+   monthly report emailed automatically to management would need a small
+   server-side job (e.g. a scheduled Cloud Function) since a browser-only
+   app cannot run on a timer with nobody signed in — this button covers the
+   "generate the report" half on demand, any time. */
+function downloadPdfReport({all, total, statusCounts, sourceCounts, conversion}){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const today = new Date().toLocaleDateString();
+  doc.setFont('helvetica','bold'); doc.setFontSize(17);
+  doc.text('Abu Zeid Showroom — CRM Report', 14, 18);
+  doc.setFont('helvetica','normal'); doc.setFontSize(10.5); doc.setTextColor(100);
+  doc.text('Generated '+today+' by '+state.user.name, 14, 25);
+
+  doc.setTextColor(20); doc.setFontSize(12); doc.setFont('helvetica','bold');
+  doc.text('Overview', 14, 38);
+  doc.setFont('helvetica','normal'); doc.setFontSize(10.5);
+  const soldCount = all.filter(c=>c.status==='Sold').length;
+  const lostCount = all.filter(c=>c.status==='Lost').length;
+  [['Total Leads', String(all.length)], ['Overall Conversion Rate', conversion+'%'],
+   ['Total Sold', String(soldCount)], ['Total Lost', String(lostCount)]].forEach((row,i)=>{
+    doc.text(row[0]+':', 14, 46+i*7); doc.text(row[1], 90, 46+i*7);
+  });
+
+  let y = 46 + 4*7 + 10;
+  doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.text('Leads by Status', 14, y); y+=8;
+  doc.setFont('helvetica','normal'); doc.setFontSize(10);
+  statusCounts.forEach(x=>{ doc.text(x.s+':', 16, y); doc.text(String(x.n)+'  ('+Math.round((x.n/total)*100)+'%)', 90, y); y+=6.5; });
+
+  y += 6;
+  doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.text('Leads by Source', 14, y); y+=8;
+  doc.setFont('helvetica','normal'); doc.setFontSize(10);
+  if(sourceCounts.length){
+    sourceCounts.forEach(x=>{ doc.text(x.s+':', 16, y); doc.text(String(x.n)+'  ('+Math.round((x.n/total)*100)+'%)', 90, y); y+=6.5; });
+  } else { doc.text('No source data yet.', 16, y); }
+
+  doc.save(`abuzeid-report-${new Date().toISOString().slice(0,10)}.pdf`);
+}
+
+/* =====================================================================
+   CAR INVENTORY (models + showroom prices — feeds the Add Customer dropdown)
+===================================================================== */
+function saveCarModels(list){
+  return db.ref('settings/carModels').set(list);
+}
+function renderInventory(main){
+  const role = currentRole();
+  const canEdit = role==='manager' || role==='admin';
+  main.innerHTML = `
+    <div class="view-head"><div><h1>Car Inventory</h1><div class="desc">Showroom models &amp; prices used across the CRM (Add Customer dropdown, CSV exports).</div></div></div>
+    <div class="card" style="max-width:640px;padding:20px 22px;">
+      <div class="section-title">Models (${state.carModels.length})</div>
+      <div class="manage-list" id="invList">
+        ${state.carModels.map((m,i)=>`
+          <div class="manage-list-row">
+            <span>${escapeHtml(m.model)} — <strong>EGP ${Number(m.price||0).toLocaleString()}</strong></span>
+            ${canEdit?`<button data-i="${i}" class="inv-del" title="Remove" style="font-size:18px;line-height:1;">&times;</button>`:''}
+          </div>`).join('') || `<div class="manage-list-row"><span style="color:var(--gray-500);">No models yet.</span></div>`}
+      </div>
+      ${canEdit?`
+      <div class="divider"></div>
+      <div class="form-grid">
+        <div class="field"><label>Model name</label><input id="invModel" placeholder="e.g. Toyota Corolla"/></div>
+        <div class="field"><label>Price (EGP)</label><input id="invPrice" type="number" min="0" placeholder="e.g. 950000"/></div>
+      </div>
+      <button class="btn btn-accent btn-sm" id="invAdd" style="margin-top:10px;">${iconSvg('plus',15)} Add Model</button>
+      `:''}
+    </div>
+  `;
+  if(!canEdit) return;
+  main.querySelectorAll('.inv-del').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const i = Number(btn.dataset.i);
+      const next = state.carModels.slice(); next.splice(i,1);
+      saveCarModels(next).then(()=>toast('Model removed.','success'));
+    });
+  });
+  main.querySelector('#invAdd').addEventListener('click', ()=>{
+    const model = document.getElementById('invModel').value.trim();
+    const price = Number(document.getElementById('invPrice').value)||0;
+    if(!model){ toast('Enter a model name first.','error'); return; }
+    saveCarModels([...state.carModels, {model, price}]).then(()=>toast('Model added.','success'));
+  });
 }
 
 /* =====================================================================
    SETTINGS
 ===================================================================== */
+function saveBranches(list){ return db.ref('settings/branches').set(list); }
+
 function renderSettings(main){
   const u = state.user;
+  const role = currentRole();
+  const isAdmin = role==='admin';
+  const isManagerOrAdmin = role==='manager' || role==='admin';
+
   main.innerHTML = `
-    <div class="view-head"><div><h1>Settings</h1><div class="desc">Your account details.</div></div></div>
-    <div class="card" style="max-width:520px;padding:24px 26px;">
+    <div class="view-head"><div><h1>Settings</h1><div class="desc">Your account, branches${isAdmin?', and team members':''}.</div></div></div>
+    <div class="card" style="max-width:640px;padding:24px 26px;margin-bottom:20px;">
       <div class="info-grid">
         <div class="info-item"><div class="k">Name</div><div class="v">${escapeHtml(u.name)}</div></div>
         <div class="info-item"><div class="k">Email</div><div class="v">${escapeHtml(u.email)}</div></div>
         <div class="info-item"><div class="k">Role</div><div class="v" style="text-transform:capitalize;">${escapeHtml(u.role)}</div></div>
         <div class="info-item"><div class="k">Status</div><div class="v">${u.active!==false?'Active':'Inactive'}</div></div>
       </div>
-      <div class="divider"></div>
-      <p style="font-size:12.5px;color:var(--gray-500);line-height:1.6;">User provisioning (creating new Manager, Sales, or Call Center accounts) is managed by an administrator via Firebase Authentication and the <code>users/</code> database node, to keep role assignment secure.</p>
     </div>
+
+    ${isManagerOrAdmin?`
+    <div class="card" style="max-width:640px;padding:20px 22px;margin-bottom:20px;">
+      <div class="section-title">Branches (${state.branches.length})</div>
+      <div class="desc" style="margin-bottom:6px;">Each Manager/Call Center/Sales account can be scoped to one branch (set below in Team); leaving branch empty keeps them on the whole company view.</div>
+      <div class="manage-list" id="branchList">
+        ${state.branches.map((b,i)=>`
+          <div class="manage-list-row"><span>${escapeHtml(b)}</span>
+            ${state.branches.length>1?`<button data-i="${i}" class="branch-del" title="Remove" style="font-size:18px;line-height:1;">&times;</button>`:''}
+          </div>`).join('')}
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <input id="newBranch" placeholder="e.g. Alexandria - North Coast Rd" style="flex:1;padding:9px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13.5px;"/>
+        <button class="btn btn-accent btn-sm" id="addBranchBtn">${iconSvg('plus',15)} Add</button>
+      </div>
+    </div>`:''}
+
+    ${isAdmin?`
+    <div class="card" style="max-width:640px;padding:20px 22px;">
+      <div class="section-title">Team Members</div>
+      <div class="desc" style="margin-bottom:6px;">Creating a user here uses a secondary Firebase session, so you stay signed in.</div>
+      <div class="manage-list" id="teamList">
+        ${Object.entries(state.users).map(([uid,tu])=>`
+          <div class="manage-list-row">
+            <span>${escapeHtml(tu.name)} <span style="color:var(--gray-500);">· ${escapeHtml(tu.email)} · ${escapeHtml(tu.role)}${tu.branch?' · '+escapeHtml(tu.branch):''}</span></span>
+            <button data-uid="${uid}" class="team-toggle" title="${tu.active!==false?'Deactivate':'Activate'}" style="font-size:11.5px;font-weight:700;color:${tu.active!==false?'var(--danger)':'var(--success)'};">${tu.active!==false?'Deactivate':'Activate'}</button>
+          </div>`).join('')}
+      </div>
+      <button class="btn btn-accent btn-sm" id="addTeamBtn" style="margin-top:12px;">${iconSvg('plus',15)} Add Team Member</button>
+    </div>`:''}
   `;
+
+  if(isManagerOrAdmin){
+    main.querySelectorAll('.branch-del').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const next = state.branches.slice(); next.splice(Number(btn.dataset.i),1);
+        saveBranches(next).then(()=>toast('Branch removed.','success'));
+      });
+    });
+    main.querySelector('#addBranchBtn').addEventListener('click', ()=>{
+      const v = document.getElementById('newBranch').value.trim();
+      if(!v){ toast('Enter a branch name first.','error'); return; }
+      if(state.branches.includes(v)){ toast('That branch already exists.','error'); return; }
+      saveBranches([...state.branches, v]).then(()=>toast('Branch added.','success'));
+    });
+  }
+
+  if(isAdmin){
+    main.querySelectorAll('.team-toggle').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const uid = btn.dataset.uid;
+        const tu = state.users[uid];
+        db.ref('users/'+uid+'/active').set(tu.active===false).then(()=>toast('Team member updated.','success'));
+      });
+    });
+    main.querySelector('#addTeamBtn').addEventListener('click', openAddTeamMemberModal);
+  }
+}
+
+function openAddTeamMemberModal(){
+  const bd = openModal(`
+    <div class="modal-head"><div><h3>Add Team Member</h3></div><button class="modal-close" data-close-modal>&times;</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field span2" id="f_tmName"><label>Full Name <span class="req">*</span></label><input id="tmName"/><div class="err">Enter a name.</div></div>
+        <div class="field span2" id="f_tmEmail"><label>Email <span class="req">*</span></label><input id="tmEmail" type="email"/><div class="err">Enter a valid email.</div></div>
+        <div class="field span2" id="f_tmPass"><label>Temporary Password <span class="req">*</span></label><input id="tmPass" type="text" placeholder="At least 6 characters"/><div class="err">Password must be at least 6 characters.</div></div>
+        <div class="field"><label>Role <span class="req">*</span></label>
+          <select id="tmRole"><option value="callcenter">Call Center</option><option value="sales">Sales</option><option value="manager">Manager</option><option value="admin">Admin</option></select>
+        </div>
+        <div class="field"><label>Branch</label>
+          <select id="tmBranch"><option value="">All branches</option>${state.branches.map(b=>`<option>${escapeHtml(b)}</option>`).join('')}</select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-outline" data-close-modal>Cancel</button><button class="btn btn-accent" id="confirmAddTeam"><span class="spinner"></span><span class="btn-label">Create Account</span></button></div>
+  `);
+  bd.querySelector('#confirmAddTeam').addEventListener('click', function(){
+    const name = document.getElementById('tmName').value.trim();
+    const email = document.getElementById('tmEmail').value.trim();
+    const pass = document.getElementById('tmPass').value;
+    const role = document.getElementById('tmRole').value;
+    const branch = document.getElementById('tmBranch').value;
+    let valid = true;
+    toggleInvalid('f_tmName', !name); if(!name) valid=false;
+    toggleInvalid('f_tmEmail', !/^\S+@\S+\.\S+$/.test(email)); if(!/^\S+@\S+\.\S+$/.test(email)) valid=false;
+    toggleInvalid('f_tmPass', pass.length<6); if(pass.length<6) valid=false;
+    if(!valid) return;
+    const btn = this; btn.classList.add('loading'); btn.disabled = true;
+    createTeamMember({name, email, pass, role, branch}).then(()=>{
+      toast('Team member created.','success');
+      closeModal(bd);
+    }).catch(err=>{
+      toast('Could not create account: '+(err.message||err), 'error');
+    }).finally(()=>{ btn.classList.remove('loading'); btn.disabled=false; });
+  });
+}
+
+/* Creates a new Firebase Auth user + users/ profile WITHOUT signing the
+   current admin out, by running the sign-up on a throwaway secondary
+   Firebase App instance pointed at the same project. */
+function createTeamMember({name, email, pass, role, branch}){
+  const secondaryApp = firebase.initializeApp(firebaseConfig, 'secondary-'+Date.now());
+  const secondaryAuth = secondaryApp.auth();
+  return secondaryAuth.createUserWithEmailAndPassword(email, pass)
+    .then(cred => db.ref('users/'+cred.user.uid).set({
+      name, email, role, branch: branch || null, active: true, createdAt: SERVER_TS
+    }).then(()=>secondaryAuth.signOut()))
+    .finally(()=>secondaryApp.delete());
 }
 
 /* =====================================================================
@@ -1695,6 +2170,7 @@ function openCustomerProfile(customerId){
           <div class="name">${escapeHtml(c.name)}</div>
           <div class="meta">${escapeHtml(c.phone||'')} · ${escapeHtml(c.interestedCar||'—')}</div>
         </div>
+        ${quickActionsHtml(c)}
       </div>
       <button class="modal-close" data-close-modal aria-label="Close">&times;</button>
     </div>
@@ -1781,13 +2257,17 @@ function renderProfileTab(bd, tab, customerId){
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <button class="btn btn-outline btn-sm" id="btnLogCall">${iconSvg('headset',15)} Log Call</button>
         <button class="btn btn-outline btn-sm" id="btnFollowUp">${iconSvg('clock',15)} Set Follow-up</button>
+        <button class="btn btn-outline btn-sm" id="btnVisit">${iconSvg('car',15)} Schedule Visit / Test Drive</button>
         <button class="btn btn-accent btn-sm" id="btnFeedback">Add Feedback</button>
       </div>` : ''}
+      ${c.visitAt ? `<div class="divider"></div><div class="info-item"><div class="k">Scheduled Visit / Test Drive</div><div class="v">${fmtDateTime(c.visitAt)}${c.visitLocation?' · '+escapeHtml(c.visitLocation):''}</div></div>` : ''}
     `;
     const logBtn = body.querySelector('#btnLogCall');
     if(logBtn) logBtn.addEventListener('click', ()=>openLogCallModal(customerId));
     const fuBtn = body.querySelector('#btnFollowUp');
     if(fuBtn) fuBtn.addEventListener('click', ()=>openFollowUpModal(customerId));
+    const visitBtn = body.querySelector('#btnVisit');
+    if(visitBtn) visitBtn.addEventListener('click', ()=>openVisitModal(customerId));
     const fbBtn = body.querySelector('#btnFeedback');
     if(fbBtn) fbBtn.addEventListener('click', ()=>openFeedbackModal(customerId));
   }
@@ -1913,6 +2393,42 @@ function openFollowUpModal(customerId){
     const v = bd.querySelector('#fuDate').value;
     if(!v){ toggleInvalid('f_fu', true); return; }
     setFollowUp(customerId, v).then(()=>{ toast('Follow-up scheduled.','success'); closeModal(bd); });
+  });
+}
+function openVisitModal(customerId){
+  const c = state.customers[customerId];
+  const bd = openModal(`
+    <div class="modal-head"><div><h3>Schedule Visit / Test Drive</h3><div class="sub">${escapeHtml(c.name)}</div></div><button class="modal-close" data-close-modal>&times;</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field" id="f_visitDate"><label>Date <span class="req">*</span></label><input type="date" id="visitDate" min="${new Date().toISOString().slice(0,10)}"/><div class="err">Please choose a date.</div></div>
+        <div class="field" id="f_visitTime"><label>Time <span class="req">*</span></label><input type="time" id="visitTime" value="11:00"/><div class="err">Please choose a time.</div></div>
+        <div class="field span2"><label>Location</label><input id="visitLocation" placeholder="e.g. Cairo - Main Showroom" value="${escapeHtml(c.branch||'')}"/></div>
+      </div>
+      <p style="font-size:12px;color:var(--gray-500);margin-top:10px;">Saving will also mark the lead's status as "Visit Scheduled" and let you add the appointment to your calendar.</p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" data-close-modal>Cancel</button>
+      <button class="btn btn-accent" id="confirmVisit">Save &amp; Add to Calendar</button>
+    </div>
+  `);
+  bd.querySelector('#confirmVisit').addEventListener('click', ()=>{
+    const d = bd.querySelector('#visitDate').value;
+    const t = bd.querySelector('#visitTime').value;
+    const location = bd.querySelector('#visitLocation').value.trim();
+    let valid = true;
+    toggleInvalid('f_visitDate', !d); if(!d) valid=false;
+    toggleInvalid('f_visitTime', !t); if(!t) valid=false;
+    if(!valid) return;
+    const start = new Date(`${d}T${t}`);
+    const end = new Date(start.getTime()+60*60000);
+    scheduleVisit(customerId, start.getTime(), location).then(()=>{
+      toast('Visit scheduled.','success');
+      const eventInfo = {title:`Showroom visit — ${c.name}`, description:`Test drive / showroom visit for ${c.name} (${c.interestedCar||'vehicle'}). Phone: ${c.phone||''}`, start, end};
+      downloadICS(`visit-${c.name.replace(/\s+/g,'-')}.ics`, icsContent(eventInfo));
+      window.open(googleCalendarLink(eventInfo), '_blank', 'noopener');
+      closeModal(bd);
+    });
   });
 }
 function openFeedbackModal(customerId){
