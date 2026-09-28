@@ -1052,6 +1052,11 @@ const AR = {
  "Branch already exists.": "الفرع موجود بالفعل.",
  "At least one branch is required.": "يجب وجود فرع واحد على الأقل.",
  "Remove": "حذف",
+ "Creates the login account and its role record together. The new member can sign in right away.": "ينشئ حساب الدخول وسجل الصلاحية معًا. يقدر العضو الجديد يسجل الدخول فورًا.",
+ "This email is already registered.": "هذا البريد الإلكتروني مسجل بالفعل.",
+ "Password is too weak (min. 6 characters).": "كلمة المرور ضعيفة (6 أحرف على الأقل).",
+ "Permission denied by database rules.": "تم الرفض بواسطة قواعد قاعدة البيانات.",
+ "Only admins can create accounts.": "إنشاء الحسابات متاح للأدمن فقط.",
  "Overview": "نظرة عامة",
  "Sales Info": "بيانات المبيعات",
  "Timeline": "السجل الزمني",
@@ -1166,6 +1171,7 @@ const AR_PATTERNS = [
   [/^Could not schedule: (.+)$/, e=>`تعذر تحديد الموعد: ${e}`],
   [/^Save failed: (.+)$/, e=>`فشل الحفظ: ${e}`],
   [/^Account created for (.+)$/, e=>`تم إنشاء حساب لـ ${e}`],
+  [/^Could not create user: (.+)$/, e=>`تعذر إنشاء المستخدم: ${trStr(e)}`],
   [/^Could not create user: (.+?) \(is the Cloud Function deployed.*\)$/, e=>`تعذر إنشاء المستخدم: ${e} (هل تم نشر الـ Cloud Function وضبط CREATE_USER_ENDPOINT؟)`]
 ];
 
@@ -1183,6 +1189,7 @@ function trStr(s){
 const I18N_ATTRS = ['placeholder','title','aria-label','data-label'];
 const I18N_SKIP = new Set(['SCRIPT','STYLE','TEXTAREA']);
 function trTextNode(n){
+  if(!n.parentNode) return;               // node was already removed by a re-render
   if(n.__tr!==undefined && n.nodeValue===n.__tr) return;
   const src = n.nodeValue, out = trStr(src);
   if(out!==src){ n.__orig = src; n.__tr = out; n.nodeValue = out; }
@@ -1198,13 +1205,14 @@ function trElAttrs(el){
 }
 function trTree(root){
   if(LANG!=='ar') return;
-  if(root.nodeType===3){ if(!I18N_SKIP.has(root.parentNode.nodeName)) trTextNode(root); return; }
+  if(!root.isConnected) return;           // detached before the observer ran
+  if(root.nodeType===3){ if(root.parentNode && !I18N_SKIP.has(root.parentNode.nodeName)) trTextNode(root); return; }
   if(root.nodeType!==1 || I18N_SKIP.has(root.nodeName)) return;
   trElAttrs(root);
   const w = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT|NodeFilter.SHOW_TEXT);
   let n;
   while((n = w.nextNode())){
-    if(n.nodeType===3){ if(!I18N_SKIP.has(n.parentNode.nodeName)) trTextNode(n); }
+    if(n.nodeType===3){ if(n.parentNode && !I18N_SKIP.has(n.parentNode.nodeName)) trTextNode(n); }
     else if(!I18N_SKIP.has(n.nodeName)) trElAttrs(n);
   }
 }
@@ -1225,7 +1233,7 @@ function i18nRestoreAll(){
 }
 new MutationObserver(muts=>{
   if(LANG!=='ar') return;
-  muts.forEach(m=>m.addedNodes.forEach(trTree));
+  muts.forEach(m=>m.addedNodes.forEach(node=>{ try{ trTree(node); }catch(e){ console.warn('i18n skip', e); } }));
 }).observe(document.body,{childList:true,subtree:true});
 
 function updateLangButtons(){
@@ -1884,7 +1892,7 @@ function renderManagerDashboard(main){
       </div>
     </div>
     <div class="section-title">Latest Leads</div>
-    ${customersTableHtml(all.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,6), {compact:true})}
+    ${customersTableHtml(Object.entries(state.customers).map(([id,c])=>({id,...c})).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,6), {compact:true})}
   `;
   bindCustomerRowClicks(main);
 }
@@ -2374,6 +2382,41 @@ function generatePdfReport(){
 /* =====================================================================
    SETTINGS
 ===================================================================== */
+/* ---- Team member creation --------------------------------------------
+   Default (no backend needed): a *secondary* Firebase app instance creates the
+   Auth account, so the Admin stays signed in on the main app. The users/{uid}
+   record is then written with the Admin's own session (allowed by the rules).
+   If you later deploy the Cloud Function and set CREATE_USER_ENDPOINT, that
+   path is used automatically instead.                                     */
+function createTeamUserInApp({name,email,password,role}){
+  if(currentRole()!=='admin') return Promise.reject(new Error('Only admins can create accounts.'));
+  let secondary;
+  try{ secondary = firebase.app('Secondary'); }catch(e){ secondary = firebase.initializeApp(firebaseConfig,'Secondary'); }
+  const sAuth = secondary.auth();
+  return sAuth.createUserWithEmailAndPassword(email, password).then(cred=>{
+    const uid = cred.user.uid;
+    return sAuth.signOut().then(()=>db.ref('users/'+uid).set({name, email, role, active:true, createdAt:SERVER_TS}));
+  });
+}
+function createTeamUserViaFunction(payload){
+  return auth.currentUser.getIdToken().then(token=>fetch(CREATE_USER_ENDPOINT,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+    body: JSON.stringify(payload)
+  })).then(r=>r.json().then(j=>{ if(!r.ok) throw new Error(j.error||'Request failed'); return j; }));
+}
+function friendlyCreateError(err){
+  switch(err && err.code){
+    case 'auth/email-already-in-use': return 'This email is already registered.';
+    case 'auth/weak-password': return 'Password is too weak (min. 6 characters).';
+    case 'auth/invalid-email': return 'That email address looks invalid.';
+    case 'auth/network-request-failed': return 'Network error — check your connection.';
+    case 'PERMISSION_DENIED': return 'Permission denied by database rules.';
+  }
+  const m = (err && err.message) || 'Unknown error';
+  return /permission_denied/i.test(m) ? 'Permission denied by database rules.' : m;
+}
+
 function renderSettings(main){
   const u = state.user;
   const role = u.role;
@@ -2409,7 +2452,7 @@ function renderSettings(main){
     ${isAdmin ? `
     <div class="card" style="padding:22px 24px;">
       <div class="section-title">Create Team Member</div>
-      <p style="font-size:12.5px;color:var(--gray-500);margin-bottom:14px;line-height:1.55;">Creates the Firebase Auth account and the users/ record together via the secure Cloud Function (see functions-create-user.js).</p>
+      <p style="font-size:12.5px;color:var(--gray-500);margin-bottom:14px;line-height:1.55;">Creates the login account and its role record together. The new member can sign in right away.</p>
       <form id="newUserForm" novalidate>
         <div class="field" id="nu_name"><label>Full name <span class="req">*</span></label><input id="nuName"/><div class="err">Required.</div></div>
         <div class="field" id="nu_email"><label>Email <span class="req">*</span></label><input id="nuEmail" type="email"/><div class="err">Enter a valid email.</div></div>
@@ -2454,13 +2497,10 @@ function renderSettings(main){
     toggleInvalid('nu_pass', password.length<6);
     if(!name || !/^\S+@\S+\.\S+$/.test(email) || password.length<6) return;
     const btn = main.querySelector('#nuBtn'); btn.classList.add('loading'); btn.disabled=true;
-    auth.currentUser.getIdToken().then(token=>fetch(CREATE_USER_ENDPOINT,{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-      body: JSON.stringify({name,email,password,role:roleV})
-    })).then(r=>r.json().then(j=>{ if(!r.ok) throw new Error(j.error||'Request failed'); return j; }))
+    const useFunction = !/YOUR_REGION|YOUR_PROJECT/.test(CREATE_USER_ENDPOINT);
+    (useFunction ? createTeamUserViaFunction({name,email,password,role:roleV}) : createTeamUserInApp({name,email,password,role:roleV}))
     .then(()=>{ toast('Account created for '+email,'success'); form.reset(); })
-    .catch(err=>toast('Could not create user: '+err.message+' (is the Cloud Function deployed and CREATE_USER_ENDPOINT set?)','error'))
+    .catch(err=>toast('Could not create user: '+friendlyCreateError(err),'error'))
     .finally(()=>{ btn.classList.remove('loading'); btn.disabled=false; });
   });
 }
