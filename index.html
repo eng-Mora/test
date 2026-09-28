@@ -13,7 +13,8 @@
 =================================================================== -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>/* set language + direction before first paint */(function(){try{var l=localStorage.getItem("az_lang")||((navigator.language||"").toLowerCase().indexOf("ar")===0?"ar":"en");document.documentElement.lang=l;document.documentElement.dir=l==="ar"?"rtl":"ltr";}catch(e){}})();</script>
 
 <!-- ===================================================================
      FIREBASE SDK (compat build, CDN, no bundler required)
@@ -525,6 +526,43 @@ tbody tr:last-child td{border-bottom:none;}
 .manage-add-row input{flex:1;}
 
 /* =====================================================================
+   ARABIC / RTL
+===================================================================== */
+html[lang="ar"]{--font-head:'Cairo','Space Grotesk',sans-serif;--font-body:'Cairo','Inter',sans-serif;}
+.lang-toggle,.lang-btn{
+  display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--gray-200);background:#fff;color:var(--navy-900);
+  border-radius:10px;font-size:13px;font-weight:600;padding:0 12px;height:38px;cursor:pointer;
+}
+.lang-toggle:hover,.lang-btn:hover{background:var(--gray-50);}
+.lang-toggle{position:absolute;top:16px;inset-inline-end:16px;height:34px;}
+.login-card{position:relative;}
+html[dir="rtl"] .sidebar{left:auto;right:0;}
+html[dir="rtl"] .main-col{margin-left:0;margin-right:var(--sidebar-w);}
+html[dir="rtl"] .topbar-search{margin-left:0;margin-right:12px;}
+html[dir="rtl"] .topbar-search svg{left:auto;right:11px;}
+html[dir="rtl"] .topbar-search input{padding:9px 36px 9px 14px;}
+html[dir="rtl"] .topbar-right{margin-left:0;margin-right:auto;}
+html[dir="rtl"] .icon-btn .dot{right:auto;left:-4px;}
+html[dir="rtl"] .nav-item .badge{margin-left:0;margin-right:auto;}
+html[dir="rtl"] .field label .req{margin-left:0;margin-right:2px;}
+html[dir="rtl"] thead th{text-align:right;}
+html[dir="rtl"] .timeline{padding-left:0;padding-right:26px;}
+html[dir="rtl"] .timeline::before{left:auto;right:8px;}
+html[dir="rtl"] .tl-dot{left:auto;right:-26px;}
+html[dir="rtl"] #toastHost{right:auto;left:20px;}
+html[dir="rtl"] .chat-list{padding-right:0;padding-left:4px;}
+html[dir="rtl"] .modal-head .sub,html[dir="rtl"] .info-item{text-align:right;}
+@media (max-width:980px){
+  html[dir="rtl"] .sidebar{transform:translateX(100%);}
+  html[dir="rtl"] .sidebar.open{transform:translateX(0);}
+  html[dir="rtl"] .main-col{margin-right:0;}
+}
+@media (max-width:760px){
+  html[dir="rtl"] tbody td{text-align:left;}
+  html[dir="rtl"] tbody td::before{text-align:right;}
+}
+
+/* =====================================================================
    RESPONSIVE
 ===================================================================== */
 @media (max-width:980px){
@@ -557,6 +595,7 @@ tbody tr:last-child td{border-bottom:none;}
 ===================================================================== -->
 <div id="loginScreen">
   <div class="login-card">
+    <button type="button" class="lang-toggle" data-lang-toggle aria-label="Language"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg><span class="lbl">العربية</span></button>
     <div class="login-brand">
       <div class="mark">AZ</div>
       <div>
@@ -619,6 +658,7 @@ tbody tr:last-child td{border-bottom:none;}
         <input type="text" id="globalSearch" placeholder="Search name, phone, or car model…" />
       </div>
       <div class="topbar-right">
+        <button type="button" class="lang-btn" data-lang-toggle aria-label="Language"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg><span class="lbl">العربية</span></button>
         <button class="icon-btn" id="notifBtn" aria-label="Notifications">
           <svg width="17" height="17"><use href="#i-bell"/></svg>
           <span class="dot hidden" id="notifDot">0</span>
@@ -779,6 +819,435 @@ const state = {
 };
 
 /* =====================================================================
+   INTERNATIONALISATION (English / Arabic + RTL)
+   The UI is authored in English. When Arabic is active, a DOM translator
+   maps text nodes + placeholders/titles through the dictionary below
+   (exact strings first, then patterns for dynamic sentences). Stored data
+   values (statuses, roles) stay in English in the database.
+===================================================================== */
+let LANG = document.documentElement.lang === 'ar' ? 'ar' : 'en';
+const LOC = () => LANG==='ar' ? 'ar-EG-u-nu-latn' : undefined;
+
+const AR = {
+ "Abu Zeid": "أبو زيد",
+ "SHOWROOM CRM": "نظام إدارة المعرض",
+ "Showroom CRM": "نظام إدارة المعرض",
+ "Sign in": "تسجيل الدخول",
+ "Enter your workspace credentials to continue.": "أدخل بيانات حسابك للمتابعة.",
+ "Email": "البريد الإلكتروني",
+ "Password": "كلمة المرور",
+ "Please enter a valid email address.": "من فضلك أدخل بريدًا إلكترونيًا صحيحًا.",
+ "Password is required.": "كلمة المرور مطلوبة.",
+ "Access is provisioned by your administrator.": "يتم منح الصلاحيات بواسطة مدير النظام.",
+ "Roles: Manager · Call Center · Sales": "الأدوار: مدير · كول سنتر · مبيعات",
+ "That email address looks invalid.": "البريد الإلكتروني غير صحيح.",
+ "This account has been disabled.": "تم تعطيل هذا الحساب.",
+ "Incorrect email or password.": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+ "Too many attempts. Please wait and try again.": "محاولات كثيرة. من فضلك انتظر ثم حاول مرة أخرى.",
+ "Network error — check your connection.": "خطأ في الاتصال — تأكد من الإنترنت.",
+ "Sign-in failed. Please try again.": "فشل تسجيل الدخول. حاول مرة أخرى.",
+ "Sign out?": "تسجيل الخروج؟",
+ "You will need to sign in again to access the CRM.": "ستحتاج لتسجيل الدخول مرة أخرى للوصول إلى النظام.",
+ "Sign out": "تسجيل الخروج",
+ "Cancel": "إلغاء",
+ "Confirm": "تأكيد",
+ "Save": "حفظ",
+ "Send": "إرسال",
+ "Add": "إضافة",
+ "Open menu": "فتح القائمة",
+ "Notifications": "الإشعارات",
+ "Dismiss": "إغلاق",
+ "Close": "إغلاق",
+ "Search name, phone, or car model…": "ابحث بالاسم أو الهاتف أو موديل السيارة…",
+ "Your account is inactive. Contact your administrator.": "حسابك غير مفعّل. تواصل مع مدير النظام.",
+ "Could not load your profile. Check database connectivity.": "تعذر تحميل بياناتك. تأكد من الاتصال بقاعدة البيانات.",
+ "Connection lost — reconnecting…": "انقطع الاتصال — جارٍ إعادة الاتصال…",
+ "admin": "أدمن",
+ "manager": "مدير",
+ "sales": "مبيعات",
+ "callcenter": "كول سنتر",
+ "Dashboard": "لوحة التحكم",
+ "Customers": "العملاء",
+ "Sales Team": "فريق المبيعات",
+ "Call Center": "الكول سنتر",
+ "Follow-ups": "المتابعات",
+ "Reports": "التقارير",
+ "Settings": "الإعدادات",
+ "My Leads": "عملائي",
+ "Add Customer": "إضافة عميل",
+ "My Customers": "عملائي",
+ "New": "جديد",
+ "Contacted": "تم التواصل",
+ "No Answer": "لا يوجد رد",
+ "Interested": "مهتم",
+ "Not Interested": "غير مهتم",
+ "Follow Up": "متابعة",
+ "Visit Scheduled": "زيارة محددة",
+ "Visited Showroom": "زار المعرض",
+ "Negotiation": "تفاوض",
+ "Sold": "تم البيع",
+ "Lost": "خسارة",
+ "High": "عالية",
+ "Medium": "متوسطة",
+ "Low": "منخفضة",
+ "Walk-in": "زيارة مباشرة",
+ "Phone Inquiry": "استفسار هاتفي",
+ "Website": "الموقع الإلكتروني",
+ "Facebook": "فيسبوك",
+ "Instagram": "إنستجرام",
+ "WhatsApp": "واتساب",
+ "Referral": "ترشيح",
+ "Showroom Event": "فعالية المعرض",
+ "Other": "أخرى",
+ "Manager Overview": "نظرة عامة للمدير",
+ "Full pipeline visibility across Abu Zeid Showroom.": "رؤية كاملة لكل مراحل العملاء في معرض أبو زيد.",
+ "Total Leads": "إجمالي العملاء",
+ "New Leads": "عملاء جدد",
+ "Assigned to Sales": "تم التعيين لمندوب مبيعات",
+ "Waiting Follow-up": "بانتظار المتابعة",
+ "Interested Customers": "عملاء مهتمون",
+ "Visits Scheduled": "زيارات محددة",
+ "Sold Cars": "سيارات تم بيعها",
+ "Lost Leads": "عملاء خسرناهم",
+ "Sales Performance": "أداء المبيعات",
+ "Sales Rep": "مندوب المبيعات",
+ "Assigned": "المعيّنون",
+ "Visits": "الزيارات",
+ "No sales reps yet": "لا يوجد مندوبو مبيعات بعد",
+ "Add sales team accounts to see performance here.": "أضف حسابات فريق المبيعات لعرض الأداء هنا.",
+ "Latest Leads": "أحدث العملاء",
+ "Call Center Dashboard": "لوحة الكول سنتر",
+ "Track the leads you've captured for Abu Zeid.": "تابع العملاء الذين سجّلتهم لمعرض أبو زيد.",
+ "Add New Customer": "إضافة عميل جديد",
+ "Total Leads Added": "إجمالي العملاء المضافين",
+ "Leads Today": "عملاء اليوم",
+ "Leads This Week": "عملاء هذا الأسبوع",
+ "Waiting for Assignment": "بانتظار التعيين",
+ "Leads Assigned": "عملاء تم تعيينهم",
+ "My Recent Leads": "أحدث عملائي",
+ "Status Breakdown": "توزيع الحالات",
+ "No leads yet": "لا يوجد عملاء بعد",
+ "Add your first customer to see the breakdown.": "أضف أول عميل لعرض التوزيع.",
+ "My Dashboard": "لوحتي",
+ "Your assigned customers and next actions.": "العملاء المعيّنون لك والإجراءات القادمة.",
+ "Customers to Call": "عملاء للاتصال بهم",
+ "Follow-ups Today": "متابعات اليوم",
+ "Manager Feedback": "ملاحظات المدير",
+ "No messages yet": "لا توجد رسائل بعد",
+ "Manager notes and messages will appear here.": "ستظهر ملاحظات ورسائل المدير هنا.",
+ "View follow-ups": "عرض المتابعات",
+ "Export CSV": "تصدير CSV",
+ "All statuses": "كل الحالات",
+ "All priorities": "كل الأولويات",
+ "All sales reps": "كل المندوبين",
+ "All managers": "كل المديرين",
+ "All call center": "كل الكول سنتر",
+ "All sources": "كل المصادر",
+ "All cars": "كل السيارات",
+ "All branches": "كل الفروع",
+ "Clear filters": "مسح الفلاتر",
+ "Customer": "العميل",
+ "Car / Budget": "السيارة / الميزانية",
+ "Status": "الحالة",
+ "Priority": "الأولوية",
+ "Score": "التقييم",
+ "Sales": "المبيعات",
+ "Source": "المصدر",
+ "Created": "تاريخ الإضافة",
+ "Unassigned": "غير معيّن",
+ "Interest": "الاهتمام",
+ "No customers found": "لا يوجد عملاء",
+ "Try adjusting your filters, or add a new lead to get started.": "جرّب تعديل الفلاتر أو أضف عميلاً جديدًا للبدء.",
+ "Rep": "المندوب",
+ "Agent": "الموظف",
+ "Leads": "العملاء",
+ "Waiting": "بانتظار",
+ "Capture a new lead for Abu Zeid Showroom.": "سجّل عميلاً محتملاً جديدًا لمعرض أبو زيد.",
+ "Full Name": "الاسم الكامل",
+ "Phone": "الهاتف",
+ "Interested Car / Model": "السيارة / الموديل المهتم به",
+ "Budget (EGP)": "الميزانية (جنيه)",
+ "Location": "المنطقة",
+ "Source of Lead": "مصدر العميل",
+ "Branch": "الفرع",
+ "Assign to Manager": "تعيين لمدير",
+ "Notes": "ملاحظات",
+ "Please enter the customer's name.": "من فضلك أدخل اسم العميل.",
+ "Enter a valid phone number.": "أدخل رقم هاتف صحيح.",
+ "Please choose or enter the car of interest.": "من فضلك اختر السيارة أو اكتبها.",
+ "Please assign this lead to a manager.": "من فضلك اختر مديرًا لهذا العميل.",
+ "e.g. Ahmed Youssef": "مثال: أحمد يوسف",
+ "+20 10 1234 5678": "+20 10 1234 5678",
+ "Optional, if different": "اختياري، إن كان مختلفًا",
+ "Type the car model": "اكتب موديل السيارة",
+ "e.g. 900000": "مثال: 900000",
+ "e.g. Nasr City, Cairo": "مثال: مدينة نصر، القاهرة",
+ "Any extra context about the customer's needs…": "أي تفاصيل إضافية عن احتياجات العميل…",
+ "Select source": "اختر المصدر",
+ "Select manager": "اختر المدير",
+ "Other (type manually)…": "أخرى (اكتب يدويًا)…",
+ "Save Customer": "حفظ العميل",
+ "Possible duplicate customer": "احتمال تكرار عميل",
+ "Add Anyway": "إضافة على أي حال",
+ "Customer added successfully.": "تمت إضافة العميل بنجاح.",
+ "Scheduled customer check-ins.": "مواعيد متابعة العملاء المجدولة.",
+ "Performance across every sales representative.": "الأداء لكل مندوب مبيعات.",
+ "No sales reps found": "لا يوجد مندوبو مبيعات",
+ "Create sales accounts in Firebase Authentication + the users/ node.": "أنشئ حسابات المبيعات في Firebase Authentication + عقدة users/.",
+ "Lead generation activity by agent.": "نشاط تسجيل العملاء حسب الموظف.",
+ "Leads Added": "العملاء المضافون",
+ "No call center agents found": "لا يوجد موظفو كول سنتر",
+ "Create call center accounts in Firebase Authentication + the users/ node.": "أنشئ حسابات الكول سنتر في Firebase Authentication + عقدة users/.",
+ "Mark all as read": "تحديد الكل كمقروء",
+ "You're all caught up": "لا توجد إشعارات جديدة",
+ "New notifications will show up here.": "ستظهر الإشعارات الجديدة هنا.",
+ "New lead assigned": "تم تعيين عميل جديد",
+ "New customer assigned": "تم تعيين عميل جديد لك",
+ "You were assigned a new customer.": "تم تعيين عميل جديد لك.",
+ "Status updated": "تم تحديث الحالة",
+ "New sales feedback": "ملاحظات جديدة من المبيعات",
+ "New note from Manager": "ملاحظة جديدة من المدير",
+ "New message from Manager": "رسالة جديدة من المدير",
+ "New message from Sales": "رسالة جديدة من المبيعات",
+ "Lead needs attention": "عميل يحتاج اهتمامًا",
+ "just now": "الآن",
+ "Pipeline health at a glance.": "نظرة سريعة على أداء المبيعات.",
+ "Download PDF Report": "تحميل تقرير PDF",
+ "Overall Conversion Rate": "معدل التحويل الكلي",
+ "Total Sold": "إجمالي المبيعات",
+ "Total Lost": "إجمالي الخسائر",
+ "Leads by Status": "العملاء حسب الحالة",
+ "Leads by Source": "العملاء حسب المصدر",
+ "No source data yet": "لا توجد بيانات للمصادر بعد",
+ "PDF library failed to load. Check your connection.": "تعذر تحميل مكتبة PDF. تأكد من الاتصال.",
+ "PDF report downloaded.": "تم تحميل تقرير PDF.",
+ "Account, inventory, branches and team.": "الحساب والمخزون والفروع والفريق.",
+ "My Account": "حسابي",
+ "Name": "الاسم",
+ "Role": "الدور",
+ "Active": "مفعّل",
+ "Inactive": "غير مفعّل",
+ "Car Inventory (Models)": "مخزون السيارات (الموديلات)",
+ "These models appear as a dropdown when Call Center adds a customer.": "تظهر هذه الموديلات كقائمة عند إضافة الكول سنتر لعميل.",
+ "Add model, e.g. Toyota Fortuner": "أضف موديل، مثال: تويوتا فورتشنر",
+ "Branches": "الفروع",
+ "Add branch, e.g. Alexandria": "أضف فرعًا، مثال: الإسكندرية",
+ "Create Team Member": "إنشاء عضو فريق",
+ "Creates the Firebase Auth account and the users/ record together via the secure Cloud Function (see functions-create-user.js).": "ينشئ حساب Firebase وسجل المستخدم معًا عبر Cloud Function آمنة (راجع functions-create-user.js).",
+ "Full name": "الاسم الكامل",
+ "Temporary password": "كلمة مرور مؤقتة",
+ "min. 6 characters": "6 أحرف على الأقل",
+ "Required.": "مطلوب.",
+ "Enter a valid email.": "أدخل بريدًا صحيحًا.",
+ "At least 6 characters.": "6 أحرف على الأقل.",
+ "Manager": "مدير",
+ "Language": "اللغة",
+ "Admin": "أدمن",
+ "Create Account": "إنشاء الحساب",
+ "Model removed.": "تم حذف الموديل.",
+ "Model added.": "تمت إضافة الموديل.",
+ "Model already exists.": "الموديل موجود بالفعل.",
+ "Branch removed.": "تم حذف الفرع.",
+ "Branch added.": "تمت إضافة الفرع.",
+ "Branch already exists.": "الفرع موجود بالفعل.",
+ "At least one branch is required.": "يجب وجود فرع واحد على الأقل.",
+ "Remove": "حذف",
+ "Overview": "نظرة عامة",
+ "Sales Info": "بيانات المبيعات",
+ "Timeline": "السجل الزمني",
+ "Communication": "التواصل",
+ "Interested Car": "السيارة المهتم بها",
+ "Budget": "الميزانية",
+ "Lead Score": "تقييم العميل",
+ "Created By": "أضافه",
+ "Created Date": "تاريخ الإضافة",
+ "Assigned Manager": "المدير المسؤول",
+ "Assigned Sales": "مندوب المبيعات",
+ "Current Status": "الحالة الحالية",
+ "Reassign": "إعادة تعيين",
+ "Assign": "تعيين",
+ "Change": "تغيير",
+ "Customer removed": "تم حذف العميل",
+ "Customer not found.": "العميل غير موجود.",
+ "Last Contact": "آخر تواصل",
+ "Next Follow-up": "المتابعة القادمة",
+ "Number of Calls": "عدد المكالمات",
+ "Customer Interest": "درجة اهتمام العميل",
+ "Sales Feedback": "ملاحظات المبيعات",
+ "No feedback recorded yet.": "لا توجد ملاحظات بعد.",
+ "Expected Purchase Date": "تاريخ الشراء المتوقع",
+ "Log Call": "تسجيل مكالمة",
+ "Set Follow-up": "تحديد متابعة",
+ "Schedule Visit": "تحديد زيارة",
+ "WhatsApp Reminder": "تذكير واتساب",
+ "Add Feedback": "إضافة ملاحظات",
+ "No activity yet": "لا يوجد نشاط بعد",
+ "Actions taken on this customer will appear here.": "ستظهر هنا الإجراءات التي تمت على هذا العميل.",
+ "Lead created": "تم إنشاء العميل",
+ "Assigned to Manager": "تم التعيين لمدير",
+ "Status changed": "تم تغيير الحالة",
+ "Call made": "تمت مكالمة",
+ "Feedback added": "تمت إضافة ملاحظات",
+ "Manager note": "ملاحظة المدير",
+ "Follow-up scheduled": "تم تحديد متابعة",
+ "Visit scheduled": "تم تحديد زيارة",
+ "WhatsApp message": "رسالة واتساب",
+ "Update": "تحديث",
+ "Sales representative contacted the customer.": "تواصل مندوب المبيعات مع العميل.",
+ "A WhatsApp follow-up message was opened for this customer.": "تم فتح رسالة متابعة واتساب لهذا العميل.",
+ "No sales rep assigned": "لم يتم تعيين مندوب مبيعات",
+ "Assign this lead to a sales representative to start the conversation.": "عيّن هذا العميل لمندوب مبيعات لبدء المحادثة.",
+ "Start the conversation between Manager and Sales.": "ابدأ المحادثة بين المدير والمبيعات.",
+ "Write a message…": "اكتب رسالة…",
+ "Message sent.": "تم إرسال الرسالة.",
+ "Assign Sales Representative": "تعيين مندوب مبيعات",
+ "Reassign Sales Representative": "إعادة تعيين مندوب مبيعات",
+ "Sales Representative": "مندوب المبيعات",
+ "Select a sales rep": "اختر مندوب مبيعات",
+ "Please choose a sales representative.": "من فضلك اختر مندوب مبيعات.",
+ "Sales representative assigned.": "تم تعيين مندوب المبيعات.",
+ "Change Status": "تغيير الحالة",
+ "Note (optional)": "ملاحظة (اختياري)",
+ "Add context for this status change…": "أضف تفاصيل لتغيير الحالة…",
+ "Status updated.": "تم تحديث الحالة.",
+ "Call note": "ملاحظة المكالمة",
+ "What happened on the call?": "ماذا حدث في المكالمة؟",
+ "Save Call": "حفظ المكالمة",
+ "Call logged.": "تم تسجيل المكالمة.",
+ "Set Follow-up Date": "تحديد موعد المتابعة",
+ "Follow-up date": "موعد المتابعة",
+ "Please choose a date.": "من فضلك اختر تاريخًا.",
+ "Follow-up scheduled.": "تم تحديد المتابعة.",
+ "Add Sales Feedback": "إضافة ملاحظات المبيعات",
+ "Feedback": "الملاحظات",
+ "e.g. Customer answered and is interested but wants to compare prices first.": "مثال: العميل رد وهو مهتم لكنه يريد مقارنة الأسعار أولاً.",
+ "Feedback cannot be empty.": "لا يمكن ترك الملاحظات فارغة.",
+ "Hot": "ساخن",
+ "Warm": "دافئ",
+ "Cold": "بارد",
+ "Save Feedback": "حفظ الملاحظات",
+ "Feedback saved.": "تم حفظ الملاحظات.",
+ "Schedule Showroom Visit / Test Drive": "تحديد زيارة للمعرض / تجربة قيادة",
+ "Date": "التاريخ",
+ "Time": "الوقت",
+ "Choose a date.": "اختر تاريخًا.",
+ "A calendar invite (.ics) will download so you can add it to Google/Outlook/Apple Calendar.": "سيتم تحميل دعوة تقويم (.ics) لإضافتها إلى Google أو Outlook أو Apple Calendar.",
+ "Schedule & Download Invite": "حدد الموعد وحمّل الدعوة",
+ "Visit scheduled.": "تم تحديد الزيارة.",
+ "CSV exported.": "تم تصدير ملف CSV.",
+ "Nothing to export for the current filters.": "لا توجد بيانات لتصديرها بالفلاتر الحالية."
+};
+
+const AR_PATTERNS = [
+  [/^(\d+) results?(?: for "(.*)")?$/, (n,q)=>`${n} ${+n===1?'نتيجة':'نتائج'}${q!==undefined?` عن "${q}"`:''}`],
+  [/^(\d+) follow-up\(s\) due today(?:, (\d+) overdue)?\.$/, (a,b)=>`${a} متابعة مستحقة اليوم${b?`، ${b} متأخرة`:''}.`],
+  [/^(\d+) follow-ups? due today( ·)?$/, (a,d)=>`${a} متابعة مستحقة اليوم${d||''}`],
+  [/^(\d+) overdue$/, n=>`${n} متأخرة`],
+  [/^Overdue \((\d+)\)$/, n=>`المتأخرة (${n})`],
+  [/^Upcoming \((\d+)\)$/, n=>`القادمة (${n})`],
+  [/^(\d+) unread$/, n=>`${n} غير مقروء`],
+  [/^(\d+)m ago$/, n=>`منذ ${n} د`], [/^(\d+)h ago$/, n=>`منذ ${n} س`], [/^(\d+)d ago$/, n=>`منذ ${n} يوم`],
+  [/^EGP (.+)$/, n=>`${n} ج.م`],
+  [/^(.*) — assigned$/, n=>`${n} — معيّنون`],
+  [/^(.+) · (admin|manager|sales|callcenter) · (.+)$/, (u,r,t)=>`${u} · ${AR[r]} · ${trStr(t)}`],
+  [/^(.+) added a new lead for (.+)\.$/, (u,c)=>`${u} أضاف عميلاً محتملاً جديدًا لسيارة ${c}.`],
+  [/^Assigned to (.+)\.$/, m=>`تم التعيين إلى ${m}.`],
+  [/^(.+) assigned this lead to (.+)\.$/, (a,b)=>`${a} عيّن هذا العميل إلى ${b}.`],
+  [/^Status set to "(.+)"\.(?: Note: (.*))?$/, (s,n)=>`تم تغيير الحالة إلى "${trStr(s)}".${n?` ملاحظة: ${n}`:''}`],
+  [/^Next follow-up set for (.+)\.$/, d=>`تم تحديد المتابعة القادمة في ${d}.`],
+  [/^Showroom visit set for (.+)\.$/, d=>`تم تحديد زيارة المعرض في ${d}.`],
+  [/^(.+) was added by (.+)\.$/, (c,u)=>`${c} أضافه ${u}.`],
+  [/^(.+) set status to "(.+)"\.$/, (u,s)=>`${u} غيّر الحالة إلى "${trStr(s)}".`],
+  [/^Regarding (.+): "(.*)"$/, (c,m)=>`بخصوص ${c}: "${m}"`],
+  [/^(.+) regarding (.+)$/, (u,c)=>`${u} بخصوص ${c}`],
+  [/^(.+) has been "New" for over (\d+)h with no update\.$/, (c,h)=>`${c} ما زال "جديد" منذ أكثر من ${h} ساعة بدون أي تحديث.`],
+  [/^"(.+)" already has this phone number in the system \(status: (.+)\)\. Do you still want to add a new lead\?$/, (n,s)=>`العميل "${n}" لديه نفس رقم الهاتف في النظام (الحالة: ${trStr(s)}). هل تريد إضافة عميل جديد رغم ذلك؟`],
+  [/^Could not save customer: (.+)$/, e=>`تعذر حفظ العميل: ${e}`],
+  [/^Could not schedule: (.+)$/, e=>`تعذر تحديد الموعد: ${e}`],
+  [/^Save failed: (.+)$/, e=>`فشل الحفظ: ${e}`],
+  [/^Account created for (.+)$/, e=>`تم إنشاء حساب لـ ${e}`],
+  [/^Could not create user: (.+?) \(is the Cloud Function deployed.*\)$/, e=>`تعذر إنشاء المستخدم: ${e} (هل تم نشر الـ Cloud Function وضبط CREATE_USER_ENDPOINT؟)`]
+];
+
+function trStr(s){
+  if(LANG!=='ar' || !s) return s;
+  const m = s.match(/^(\s*)([\s\S]*?)(\s*)$/);
+  const core = m[2]; if(!core) return s;
+  let out = Object.prototype.hasOwnProperty.call(AR, core) ? AR[core] : undefined;
+  if(out===undefined){
+    for(const [re,fn] of AR_PATTERNS){ const mm = core.match(re); if(mm){ out = fn(...mm.slice(1)); break; } }
+  }
+  return out===undefined ? s : m[1]+out+m[3];
+}
+
+const I18N_ATTRS = ['placeholder','title','aria-label','data-label'];
+const I18N_SKIP = new Set(['SCRIPT','STYLE','TEXTAREA']);
+function trTextNode(n){
+  if(n.__tr!==undefined && n.nodeValue===n.__tr) return;
+  const src = n.nodeValue, out = trStr(src);
+  if(out!==src){ n.__orig = src; n.__tr = out; n.nodeValue = out; }
+}
+function trElAttrs(el){
+  for(const a of I18N_ATTRS){
+    if(!el.hasAttribute(a)) continue;
+    const key='__a_'+a, v = el.getAttribute(a);
+    if(el[key] && el[key].tr===v) continue;
+    const out = trStr(v);
+    if(out!==v){ el[key]={orig:v,tr:out}; el.setAttribute(a,out); }
+  }
+}
+function trTree(root){
+  if(LANG!=='ar') return;
+  if(root.nodeType===3){ if(!I18N_SKIP.has(root.parentNode.nodeName)) trTextNode(root); return; }
+  if(root.nodeType!==1 || I18N_SKIP.has(root.nodeName)) return;
+  trElAttrs(root);
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT|NodeFilter.SHOW_TEXT);
+  let n;
+  while((n = w.nextNode())){
+    if(n.nodeType===3){ if(!I18N_SKIP.has(n.parentNode.nodeName)) trTextNode(n); }
+    else if(!I18N_SKIP.has(n.nodeName)) trElAttrs(n);
+  }
+}
+function i18nRestoreAll(){
+  const w = document.createTreeWalker(document.body, NodeFilter.SHOW_ELEMENT|NodeFilter.SHOW_TEXT);
+  let n;
+  while((n = w.nextNode())){
+    if(n.nodeType===3){
+      if(n.__orig!==undefined && n.nodeValue===n.__tr) n.nodeValue = n.__orig;
+      n.__orig = undefined; n.__tr = undefined;
+    } else {
+      for(const a of I18N_ATTRS){
+        const k='__a_'+a;
+        if(n[k]){ if(n.getAttribute(a)===n[k].tr) n.setAttribute(a,n[k].orig); n[k]=undefined; }
+      }
+    }
+  }
+}
+new MutationObserver(muts=>{
+  if(LANG!=='ar') return;
+  muts.forEach(m=>m.addedNodes.forEach(trTree));
+}).observe(document.body,{childList:true,subtree:true});
+
+function updateLangButtons(){
+  document.querySelectorAll('[data-lang-toggle] .lbl').forEach(l=>{ l.textContent = LANG==='ar' ? 'English' : 'العربية'; });
+}
+function setLang(l){
+  LANG = l;
+  try{ localStorage.setItem('az_lang', l); }catch(e){}
+  document.documentElement.lang = l;
+  document.documentElement.dir = l==='ar' ? 'rtl' : 'ltr';
+  document.title = l==='ar' ? 'أبو زيد | نظام إدارة المعرض' : 'Abu Zeid | Showroom CRM';
+  if(l==='ar') trTree(document.body); else i18nRestoreAll();
+  updateLangButtons();
+  if(typeof state!=='undefined' && state.user){
+    renderSidebarNav(); renderSidebarUser(); renderNotifBadge();
+    route(state.route, true);
+    refreshOpenProfile();
+  }
+}
+document.querySelectorAll('[data-lang-toggle]').forEach(b=>b.addEventListener('click', ()=>setLang(LANG==='ar'?'en':'ar')));
+
+/* =====================================================================
    TOASTS
 ===================================================================== */
 function toast(msg, type='info'){
@@ -842,12 +1311,12 @@ function initials(name){
 function fmtDate(ts){
   if(!ts) return '—';
   const d = new Date(ts);
-  return d.toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'});
+  return d.toLocaleDateString(LOC(),{day:'2-digit',month:'short',year:'numeric'});
 }
 function fmtDateTime(ts){
   if(!ts) return '—';
   const d = new Date(ts);
-  return d.toLocaleDateString(undefined,{day:'2-digit',month:'short'}) + ' · ' + d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});
+  return d.toLocaleDateString(LOC(),{day:'2-digit',month:'short'}) + ' · ' + d.toLocaleTimeString(LOC(),{hour:'2-digit',minute:'2-digit'});
 }
 function fmtRelative(ts){
   if(!ts) return '—';
@@ -1630,20 +2099,20 @@ function renderAddCustomerPage(main){
           <div class="field" id="f_phone"><label>Phone <span class="req">*</span></label><input id="in_phone" placeholder="+20 10 1234 5678"/><div class="err">Enter a valid phone number.</div></div>
           <div class="field" id="f_whatsapp"><label>WhatsApp</label><input id="in_whatsapp" placeholder="Optional, if different"/></div>
           <div class="field" id="f_car"><label>Interested Car / Model <span class="req">*</span></label>
-            <select id="in_car_select">${state.carModels.map(m=>`<option>${escapeHtml(m)}</option>`).join('')}<option value="__other__">Other (type manually)…</option></select>
+            <select id="in_car_select">${state.carModels.map(m=>`<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('')}<option value="__other__">Other (type manually)…</option></select>
             <input id="in_car_other" placeholder="Type the car model" style="margin-top:8px;display:none;"/>
             <div class="err">Please choose or enter the car of interest.</div>
           </div>
           <div class="field" id="f_budget"><label>Budget (EGP)</label><input id="in_budget" type="number" min="0" placeholder="e.g. 900000"/></div>
           <div class="field" id="f_location"><label>Location</label><input id="in_location" placeholder="e.g. Nasr City, Cairo"/></div>
           <div class="field" id="f_source"><label>Source of Lead</label>
-            <select id="in_source"><option value="">Select source</option>${SOURCES.map(s=>`<option>${s}</option>`).join('')}</select>
+            <select id="in_source"><option value="">Select source</option>${SOURCES.map(s=>`<option value="${s}">${s}</option>`).join('')}</select>
           </div>
           <div class="field" id="f_priority"><label>Priority</label>
-            <select id="in_priority">${PRIORITIES.map(p=>`<option ${p==='Medium'?'selected':''}>${p}</option>`).join('')}</select>
+            <select id="in_priority">${PRIORITIES.map(p=>`<option value="${p}" ${p==='Medium'?'selected':''}>${p}</option>`).join('')}</select>
           </div>
           ${showBranch?`<div class="field" id="f_branch"><label>Branch</label>
-            <select id="in_branch">${state.branches.map(b=>`<option>${escapeHtml(b)}</option>`).join('')}</select>
+            <select id="in_branch">${state.branches.map(b=>`<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('')}</select>
           </div>`:''}
           <div class="field ${showBranch?'':'span2'}" id="f_manager"><label>Assign to Manager <span class="req">*</span></label>
             <select id="in_manager"><option value="">Select manager</option>${managers.map(m=>`<option value="${m.uid}">${escapeHtml(m.name)}</option>`).join('')}</select>
@@ -1940,7 +2409,7 @@ function renderSettings(main){
     ${isAdmin ? `
     <div class="card" style="padding:22px 24px;">
       <div class="section-title">Create Team Member</div>
-      <p style="font-size:12.5px;color:var(--gray-500);margin-bottom:14px;line-height:1.55;">Creates the Firebase Auth account and the <code>users/</code> record together via the secure Cloud Function (see <code>functions-create-user.js</code>).</p>
+      <p style="font-size:12.5px;color:var(--gray-500);margin-bottom:14px;line-height:1.55;">Creates the Firebase Auth account and the users/ record together via the secure Cloud Function (see functions-create-user.js).</p>
       <form id="newUserForm" novalidate>
         <div class="field" id="nu_name"><label>Full name <span class="req">*</span></label><input id="nuName"/><div class="err">Required.</div></div>
         <div class="field" id="nu_email"><label>Email <span class="req">*</span></label><input id="nuEmail" type="email"/><div class="err">Enter a valid email.</div></div>
@@ -2076,12 +2545,12 @@ function renderProfileTab(bd, tab, customerId){
         <div class="info-item">
           <div class="k">Assigned Sales</div>
           <div class="v">${escapeHtml(c.salesName||'Unassigned')}
-            ${(role==='manager'||role==='admin')?`<button class="btn btn-ghost btn-sm" id="btnAssignSales" style="margin-left:6px;padding:3px 8px;">${c.salesName?'Reassign':'Assign'}</button>`:''}
+            ${(role==='manager'||role==='admin')?`<button class="btn btn-ghost btn-sm" id="btnAssignSales" style="margin-inline-start:6px;padding:3px 8px;">${c.salesName?'Reassign':'Assign'}</button>`:''}
           </div>
         </div>
         <div class="info-item span2" style="grid-column:1/-1;"><div class="k">Current Status</div>
           <div class="v"><span class="badge ${statusClass(c.status)}">${escapeHtml(c.status||'New')}</span>
-          ${(role==='sales'||role==='manager'||role==='admin')?`<button class="btn btn-ghost btn-sm" id="btnChangeStatus" style="margin-left:6px;padding:3px 8px;">Change</button>`:''}
+          ${(role==='sales'||role==='manager'||role==='admin')?`<button class="btn btn-ghost btn-sm" id="btnChangeStatus" style="margin-inline-start:6px;padding:3px 8px;">Change</button>`:''}
           </div>
         </div>
       </div>
@@ -2280,7 +2749,9 @@ function openFeedbackModal(customerId){
 
 function sendWhatsAppReminder(customerId){
   const c = state.customers[customerId];
-  const msg = `Hello ${c.name}, this is ${state.user.name} from Abu Zeid Showroom. I'm following up on your interest in the ${c.interestedCar||'car'}. Would you like to visit the showroom or book a test drive?`;
+  const msg = LANG==='ar'
+    ? `أهلاً ${c.name}، معك ${state.user.name} من معرض أبو زيد. بتابع معاك بخصوص اهتمامك بسيارة ${c.interestedCar||''}. تحب تزور المعرض أو نحجز لك تجربة قيادة؟`
+    : `Hello ${c.name}, this is ${state.user.name} from Abu Zeid Showroom. I'm following up on your interest in the ${c.interestedCar||'car'}. Would you like to visit the showroom or book a test drive?`;
   window.open(waLink(c.whatsapp||c.phone, msg), '_blank', 'noopener');
   addTimelineEvent(customerId, 'WhatsApp message', 'A WhatsApp follow-up message was opened for this customer.');
 }
@@ -2324,6 +2795,8 @@ function openScheduleVisitModal(customerId){
   main.innerHTML = `<div class="skeleton-row"><div class="skeleton" style="width:40px;height:40px;border-radius:10px;"></div><div class="skeleton" style="flex:1;"></div></div>`.repeat(4);
 })();
 
+updateLangButtons();
+if(LANG==='ar'){ document.title = 'أبو زيد | نظام إدارة المعرض'; trTree(document.body); }
 lucide && lucide.createIcons && lucide.createIcons();
 </script>
 </body>
