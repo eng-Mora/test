@@ -162,9 +162,9 @@ class _Hero extends StatelessWidget {
                 ?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          const ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: 520),
-            child: Text(
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 520),
+            child: const Text(
               'موقع بسيط وسريع مبني بإطار عمل Flutter، يعمل على المتصفح والموبايل بنفس الكود.',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 18, height: 1.6),
