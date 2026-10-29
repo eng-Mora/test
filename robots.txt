@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://pit-house.web.app/sitemap.xml
